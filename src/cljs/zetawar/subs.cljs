@@ -326,17 +326,16 @@
 (deftrack unit-selected? [conn]
   @(apply unit-at? conn @(selected-qr conn)))
 
-;; TODO: these should be deftracks
-(deftrack selected-can-move? [conn]
+(defn selected-can-move? [conn]
   (apply can-move? conn @(selected-qr conn)))
 
-(deftrack selected-can-attack? [conn]
+(defn selected-can-attack? [conn]
   (apply can-attack? conn @(selected-qr conn)))
 
-(deftrack selected-can-repair? [conn]
+(defn selected-can-repair? [conn]
   (apply can-repair? conn @(selected-qr conn)))
 
-(deftrack selected-can-capture? [conn]
+(defn selected-can-capture? [conn]
   (apply can-capture? conn @(selected-qr conn)))
 
 (deftrack selected-can-build? [conn q r]
