@@ -2,39 +2,36 @@
   :source-paths #{"src/clj" "src/cljc" "src/cljs" "src/js" "src/less" "test" "site"}
   :resource-paths #{"assets"}
   :dependencies
-  '[;; Dev deps
-    [adzerk/boot-cljs "1.7.228-1" :scope "test"]
+  '[[adzerk/boot-cljs "1.7.228-1" :scope "test"]
     [adzerk/boot-cljs-repl "0.3.2" :scope "test"]
     [adzerk/boot-reload "0.4.9" :scope "test"]
-    [com.cemerick/piggieback "0.2.1" :scope "test"]
-    [crisptrutski/boot-cljs-test "0.2.2-SNAPSHOT" :scope "test"]
-    [deraen/boot-less  "0.5.0" :scope "test"]
-    [devcards "0.2.1-7" :scope "test"]
-    [fipp "0.6.5" :scope "test"]
-    [hashobject/boot-s3 "0.1.2-SNAPSHOT" :scope "test"]
-    [org.clojure/tools.nrepl "0.2.12" :scope "test"]
-    [org.martinklepsch/boot-gzip "0.1.2" :scope "test"]
-    [pandeiro/boot-http "0.7.3" :scope "test"]
-    [perun "0.3.0" :scope "test"]
-    [weasel "0.7.0" :scope "test"]
-
-    ;; App deps
     [cljsjs/clipboard "1.5.9-0"]
     [cljsjs/react "15.1.0-0"]
     [cljsjs/react-bootstrap "0.29.2-0"]
     [cljsjs/react-dom "15.1.0-0"]
     [cljsjs/react-dom-server "15.1.0-0"]
+    [com.cemerick/piggieback "0.2.1" :scope "test"]
     [com.cognitect/transit-cljs "0.8.239"]
     [com.rpl/specter "0.10.0"]
     [com.stuartsierra/component "0.3.1"]
+    [crisptrutski/boot-cljs-test "0.2.2-SNAPSHOT" :scope "test"]
     [datascript "0.15.0"]
+    [deraen/boot-less  "0.5.0" :scope "test"]
+    [devcards "0.2.1-7" :scope "test"]
+    [fipp "0.6.5" :scope "test"]
+    [hashobject/boot-s3 "0.1.2-SNAPSHOT" :scope "test"]
     [hiccup "1.0.5"]
     [org.clojure/clojurescript "1.9.93"]
+    [org.clojure/tools.nrepl "0.2.12" :scope "test"]
+    [org.martinklepsch/boot-gzip "0.1.2" :scope "test"]
     [org.webjars.npm/bootswatch "3.3.6"]
     [org.webjars/bootstrap "3.3.6"]
     [org.webjars/font-awesome "4.6.3"]
+    [pandeiro/boot-http "0.7.3" :scope "test"]
+    [perun "0.3.0" :scope "test"]
     [posh "0.3.5"]
-    [reagent "0.6.0-rc"]])
+    [reagent "0.6.0-rc"]
+    [weasel "0.7.0" :scope "test"]])
 
 (require
   '[adzerk.boot-cljs :refer :all]
