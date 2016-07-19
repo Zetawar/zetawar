@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+
+case $1 in
+  staging)
+    destination="s3://staging.zetawar.com"
+    ;;
+  production)
+    destination="s3://www.zetawar.com"
+    ;;
+  *)
+    echo -e "Unknown environment $e"
+    exit 1
+    ;;
+esac
+
+s3cmd sync --exclude '*' --include '*.css' --acl-public -m 'text/css' --add-header='Content-Encoding: gzip' target/ $destination
+s3cmd sync --exclude '*' --include '*.js'  --acl-public -m 'application/javascript' --add-header='Content-Encoding: gzip' target/ $destination
+s3cmd sync --exclude '*' --include '*.html' --acl-public -m 'text/html' --add-header='Content-Encoding: gzip' target/ $destination
+s3cmd sync --exclude '*' --include '*.png' --include '*.jpg' --include '*.ico' --include '*.gif' --acl-public --add-header='Cache-Control: max-age=86400' target/ $destination
+s3cmd sync --exclude '*' --include '*.svg' --acl-public -m 'image/svg+xml' --add-header='Cache-Control: max-age=86400' target/ $destination
+s3cmd sync --delete-removed --acl-public target/ $destination

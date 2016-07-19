@@ -1,0 +1,6 @@
+*.class
+*.jar
+.m2
+/.nrepl-*
+/out
+/target

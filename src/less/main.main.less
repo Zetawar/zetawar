@@ -1,0 +1,69 @@
+@import "bootstrap/bootstrap.less";
+@import "font-awesome/font-awesome.less";
+
+///////////////////////////////////////////////////////////////////////////////
+// Global
+
+body {
+  padding-top: 70px;
+}
+
+.navbar-brand img {
+  display: inline;
+  margin: 0 12px;
+}
+
+#footer {
+  text-align: center;
+  margin-top: 20px;
+  padding: 5px;
+  border-top: 1px solid #e5e5e5;
+  color: #888;
+}
+
+.noselect {
+  .user-select(none);
+}
+
+.clickable {
+  .user-select(none);
+  cursor: pointer;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Game
+
+svg {
+  image-rendering: -moz-crisp-edges;         /* Firefox */
+  image-rendering:   -o-crisp-edges;         /* Opera */
+  image-rendering: -webkit-optimize-contrast;/* Webkit (non-standard naming) */
+  image-rendering: crisp-edges;
+  -ms-interpolation-mode: nearest-neighbor;  /* IE (non-standard property) */
+}
+
+#faction-status {
+  border-bottom: 1px solid #e5e5e5;
+  padding-bottom: 5px;
+  margin-bottom: 10px;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Blog
+
+.blog-post {
+  margin-bottom: 60px;
+}
+
+.blog-post-title {
+  margin-bottom: 5px;
+  font-size: 40px;
+}
+
+.blog-post-meta {
+  margin-bottom: 20px;
+  color: #999;
+}
+
+.blog-post-meta a {
+  color: #999;
+}
