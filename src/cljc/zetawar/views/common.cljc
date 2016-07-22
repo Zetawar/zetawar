@@ -50,7 +50,8 @@
 (def nav-links
   [{:href "/"        :title "Game"}
    {:href "/blog"    :title "Blog"}
-   {:href "/roadmap" :title "Roadmap"}])
+   {:href "/roadmap" :title "Roadmap"}
+   {:href "/backers" :title "Backers"}])
 
 (defn navbar
   ([] (navbar nil))
