@@ -313,12 +313,11 @@
      [:> js/ReactBootstrap.Modal.Title
       "Congratulations! You won!"]]
     [:> js/ReactBootstrap.Modal.Body
-     "Thanks for playing Zetawar! "
-     "If you enjoyed it and are interested in seeing Zetawar turn into a "
-     "full featured open source game complete with multiplayer, custom maps, "
-     "and programmable AI, please consider supporting the "
-     [:a {:href "https://www.kickstarter.com/projects/311016908/zetawar"}
-      "Zetawar Kickstarter"] "!"]
+     "Thanks for playing Zetawar! If you're interested in staying up-to-date"
+     " with Zetawar as it develops, please follow "
+     [:a {:href "https://twitter.com/ZetawarGame"}
+      "@ZetawarGame"]
+     " on Twitter."]
     [:> js/ReactBootstrap.Modal.Footer
      [:button.btn.btn-default {:on-click #(handlers/hide-win-dialog conn %)}
       "Close"]]]
