@@ -3,7 +3,7 @@ listed and backed the project at or above the "Virtual Immortality" level.
 
 ### Sponsors
 
-![Awesome Forms](https://awesomeforms.com/assets/logotype-0e39fee9805478f7769f0e25cb16b6e2.png)
+[![Awesome Forms](https://awesomeforms.com/assets/logotype-0e39fee9805478f7769f0e25cb16b6e2.png)](https://awesomeforms.com)
 
 [Rowdy Labs](http://www.rowdylabs.com)
 
