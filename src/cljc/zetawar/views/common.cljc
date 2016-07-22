@@ -93,16 +93,14 @@
   [:div.row
    [:div.col-md-12
     [:div.alert.alert-success
-     [:strong.hidden-xs
-      "Zetawar is a prototype. Support the "
+     [:strong
+      "Zetawar is "
       [:a {:href "https://www.kickstarter.com/projects/311016908/zetawar"}
-       "Zetawar Kickstarter"]
-      " to help it become a full featured open source game!"]
-     [:strong.visible-xs
-      "Support the "
-      [:a {:href "https://www.kickstarter.com/projects/311016908/zetawar"}
-       "Zetawar Kickstarter"]
-      "!"]]]])
+       "funded"]
+      "! Full-time development starts mid-August. Follow "
+      [:a {:href "https://twitter.com/ZetawarGame"}
+       "@ZetawarGame"]
+      " for updates."]]]])
 
 (defn footer []
   [:div.container
