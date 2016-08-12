@@ -1,12 +1,10 @@
-Zetawar
-=======
+# Zetawar [![CircleCI](https://circleci.com/gh/Zetawar/zetawar.svg?style=svg&circle-token=b630f4db37e3538b7c390856687648246468e98b)](https://circleci.com/gh/Zetawar/zetawar)
 
 Source code for [Zetawar](http://www.zetawar.com/). Zetawar is funded by the
 generous support of the [Zetawar
 Kickstarter](https://www.kickstarter.com/projects/djwhitt/zetawar) backers.
 
-WARNING
--------
+## WARNING
 
 Code cleanup is still in progress. Function names, namespaces, and architecture
 are still evolving.
