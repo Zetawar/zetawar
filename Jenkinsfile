@@ -1,3 +1,3 @@
 node {
-  sh "/usr/local/bin/boot ci"
+  sh "/usr/local/bin/boot ci --no-colors --verbose"
 }
