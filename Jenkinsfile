@@ -9,7 +9,7 @@ node {
 
     stage 'Test'
 
-      sh "/usr/local/bin/boot --no-colors ci"
+      sh "boot --no-colors ci"
 
   } catch (err) {
 
