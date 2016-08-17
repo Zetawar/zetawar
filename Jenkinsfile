@@ -3,9 +3,10 @@ node {
   currentBuild.result = "SUCCESS"
 
   try {
+
     stage 'Checkout'
 
-      git url: "https://github.com/Zetawar/zetawar.git"
+      checkout scm
 
     stage 'Test'
 
