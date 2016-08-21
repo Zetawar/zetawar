@@ -12,6 +12,14 @@ node {
 
       sh "boot --no-colors ci"
 
+    stage 'Build'
+
+      sh "boot build -e dev-builds"
+
+    stage 'Deploy'
+
+      sh "./bin/deploy -b dev.zetawar.com"
+
   } catch (err) {
 
       currentBuild.result = "FAILURE"
