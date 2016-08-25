@@ -4,11 +4,11 @@
     [posh.core :as posh]
     [reagent.core :as r]
     [zetawar.app :as app]
-    [zetawar.data :as data]
+    [zetawar.db :as db]
     [zetawar.game :as game]))
 
 (defn create-conn [scenario-id]
-  (let [conn (d/create-conn data/schema)]
+  (let [conn (d/create-conn db/schema)]
     (posh/posh! conn)
     (app/start-new-game! conn scenario-id)
     conn))
