@@ -9,11 +9,12 @@
     [reagent.core :as r]
     [zetawar.app :as app]
     [zetawar.data :as data]
+    [zetawar.db :refer [e]]
     [zetawar.game :as game]
     [zetawar.handlers :as handlers]
     [zetawar.subs :as subs]
     [zetawar.system :refer [new-system]]
-    [zetawar.util :refer [e spy]]
+    [zetawar.util :refer [spy]]
     [zetawar.views :as views])
   (:require-macros
     [devcards.core :refer [defcard defcard-rg]]))
