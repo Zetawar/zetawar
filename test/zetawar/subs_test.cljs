@@ -4,10 +4,10 @@
     [datascript.core :as d]
     [devcards.core :as dc :refer-macros [deftest]]
     [zetawar.app :as app]
+    [zetawar.db :refer [e qe]]
     [zetawar.game :as game]
     [zetawar.subs :as subs]
-    [zetawar.test-helper :as helper]
-    [zetawar.util :refer [e qe]]))
+    [zetawar.test-helper :as helper]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; App

@@ -1,6 +1,5 @@
 (ns zetawar.util
   (:require
-    [datascript.core :as d]
     [fipp.edn]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -33,48 +32,6 @@
 ;; TODO: check performance
 (defn select-values [m ks]
   (reduce #(if-let [v (m %2)] (conj %1 v) %1) [] ks))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; DB
-
-(defn qe
-  "Returns the single entity returned by a query."
-  [query db & args]
-  (when-let [result (-> (apply d/q query db args) ssolo)]
-    (d/entity db result)))
-
-(defn find-by
-  "Returns the unique entity identified by attr and val."
-  [db attr val]
-  (qe '[:find ?e
-        :in $ ?attr ?val
-        :where  [?e ?attr ?val]]
-      db attr val))
-
-(defn qes
-  "Returns the entities returned by a query, assuming that
-   all :find results are entity ids."
-  [query db & args]
-  (->> (apply d/q query db args)
-       (mapv (fn [items]
-               (mapv (partial d/entity db) items)))))
-
-(defprotocol Eid
-  "A simple protocol for retrieving an object's id."
-  (e [_] "identifying id for a value"))
-
-(extend-protocol Eid
-  number
-  (e [n] n)
-
-  cljs.core.PersistentHashMap
-  (e [ent] (:db/id ent))
-
-  cljs.core.PersistentArrayMap
-  (e [ent] (:db/id ent))
-
-  datascript.impl.entity.Entity
-  (e [ent] (:db/id ent)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Debugging

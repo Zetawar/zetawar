@@ -4,10 +4,11 @@
     [datascript.core :as d]
     [devcards.core :as dc :refer-macros [deftest]]
     [zetawar.app :as app]
+    [zetawar.db :refer [e qe]]
     [zetawar.data :as data]
     [zetawar.game :as game]
     [zetawar.test-helper :as helper]
-    [zetawar.util :refer [e qe spy]]))
+    [zetawar.util :refer [spy]]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Util

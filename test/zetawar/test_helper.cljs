@@ -5,8 +5,7 @@
     [reagent.core :as r]
     [zetawar.app :as app]
     [zetawar.data :as data]
-    [zetawar.game :as game]
-    [zetawar.util :refer [qe]]))
+    [zetawar.game :as game]))
 
 (defn create-conn [scenario-id]
   (let [conn (d/create-conn data/schema)]

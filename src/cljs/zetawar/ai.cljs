@@ -2,8 +2,8 @@
   (:require
     [cljs.pprint :refer [pprint]]
     [datascript.core :as d]
-    [zetawar.game :as game]
-    [zetawar.util :refer [e qe qes]]))
+    [zetawar.db :refer [e qe qes]]
+    [zetawar.game :as game]))
 
 ;; for each unit:
 ;; - repair if < 50% health (optional)

@@ -4,8 +4,9 @@
                              setval transform]]
     [datascript.core :as d]
     [zetawar.data :as data]
+    [zetawar.db :refer [e find-by qe qes]]
     [zetawar.hex :as hex]
-    [zetawar.util :refer [e find-by oonly qe qes spy]]))
+    [zetawar.util :refer [oonly spy]]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Util

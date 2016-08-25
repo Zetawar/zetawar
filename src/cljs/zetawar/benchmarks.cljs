@@ -3,9 +3,9 @@
     [clojure.string :as string]
     [datascript.core :as d]
     [zetawar.data :as data]
+    [zetawar.db :refer [qe]]
     [zetawar.game :as game]
     [zetawar.hex :as hex]
-    [zetawar.util :refer [qe]]
     [reagent.core :as r]))
 
 (defn setup-conn []

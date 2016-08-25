@@ -6,10 +6,11 @@
     [datascript.core :as d]
     [goog.crypt.base64 :as base64]
     [lzw]
+    [zetawar.db :refer [e find-by qe qes]]
     [zetawar.data :as data]
     [zetawar.game :as game]
     [zetawar.hex :as hex]
-    [zetawar.util :refer [e find-by oonly qe qes spy]]))
+    [zetawar.util :refer [oonly spy]]))
 
 ;; TODO: rename to get-app (?)
 (defn app [db]

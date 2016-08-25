@@ -7,11 +7,12 @@
     [posh.core :as posh]
     [reagent.core :as r]
     [zetawar.ai :as ai]
+    [zetawar.db :refer [e qe]]
     [zetawar.game :as game]
     [zetawar.handlers :as handlers]
     [zetawar.hex :as hex]
     [zetawar.subs :as subs]
-    [zetawar.util :refer [e only oonly qe spy]]
+    [zetawar.util :refer [only oonly spy]]
     [zetawar.views.common :refer [footer kickstarter-alert navbar]]))
 
 ;; Game           => Factions

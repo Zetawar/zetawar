@@ -1,9 +1,10 @@
 (ns zetawar.subs
   (:require
     [datascript.core :as d]
+    [zetawar.db :refer [e qe]]
     [zetawar.game :as game]
     [zetawar.hex :as hex]
-    [zetawar.util :refer [e qe select-values spy]]
+    [zetawar.util :refer [select-values spy]]
     [posh.core :as posh]
     [reagent.core :as r])
   (:require-macros

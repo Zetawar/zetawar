@@ -7,8 +7,9 @@
     [reagent.core :as r]
     [zetawar.ai :as ai]
     [zetawar.app :as app]
+    [zetawar.db :refer [e qe qes]]
     [zetawar.game :as game]
-    [zetawar.util :refer [e only oonly qe qes spy]]))
+    [zetawar.util :refer [only oonly spy]]))
 
 ;; New click logic:
 ;; - no selection?
