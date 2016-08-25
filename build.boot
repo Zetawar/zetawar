@@ -14,6 +14,7 @@
     [com.cognitect/transit-cljs "0.8.239"]
     [com.rpl/specter "0.10.0"]
     [com.stuartsierra/component "0.3.1"]
+    [com.taoensso/timbre "4.7.4"]
     [crisptrutski/boot-cljs-test "0.2.2-SNAPSHOT" :scope "test"]
     [datascript "0.15.0"]
     [deraen/boot-less  "0.5.0" :scope "test"]

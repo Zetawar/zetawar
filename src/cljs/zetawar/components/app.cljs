@@ -13,4 +13,4 @@
 (defn new-app
   []
   (component/using (map->App {})
-    [:datascript]))
+    [:datascript :timbre]))
