@@ -3,13 +3,13 @@
     [clojure.string :as string]
     [datascript.core :as d]
     [zetawar.data :as data]
-    [zetawar.db :refer [qe]]
+    [zetawar.db :as db :refer [qe]]
     [zetawar.game :as game]
     [zetawar.hex :as hex]
     [reagent.core :as r]))
 
 (defn setup-conn []
-  (let [conn (d/create-conn data/schema)]
+  (let [conn (d/create-conn db/schema)]
     (game/load-specs! conn)
     (let [game-id (game/setup-game! conn "Sterling's Aruba")]
       (d/transact! conn [{:db/id -1

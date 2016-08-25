@@ -1,7 +1,5 @@
 (ns zetawar.data)
 
-;; TODO: add unit/terrain
-
 (def terrains
   {:plains        {:name "Plains"
                    :image "tilesets/elite-command/terrains/plains.png"}
