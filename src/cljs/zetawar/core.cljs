@@ -7,16 +7,16 @@
     [zetawar.app :as app]
     [zetawar.benchmarks :as benchmarks]
     [zetawar.game :as game]
+    [zetawar.site :as site]
     [zetawar.system :refer [new-system]]
     [zetawar.util :refer [spy]]
     [zetawar.views :as views]
     [zetawar.views.common :refer [navbar]]))
 
-(defonce system (component/start (new-system)))
+(when-not (site/viewing-devcards?)
+  (defonce system (component/start (new-system))))
 
 (defn ^:export run []
-  (enable-console-print!)
-
   (let [body-id (-> js/document
                     (.getElementsByTagName "body")
                     (aget 0)
@@ -43,11 +43,12 @@
       nil)))
 
 (defn ^:export init []
-  (let [conn (get-in system [:datascript :conn])
-        encoded-game-state (some-> js/window.location.hash
-                                   not-empty
-                                   (subs 1))]
-    (if encoded-game-state
-      (app/load-encoded-game-state! conn encoded-game-state)
-      (app/start-new-game! conn :sterlings-aruba-multiplayer))
-    (set! (.-onload js/window) run)))
+  (when-not (site/viewing-devcards?)
+    (let [conn (get-in system [:datascript :conn])
+          encoded-game-state (some-> js/window.location.hash
+                                     not-empty
+                                     (subs 1))]
+      (if encoded-game-state
+        (app/load-encoded-game-state! conn encoded-game-state)
+        (app/start-new-game! conn :sterlings-aruba-multiplayer))
+      (set! (.-onload js/window) run))))

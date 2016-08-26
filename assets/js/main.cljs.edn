@@ -3,4 +3,4 @@
  :compiler-options {:asset-path "/js/main.out"
                     :externs ["js/externs.js"]
                     :foreign-libs [{:file "lzw.js"
-                                    :provides ["lzw"]}] }}
+                                    :provides ["lzw"]}]}}

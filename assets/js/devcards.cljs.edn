@@ -1,6 +1,0 @@
-{:require [zetawar.devcards]
- :compiler-options {:devcards true
-                    :asset-path "/js/devcards.out"
-                    :externs ["js/externs.js"]
-                    :foreign-libs [{:file "lzw.js"
-                                    :provides ["lzw"]}]}}

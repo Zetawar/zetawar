@@ -76,4 +76,4 @@
     (html5
       (head data "Zetawar Devcards")
       [:body#devcards
-       (include-js "/js/devcards.js")])))
+       (include-js "/js/main.js")])))

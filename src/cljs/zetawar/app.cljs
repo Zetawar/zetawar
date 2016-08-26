@@ -1,8 +1,6 @@
 (ns zetawar.app
   (:require
     [cognitect.transit :as transit]
-    [com.rpl.specter :refer [ALL LAST collect-one filterer select selected?
-                             setval transform]]
     [datascript.core :as d]
     [goog.crypt.base64 :as base64]
     [lzw]
