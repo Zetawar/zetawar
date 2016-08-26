@@ -148,7 +148,7 @@
 (deftask build-cljs
   "Build ClojureScript for production and staging deployments."
   []
-  (cljs :ids ["js/main" "js/devcards"]
+  (cljs :ids ["js/main"]
         :optimizations :advanced
         :source-map true
         :compiler-options {:parallel-build true}))
