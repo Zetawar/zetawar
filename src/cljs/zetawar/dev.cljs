@@ -4,9 +4,10 @@
     [zetawar.devcards.maps]
     [zetawar.devcards.prototype]
     [zetawar.devcards.selection-and-target]
+    [zetawar.devcards.specs]
     [zetawar.game-test]
-    [zetawar.subs-test]
-    [zetawar.site :as site]))
+    [zetawar.site :as site]
+    [zetawar.subs-test]))
 
 (enable-console-print!)
 
