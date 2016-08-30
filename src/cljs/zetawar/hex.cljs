@@ -1,5 +1,11 @@
 (ns zetawar.hex)
 
+(def min-q 0)
+(def min-r 0)
+
+(def max-q 100)
+(def max-r 100)
+
 (defn east [q r]
   [(inc q) r])
 
