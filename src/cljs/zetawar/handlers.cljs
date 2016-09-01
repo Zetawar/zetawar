@@ -1,5 +1,6 @@
 (ns zetawar.handlers
   (:require
+    [cljs.core.async :refer [chan close! put!]]
     [cognitect.transit :as transit]
     [datascript.core :as d]
     [goog.crypt.base64 :as base64]
@@ -9,7 +10,37 @@
     [zetawar.app :as app]
     [zetawar.db :refer [e qe qes]]
     [zetawar.game :as game]
-    [zetawar.util :refer [only oonly spy]]))
+    [zetawar.util :refer [only oonly spy]])
+  (:require-macros
+    [cljs.core.async.macros :refer [go go-loop]]))
+
+(comment
+
+  ; handler-loop and dispatch should probably go in a router ns
+
+  (defn handler-loop [handler-ctx]
+    (go-loop []
+      ; validate event
+      ; call handler
+      ; execute retrned tx
+      ; dispatch returnted events
+      )
+    )
+
+  (defn dispatch [event-ch]
+    ; queue event in event-ch
+    )
+
+  (defmulti handle (fn [ev-ctx ev-msg] (:id ev-msg)))
+
+  (defmethod handle :zetawar.event/select-hex
+    [{:as ev-ctx :keys [db]} {:as ev-msg :keys [id q r]}]
+    ; do stuff
+    {:tx [[...]]
+     :dispatch [[] ...]
+     })
+
+  )
 
 ;; New click logic:
 ;; - no selection?
