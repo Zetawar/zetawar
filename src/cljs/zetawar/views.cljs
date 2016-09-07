@@ -9,7 +9,7 @@
     [zetawar.ai :as ai]
     [zetawar.db :refer [e qe]]
     [zetawar.game :as game]
-    [zetawar.handlers :as handlers]
+    [zetawar.events :as handlers]
     [zetawar.hex :as hex]
     [zetawar.subs :as subs]
     [zetawar.util :refer [only oonly spy]]
@@ -218,7 +218,7 @@
       " · "
       (str "Round " round)]]))
 
-(defn faction-actions [{:keys [conn] :as app}]
+(defn faction-actions [{:keys [conn ev-chan] :as app}]
   ;; TODO: replace query with something from subs ns
   (let [[round current-color] (-> @(posh/q conn '[:find ?round ?current-color
                                                   :where
@@ -231,7 +231,7 @@
      (when @(subs/selected-can-move-to-targeted? conn)
        [:p
         [:button.btn.btn-primary.btn-block
-         {:on-click #(handlers/move conn %)}
+         {:on-click #(handlers/move conn ev-chan %)}
          "Move"]])
      (when @(subs/selected-can-build? conn)
        [:p

@@ -1,4 +1,4 @@
-(ns zetawar.handlers
+(ns zetawar.events
   (:require
     [cljs.core.async :refer [chan close! put!]]
     [cognitect.transit :as transit]
@@ -10,37 +10,10 @@
     [zetawar.app :as app]
     [zetawar.db :refer [e qe qes]]
     [zetawar.game :as game]
+    [zetawar.router :as router]
     [zetawar.util :refer [only oonly spy]])
   (:require-macros
     [cljs.core.async.macros :refer [go go-loop]]))
-
-(comment
-
-  ; handler-loop and dispatch should probably go in a router ns
-
-  (defn handler-loop [handler-ctx]
-    (go-loop []
-      ; validate event
-      ; call handler
-      ; execute retrned tx
-      ; dispatch returnted events
-      )
-    )
-
-  (defn dispatch [event-ch]
-    ; queue event in event-ch
-    )
-
-  (defmulti handle (fn [ev-ctx ev-msg] (:id ev-msg)))
-
-  (defmethod handle :zetawar.event/select-hex
-    [{:as ev-ctx :keys [db]} {:as ev-msg :keys [id q r]}]
-    ; do stuff
-    {:tx [[...]]
-     :dispatch [[] ...]
-     })
-
-  )
 
 ;; New click logic:
 ;; - no selection?
@@ -151,6 +124,26 @@
                             (conj [:db/retract (e app) :app/targeted-q targeted-q])
                             (conj [:db/retract (e app) :app/targeted-r targeted-r])))))))
 
+(defmethod router/handle-event :zetawar.event/clear-selection
+  [{:as ev-ctx :keys [db]} _]
+  (let [app (qe '[:find ?a
+                  :where
+                  [?a :app/game]]
+                db)
+
+        [selected-q selected-r] (app/selected-qr db)
+        [targeted-q targeted-r] (app/targeted-qr db)]
+    {:tx (cond-> []
+           (and selected-q selected-r)
+           (->
+             (conj [:db/retract (e app) :app/selected-q selected-q])
+             (conj [:db/retract (e app) :app/selected-r selected-r]))
+
+           (and targeted-q targeted-r)
+           (->
+             (conj [:db/retract (e app) :app/targeted-q targeted-q])
+             (conj [:db/retract (e app) :app/targeted-r targeted-r])))}))
+
 (defn clear-selection [conn ev]
   (let [db @conn
         app (qe '[:find ?a
@@ -179,7 +172,7 @@
     (when (game/current-faction-won? db)
       (d/transact! conn [[:db/add (e app) :app/show-win-dialog true]]))))
 
-(defn move [conn ev]
+(defn move [conn ev-chan ev]
   (let [db @conn
         [q1 r1 q2 r2] (first (d/q '[:find ?q1 ?r1 ?q2 ?r2
                                     :where
@@ -206,7 +199,9 @@
                             [:db/retract (e app) :app/targeted-q q2]
                             [:db/retract (e app) :app/targeted-r r2]])
         ;; TODO: cleanup clear-selection handler usage
-        (clear-selection conn nil)))))
+        (router/dispatch! ev-chan [:zetawar.event/clear-selection])
+        ;(clear-selection conn nil)
+        ))))
 
 (defn attack [conn ev]
   (let [db @conn

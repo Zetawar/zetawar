@@ -1,7 +1,7 @@
 (ns zetawar.events-spec
   (:require
     [clojure.spec :as s]
-    [zetawar.handlers :as handlers]
+    [zetawar.events :as events]
     [zetawar.hex :as hex]))
 
 (s/def :zetawar.event/id #{:zetawar.event.id/select-hex

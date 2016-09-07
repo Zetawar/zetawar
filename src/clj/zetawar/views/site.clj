@@ -30,7 +30,7 @@
       (head data (:site-title global-meta))
       [:body#site
        (navbar "Blog")
-       [:div.container
+      [:div.container
         (kickstarter-alert)
         (into [:div#blog-posts]
               (for [entry entries]

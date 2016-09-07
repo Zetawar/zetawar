@@ -5,6 +5,7 @@
   '[[adzerk/boot-cljs "1.7.228-1" :scope "test"]
     [adzerk/boot-cljs-repl "0.3.3" :scope "test"]
     [adzerk/boot-reload "0.4.12" :scope "test"]
+    [binaryage/devtools "0.8.1" :scope "test"]
     [cljsjs/clipboard "1.5.9-0"]
     [cljsjs/react "15.3.1-0"]
     [cljsjs/react-bootstrap "0.29.2-0"]
@@ -119,12 +120,13 @@
   "Run dev environment."
   []
   (comp (serve)
+        (repl)
         (watch)
         (build-html :metadata-file "perun.base.dev.edn")
         (build-css)
         (reload :on-jsload 'zetawar.core/run
                 :cljs-asset-path "")
-        (cljs-repl)
+        (cljs-repl-env)
         (cljs :ids ["js/main"]
               :optimizations :none
               :source-map true

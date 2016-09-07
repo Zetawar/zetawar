@@ -3,14 +3,14 @@
     [com.stuartsierra.component :as component]
     [posh.core :as posh]))
 
-(defrecord App [datascript conn]
+(defrecord App [datascript router timbre conn ev-chan]
   component/Lifecycle
   (start [component]
-    (assoc component :conn (:conn datascript)))
+    (assoc component :conn (:conn datascript) :ev-chan (:ev-chan router)))
   (stop [component]
-    (assoc component :datascript nil :conn nil)))
+    (assoc component :datascript nil :conn nil :event-chan nil)))
 
 (defn new-app
   []
   (component/using (map->App {})
-    [:datascript :timbre]))
+    [:datascript :router :timbre]))
