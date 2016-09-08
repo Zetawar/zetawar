@@ -19,8 +19,10 @@
       ; TODO: validate event
       ; TODO: validate handler return value
       (let [{:as ret :keys [tx dispatch]} (handle-event {:db @conn} ev-msg)]
-        (log/debugf "Transacting: %s" (pr-str tx))
-        (d/transact! conn tx)
+        (log/tracef "Handler returned: %s" (pr-str ret))
+        (when tx
+          (log/debugf "Transacting: %s" (pr-str tx))
+          (d/transact! conn tx))
         (doseq [event dispatch]
           (dispatch! ev-chan event)))
       (recur (<! ev-chan)))))

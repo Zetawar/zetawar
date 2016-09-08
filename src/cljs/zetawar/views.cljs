@@ -8,9 +8,10 @@
     [reagent.core :as r]
     [zetawar.ai :as ai]
     [zetawar.db :refer [e qe]]
+    [zetawar.events :as events]
     [zetawar.game :as game]
-    [zetawar.events :as handlers]
     [zetawar.hex :as hex]
+    [zetawar.router :as router]
     [zetawar.subs :as subs]
     [zetawar.util :refer [only oonly spy]]
     [zetawar.views.common :refer [footer kickstarter-alert navbar]]))
@@ -107,7 +108,7 @@
                 :width 32 :height 34
                 :xlink-href "/images/game/borders/selected.png"}])]))
 
-(defn board-unit [{:keys [conn] :as app} q r]
+(defn board-unit [{:keys [conn ev-chan] :as app} q r]
   (when-let [unit @(subs/unit-at conn q r)]
     (let [[x y] (hex/offset->pixel q r)
           color (-> unit
@@ -120,7 +121,7 @@
        [:image {:x x :y y
                 :width 32 :height 34
                 :xlink-href (str "/images/game/" image)
-                :on-click #(handlers/select conn q r %)}]
+                :on-click #(router/dispatch! ev-chan [::events/select-hex q r])}]
        (when (:unit/capturing unit)
          [:image {:x x :y y
                   :width 32 :height 34
@@ -159,10 +160,10 @@
              :width 32 :height 34
              :xlink-href (str "/images/game/" image)}]))
 
-(defn tile [{:keys [conn] :as app} terrain]
+(defn tile [{:keys [conn ev-chan] :as app} terrain]
   (let [{:keys [terrain/q terrain/r]} terrain]
     ^{:key (str q "," r)}
-    [:g {:on-click #(handlers/select conn q r %)}
+    [:g {:on-click #(router/dispatch! ev-chan [::events/select-hex q r])}
      [terrain-tile app terrain q r]
      [tile-border app q r]
      [board-unit app q r]
@@ -186,10 +187,10 @@
      [:span.text-muted.pull-right (str "+" income)
       [:span.hidden-md "/turn"]]]))
 
-(defn end-turn-link [{:keys [conn] :as app}]
+(defn end-turn-link [{:keys [conn ev-chan] :as app}]
   (let [clipboard (atom nil)
         text-fn (fn []
-                  (handlers/end-turn conn e)
+                  (events/end-turn conn ev-chan e)
                   js/window.location)]
     (r/create-class
       {:component-did-mount
@@ -204,7 +205,7 @@
          [:a {:href "#" :on-click #(.preventDefault %)}
           "End Turn?"])})))
 
-(defn faction-status [{:keys [conn] :as app}]
+(defn faction-status [{:keys [conn ev-chan] :as app}]
   (let [{:keys [game/round]} @(subs/game conn)
         base-count @(subs/current-base-count conn)]
     [:div#faction-status
@@ -213,7 +214,7 @@
       [:a {:href "#"
            :on-click (fn [e]
                        (.preventDefault e)
-                       (handlers/new-game conn e))}
+                       (events/new-game conn ev-chan e))}
        "New Game"]
       " · "
       (str "Round " round)]]))
@@ -231,27 +232,27 @@
      (when @(subs/selected-can-move-to-targeted? conn)
        [:p
         [:button.btn.btn-primary.btn-block
-         {:on-click #(handlers/move conn ev-chan %)}
+         {:on-click #(events/move conn ev-chan %)}
          "Move"]])
      (when @(subs/selected-can-build? conn)
        [:p
         [:button.btn.btn-primary.btn-block
-         {:on-click #(handlers/build conn %)}
+         {:on-click #(router/dispatch! ev-chan [::events/build-unit])}
          "Build"]])
      (when @(subs/selected-can-attack-targeted? conn)
        [:p
         [:button.btn.btn-danger.btn-block
-         {:on-click #(handlers/attack conn %)}
+         {:on-click #(router/dispatch! ev-chan [::events/attack-targeted])}
          "Attack"]])
      (when @(subs/selected-can-repair? conn)
        [:p
         [:button.btn.btn-success.btn-block
-         {:on-click #(handlers/repair conn %)}
+         {:on-click #(router/dispatch! ev-chan [::events/repair-selected])}
          "Repair"]])
      (when @(subs/selected-can-capture? conn)
        [:p
         [:button.btn.btn-primary.btn-block
-         {:on-click #(handlers/capture conn %)}
+         {:on-click #(router/dispatch! ev-chan [::events/capture-selected])}
          "Capture"]])
      ;; TODO: cleanup conditionals
      ;; TODO: make help text a separate component
@@ -276,7 +277,7 @@
         [:a {:href "https://www.kickstarter.com/projects/311016908/zetawar/posts/1608417"} "here"]
         "."])]))
 
-(defn faction-list [{:keys [conn] :as app}]
+(defn faction-list [{:keys [conn ev-chan] :as app}]
   (into [:ul.list-group]
         (for [faction @(subs/factions conn)]
           (let [color (-> faction
@@ -297,19 +298,19 @@
               (if (:faction/ai faction)
                 [:span.fa.fa-fw.fa-laptop.clickable
                  {:aria-hidden true
-                  :on-click #(handlers/toggle-faction-ai conn faction %)
+                  :on-click #(events/toggle-faction-ai conn ev-chan faction %)
                   :title "Disable AI"}]
                 [:span.fa.fa-fw.fa-user.clickable
                  {:aria-hidden true
-                  :on-click #(handlers/toggle-faction-ai conn faction %)
+                  :on-click #(events/toggle-faction-ai conn ev-chan faction %)
                   :title "Enable AI"}])]]))))
 
 ;; TODO: turn entire game interface into it's own component
 
-(defn app-root [{:keys [conn] :as app}]
+(defn app-root [{:keys [conn ev-chan] :as app}]
   [:div
    [:> js/ReactBootstrap.Modal {:show @(subs/show-win-dialog? conn)
-                                :on-hide #(handlers/hide-win-dialog conn %)}
+                                :on-hide #(events/hide-win-dialog conn ev-chan %)}
     [:> js/ReactBootstrap.Modal.Header
      [:> js/ReactBootstrap.Modal.Title
       "Congratulations! You won!"]]
@@ -320,7 +321,7 @@
       "@ZetawarGame"]
      " on Twitter."]
     [:> js/ReactBootstrap.Modal.Footer
-     [:button.btn.btn-default {:on-click #(handlers/hide-win-dialog conn %)}
+     [:button.btn.btn-default {:on-click #(events/hide-win-dialog conn ev-chan %)}
       "Close"]]]
    (navbar "Game")
    [:div.container

@@ -11,7 +11,6 @@
     [zetawar.data :as data]
     [zetawar.db :refer [e]]
     [zetawar.game :as game]
-    [zetawar.events :as handlers]
     [zetawar.subs :as subs]
     [zetawar.system :refer [new-system]]
     [zetawar.util :refer [spy]]

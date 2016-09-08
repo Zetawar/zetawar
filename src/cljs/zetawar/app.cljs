@@ -10,7 +10,7 @@
     [zetawar.hex :as hex]
     [zetawar.util :refer [oonly spy]]))
 
-;; TODO: rename to get-app (?)
+;; TODO: rename to root
 (defn app [db]
   (qe '[:find ?a
         :where

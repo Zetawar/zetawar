@@ -6,6 +6,7 @@
     [goog.crypt.base64 :as base64]
     [posh.core :as posh]
     [reagent.core :as r]
+    [taoensso.timbre :as log]
     [zetawar.ai :as ai]
     [zetawar.app :as app]
     [zetawar.db :refer [e qe qes]]
@@ -30,9 +31,9 @@
 ;;     - tile is a valid move destination?
 ;;       - set target to terrain
 
-(defn select [conn q r ev]
-  (let [db @conn
-        [app game] (only (qes '[:find ?a ?g
+(defmethod router/handle-event ::select-hex
+  [{:as ev-ctx :keys [db]} [_ q r]]
+  (let [[app game] (only (qes '[:find ?a ?g
                                 :where
                                 [?a :app/game ?g]]
                               db))
@@ -44,93 +45,91 @@
         selected-terrain (game/terrain-at db game selected-q selected-r)
         targeted-unit (game/unit-at db game targeted-q targeted-r)
         targeted-terrain (game/terrain-at db game targeted-q targeted-r)]
-    (spy [q r])
-    (cond
-      ;; selecting selected tile
-      (and (= q selected-q) (= r selected-r))
-      (d/transact! conn (cond-> []
-                          (and selected-q selected-r)
-                          (->
-                            (conj [:db/retract (e app) :app/selected-q selected-q])
-                            (conj [:db/retract (e app) :app/selected-r selected-r]))
+    {:tx (cond
+           ;; selecting selected tile
+           (and (= q selected-q) (= r selected-r))
+           (cond-> []
+             (and selected-q selected-r)
+             (->
+               (conj [:db/retract (e app) :app/selected-q selected-q])
+               (conj [:db/retract (e app) :app/selected-r selected-r]))
 
-                          (and targeted-q targeted-r)
-                          (->
-                            (conj [:db/retract (e app) :app/targeted-q targeted-q])
-                            (conj [:db/retract (e app) :app/targeted-r targeted-r]))))
+             (and targeted-q targeted-r)
+             (->
+               (conj [:db/retract (e app) :app/targeted-q targeted-q])
+               (conj [:db/retract (e app) :app/targeted-r targeted-r])))
 
-      ;; selecting targeted tile
-      (and (= q targeted-q) (= r targeted-r))
-      (d/transact! conn [[:db/retract (e app) :app/targeted-q targeted-q]
-                         [:db/retract (e app) :app/targeted-r targeted-r]])
+           ;; selecting targeted tile
+           (and (= q targeted-q) (= r targeted-r))
+           [[:db/retract (e app) :app/targeted-q targeted-q]
+            [:db/retract (e app) :app/targeted-r targeted-r]]
 
-      ;; selecting in range enemy unit with unit selected
-      (and unit
-           selected-unit
-           (not (game/unit-current? db game unit))
-           (and (game/can-attack? db game selected-unit)
-                (game/in-range? db selected-unit unit)))
-      (d/transact! conn [{:db/id (e app)
-                          :app/targeted-q q
-                          :app/targeted-r r}])
+           ;; selecting in range enemy unit with unit selected
+           (and unit
+                selected-unit
+                (not (game/unit-current? db game unit))
+                (and (game/can-attack? db game selected-unit)
+                     (game/in-range? db selected-unit unit)))
+           [{:db/id (e app)
+             :app/targeted-q q
+             :app/targeted-r r}]
 
-      ;; selecting valid destination terrain with unit selected
-      (and terrain
-           selected-unit
-           (game/can-move? db game selected-unit)
-           (game/valid-destination? db game selected-unit q r))
-      (d/transact! conn [{:db/id (e app)
-                          :app/targeted-q q
-                          :app/targeted-r r}])
+           ;; selecting valid destination terrain with unit selected
+           (and terrain
+                selected-unit
+                (game/can-move? db game selected-unit)
+                (game/valid-destination? db game selected-unit q r))
+           [{:db/id (e app)
+             :app/targeted-q q
+             :app/targeted-r r}]
 
-      ;; selecting friendly unit with unit or terrain selected
-      (and unit
-           (or selected-unit selected-terrain)
-           (or (game/can-move? db game unit)
-               (game/can-attack? db game unit)))
-      (d/transact! conn (cond-> [{:db/id (e app)
-                                  :app/selected-q q
-                                  :app/selected-r r}]
-                          (and targeted-q targeted-r)
-                          (->
-                            (conj [:db/retract (e app) :app/targeted-q targeted-q])
-                            (conj [:db/retract (e app) :app/targeted-r targeted-r]))))
+           ;; selecting friendly unit with unit or terrain selected
+           (and unit
+                (or selected-unit selected-terrain)
+                (or (game/can-move? db game unit)
+                    (game/can-attack? db game unit)))
+           (cond-> [{:db/id (e app)
+                     :app/selected-q q
+                     :app/selected-r r}]
+             (and targeted-q targeted-r)
+             (->
+               (conj [:db/retract (e app) :app/targeted-q targeted-q])
+               (conj [:db/retract (e app) :app/targeted-r targeted-r])))
 
-      ;; selecting owned base with no unit selected
-      (and terrain
-           (not unit)
-           (not selected-unit)
-           (game/current-base? db game terrain))
-      (d/transact! conn (cond-> [{:db/id (e app)
-                                  :app/selected-q q
-                                  :app/selected-r r}]
-                          (and targeted-q targeted-r)
-                          (->
-                            (conj [:db/retract (e app) :app/targeted-q targeted-q])
-                            (conj [:db/retract (e app) :app/targeted-r targeted-r]))))
+           ;; selecting owned base with no unit selected
+           (and terrain
+                (not unit)
+                (not selected-unit)
+                (game/current-base? db game terrain))
+           (cond-> [{:db/id (e app)
+                     :app/selected-q q
+                     :app/selected-r r}]
+             (and targeted-q targeted-r)
+             (->
+               (conj [:db/retract (e app) :app/targeted-q targeted-q])
+               (conj [:db/retract (e app) :app/targeted-r targeted-r])))
 
-      ;; selecting unselected friendly unit
-      (and unit
-           (or (game/can-move? db game unit)
-               (and
-                 (game/can-attack? db game unit)
-                 (not= 0 (count (game/enemies-in-range db game unit))))
-               (game/can-capture? db game unit terrain)))
-      (d/transact! conn (cond-> [{:db/id (e app)
-                                  :app/selected-q q
-                                  :app/selected-r r}]
-                          (and targeted-q targeted-r)
-                          (->
-                            (conj [:db/retract (e app) :app/targeted-q targeted-q])
-                            (conj [:db/retract (e app) :app/targeted-r targeted-r])))))))
+           ;; selecting unselected friendly unit
+           (and unit
+                (or (game/can-move? db game unit)
+                    (and
+                      (game/can-attack? db game unit)
+                      (not= 0 (count (game/enemies-in-range db game unit))))
+                    (game/can-capture? db game unit terrain)))
+           (cond-> [{:db/id (e app)
+                     :app/selected-q q
+                     :app/selected-r r}]
+             (and targeted-q targeted-r)
+             (->
+               (conj [:db/retract (e app) :app/targeted-q targeted-q])
+               (conj [:db/retract (e app) :app/targeted-r targeted-r]))))}))
 
-(defmethod router/handle-event :zetawar.event/clear-selection
+(defmethod router/handle-event ::clear-selection
   [{:as ev-ctx :keys [db]} _]
   (let [app (qe '[:find ?a
                   :where
                   [?a :app/game]]
                 db)
-
         [selected-q selected-r] (app/selected-qr db)
         [targeted-q targeted-r] (app/targeted-qr db)]
     {:tx (cond-> []
@@ -144,34 +143,16 @@
              (conj [:db/retract (e app) :app/targeted-q targeted-q])
              (conj [:db/retract (e app) :app/targeted-r targeted-r])))}))
 
-(defn clear-selection [conn ev]
-  (let [db @conn
-        app (qe '[:find ?a
-                  :where
-                  [?a :app/game]]
-                db)
-        [selected-q selected-r] (app/selected-qr db)
-        [targeted-q targeted-r] (app/targeted-qr db)]
-    (d/transact! conn (cond-> []
-                        (and selected-q selected-r)
-                        (->
-                          (conj [:db/retract (e app) :app/selected-q selected-q])
-                          (conj [:db/retract (e app) :app/selected-r selected-r]))
-
-                        (and targeted-q targeted-r)
-                        (->
-                          (conj [:db/retract (e app) :app/targeted-q targeted-q])
-                          (conj [:db/retract (e app) :app/targeted-r targeted-r]))))))
-
-(defn alert-if-win [conn]
-  (let [db @conn
-        app (qe '[:find ?a
+(defmethod router/handle-event ::alert-if-win
+  [{:as ev-ctx :keys [db]} [_ q r]]
+  (let [app (qe '[:find ?a
                   :where
                   [?a :app/game]]
                 db)]
     (when (game/current-faction-won? db)
-      (d/transact! conn [[:db/add (e app) :app/show-win-dialog true]]))))
+      {:tx [[:db/add (e app) :app/show-win-dialog true]]})))
 
+;; TODO: convert to message based event handler
 (defn move [conn ev-chan ev]
   (let [db @conn
         [q1 r1 q2 r2] (first (d/q '[:find ?q1 ?r1 ?q2 ?r2
@@ -183,6 +164,7 @@
                                   db))]
     (game/move! conn (app/current-game-id db) q1 r1 q2 r2)
     ;; TODO: cleanup
+    ;; TODO: make de-select a second event
     (let [db @conn
           app (qe '[:find ?a
                     :where
@@ -198,60 +180,54 @@
                             [:db/add (e app) :app/selected-r r2]
                             [:db/retract (e app) :app/targeted-q q2]
                             [:db/retract (e app) :app/targeted-r r2]])
-        ;; TODO: cleanup clear-selection handler usage
-        (router/dispatch! ev-chan [:zetawar.event/clear-selection])
-        ;(clear-selection conn nil)
-        ))))
+        (router/dispatch! ev-chan [::clear-selection])))))
 
-(defn attack [conn ev]
-  (let [db @conn
-        [q1 r1 q2 r2] (first (d/q '[:find ?q1 ?r1 ?q2 ?r2
+(defmethod router/handle-event ::attack-targeted
+  [{:as ev-ctx :keys [db]} _]
+  (let [[q1 r1 q2 r2] (first (d/q '[:find ?q1 ?r1 ?q2 ?r2
                                     :where
                                     [?a :app/selected-q ?q1]
                                     [?a :app/selected-r ?r1]
                                     [?a :app/targeted-q ?q2]
                                     [?a :app/targeted-r ?r2]]
                                   db))]
-    (game/attack! conn (app/current-game-id db) q1 r1 q2 r2)
-    ;; TODO: cleanup clear-selection handler usage
-    (clear-selection conn nil)
-    (alert-if-win conn)))
+    {:tx       (game/attack-tx db (app/current-game db) q1 r1 q2 r2)
+     :dispatch [[::clear-selection]
+                [::alert-if-win]]}))
 
-(defn repair [conn ev]
-  (let [db @conn
-        [q r] (first (d/q '[:find ?q ?r
+(defmethod router/handle-event ::repair-selected
+  [{:as ev-ctx :keys [db]} _]
+  (let [[q r] (first (d/q '[:find ?q ?r
                             :where
                             [?a :app/selected-q ?q]
                             [?a :app/selected-r ?r]]
                           db))]
-    (game/repair! conn (app/current-game-id db) q r)
-    ;; TODO: cleanup clear-selection handler usage
-    (clear-selection conn nil)))
+    {:tx (game/repair-tx db (app/current-game db) q r)
+     :dispatch [[::clear-selection]]}))
 
-(defn capture [conn ev]
-  (let [db @conn
-        [q r] (first (d/q '[:find ?q ?r
+(defmethod router/handle-event ::capture-selected
+  [{:as ev-ctx :keys [db]} _]
+  (let [[q r] (first (d/q '[:find ?q ?r
                             :where
                             [?a :app/selected-q ?q]
                             [?a :app/selected-r ?r]]
                           db))]
-    (game/capture! conn (app/current-game-id db) q r)
-    ;; TODO: cleanup clear-selection handler usage
-    (clear-selection conn nil)
-    (alert-if-win conn)))
+    {:tx (game/capture-tx db (app/current-game db) q r)
+     :dispatch [[::clear-selection]
+                [::alert-if-win]]}))
 
-(defn build [conn ev]
-  (let [db @conn
-        [q r]  (first (d/q '[:find ?q ?r
-                             :where
-                             [?a :app/selected-q ?q]
-                             [?a :app/selected-r ?r]]
-                           db))]
-    (game/build! conn (app/current-game-id db) q r :unit-type.id/infantry)
-    ;; TODO: cleanup clear-selection handler usage
-    (clear-selection conn nil)))
+(defmethod router/handle-event ::build-unit
+  [{:as ev-ctx :keys [db]} _]
+  (let [[q r] (first (d/q '[:find ?q ?r
+                            :where
+                            [?a :app/selected-q ?q]
+                            [?a :app/selected-r ?r]]
+                          db))]
+    (spy [q r])
+    {:tx (game/build-tx db (app/current-game db) q r :unit-type.id/infantry)
+     :dispatch [[::clear-selection]]}))
 
-(defn end-turn [conn ev]
+(defn end-turn [conn ev-chan ev]
   (let [db @conn
         ;; TODO: replace with app/current-game-id
         game-id (oonly (d/q '[:find ?game-id
@@ -259,21 +235,20 @@
                               [_ :game/id ?game-id]]
                             db))
         game (game/game-by-id db game-id)]
-    ;; TODO: cleanup clear-selection handler usage
-    (clear-selection conn nil)
+    (router/dispatch! ev-chan [::clear-selection])
     (game/end-turn! conn game-id)
     (when (get-in (game/game-by-id @conn game-id) [:game/current-faction :faction/ai])
       (ai/execute-turn conn game-id)
       (game/end-turn! conn game-id)
-      (alert-if-win conn))
+      (router/dispatch! ev-chan [::alert-if-win]))
     (app/set-url-game-state! @conn)))
 
-(defn new-game [conn ev]
+(defn new-game [conn ev-chan ev]
   (when (js/confirm "Are you sure you want to end your current game and start a new one?")
     (set! js/window.location.hash "")
     (app/start-new-game! conn :sterlings-aruba-multiplayer)))
 
-(defn toggle-faction-ai [conn faction ev]
+(defn toggle-faction-ai [conn ev-chan faction ev]
   (let [db @conn
         game-id (app/current-game-id db)
         {:keys [faction/ai]} faction
@@ -300,7 +275,7 @@
       (js/alert "Enabling AI on all factions is not yet supported.")
       (d/transact! conn [[:db/add (e faction) :faction/ai (not ai)]]))))
 
-(defn hide-win-dialog [conn ev]
+(defn hide-win-dialog [conn ev-chan ev]
   (let [db @conn
         app (qe '[:find ?a
                   :where
