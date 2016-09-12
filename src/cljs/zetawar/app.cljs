@@ -17,6 +17,12 @@
         [?a :app/game]]
       db))
 
+(defn root [db]
+  (qe '[:find ?a
+        :where
+        [?a :app/game]]
+      db))
+
 (defn current-game [db]
   (qe '[:find ?g
         :where

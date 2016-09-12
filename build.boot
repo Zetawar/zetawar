@@ -118,14 +118,15 @@
 
 (deftask dev
   "Run dev environment."
-  []
+  [H host HOST str]
   (comp (serve)
         (repl)
         (watch)
         (build-html :metadata-file "perun.base.dev.edn")
         (build-css)
         (reload :on-jsload 'zetawar.core/run
-                :cljs-asset-path "")
+                :cljs-asset-path ""
+                :ws-host host)
         (cljs-repl-env)
         (cljs :ids ["js/main"]
               :optimizations :none

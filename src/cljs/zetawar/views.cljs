@@ -190,20 +190,20 @@
 (defn end-turn-link [{:keys [conn ev-chan] :as app}]
   (let [clipboard (atom nil)
         text-fn (fn []
-                  (events/end-turn conn ev-chan e)
+                  (router/dispatch! ev-chan [::events/end-turn])
                   js/window.location)]
     (r/create-class
-      {:component-did-mount
-       (fn [this]
-         (reset! clipboard (js/Clipboard. (r/dom-node this) #js {"text" text-fn})))
-       :component-will-unmount
-       (fn [this]
-         (.destroy @clipboard)
-         (reset! clipboard nil))
-       :reagent-render
-       (fn [this]
-         [:a {:href "#" :on-click #(.preventDefault %)}
-          "End Turn?"])})))
+     {:component-did-mount
+      (fn [this]
+        (reset! clipboard (js/Clipboard. (r/dom-node this) #js {"text" text-fn})))
+      :component-will-unmount
+      (fn [this]
+        (.destroy @clipboard)
+        (reset! clipboard nil))
+      :reagent-render
+      (fn [this]
+        [:a {:href "#" :on-click #(.preventDefault %)}
+         "End Turn?"])})))
 
 (defn faction-status [{:keys [conn ev-chan] :as app}]
   (let [{:keys [game/round]} @(subs/game conn)
@@ -214,7 +214,7 @@
       [:a {:href "#"
            :on-click (fn [e]
                        (.preventDefault e)
-                       (events/new-game conn ev-chan e))}
+                       (router/dispatch! ev-chan [::events/new-game]))}
        "New Game"]
       " · "
       (str "Round " round)]]))
@@ -232,7 +232,7 @@
      (when @(subs/selected-can-move-to-targeted? conn)
        [:p
         [:button.btn.btn-primary.btn-block
-         {:on-click #(events/move conn ev-chan %)}
+         {:on-click #(router/dispatch! ev-chan [::events/move-selected-unit])}
          "Move"]])
      (when @(subs/selected-can-build? conn)
        [:p
@@ -263,11 +263,11 @@
                     @(subs/selected-can-capture? conn)))
        [:p.hidden-xs.hidden-sm "Select a unit or base."])
      (when (and
-             (or @(subs/selected-can-move? conn)
-                 @(subs/selected-can-attack? conn))
-             (not
-               (or @(subs/selected-can-move-to-targeted? conn)
-                   @(subs/selected-can-attack-targeted? conn))))
+            (or @(subs/selected-can-move? conn)
+                @(subs/selected-can-attack? conn))
+            (not
+             (or @(subs/selected-can-move-to-targeted? conn)
+                 @(subs/selected-can-attack-targeted? conn))))
        [:p.hidden-xs.hidden-sm
         "Select a destination or target to move or attack."])
      ;; TODO: only display when starting faction is active
@@ -280,11 +280,12 @@
 (defn faction-list [{:keys [conn ev-chan] :as app}]
   (into [:ul.list-group]
         (for [faction @(subs/factions conn)]
-          (let [color (-> faction
+          (let [faction-eid (e faction)
+                color (-> faction
                           :faction/color
                           name
                           string/capitalize)
-                active (= (e faction) @(subs/current-faction-eid conn))
+                active (= faction-eid @(subs/current-faction-eid conn))
                 li-class (if active
                            "list-group-item active"
                            "list-group-item")]
@@ -298,11 +299,11 @@
               (if (:faction/ai faction)
                 [:span.fa.fa-fw.fa-laptop.clickable
                  {:aria-hidden true
-                  :on-click #(events/toggle-faction-ai conn ev-chan faction %)
+                  :on-click #(router/dispatch! ev-chan [::events/toggle-faction-ai faction])
                   :title "Disable AI"}]
                 [:span.fa.fa-fw.fa-user.clickable
                  {:aria-hidden true
-                  :on-click #(events/toggle-faction-ai conn ev-chan faction %)
+                  :on-click #(router/dispatch! ev-chan [::events/toggle-faction-ai faction])
                   :title "Enable AI"}])]]))))
 
 ;; TODO: turn entire game interface into it's own component
@@ -310,7 +311,7 @@
 (defn app-root [{:keys [conn ev-chan] :as app}]
   [:div
    [:> js/ReactBootstrap.Modal {:show @(subs/show-win-dialog? conn)
-                                :on-hide #(events/hide-win-dialog conn ev-chan %)}
+                                :on-hide #(router/dispatch! ev-chan [::events/hide-win-dialog])}
     [:> js/ReactBootstrap.Modal.Header
      [:> js/ReactBootstrap.Modal.Title
       "Congratulations! You won!"]]
@@ -321,7 +322,7 @@
       "@ZetawarGame"]
      " on Twitter."]
     [:> js/ReactBootstrap.Modal.Footer
-     [:button.btn.btn-default {:on-click #(events/hide-win-dialog conn ev-chan %)}
+     [:button.btn.btn-default {:on-click #(router/dispatch! ev-chan [::events/hide-win-dialog])}
       "Close"]]]
    (navbar "Game")
    [:div.container
