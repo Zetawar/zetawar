@@ -4,7 +4,11 @@
    [zetawar.db :refer [e qe qes]]
    [zetawar.game :as game]))
 
-;; current AI logic
+;; AI communication
+;;   - two channels per bot (req + notify)
+;;   - two bot events: request, notify
+
+;; Current AI logic
 ;;   - for each unit
 ;;     - get moves
 ;;     - pick move that gets closest to a capturable base
@@ -12,20 +16,19 @@
 ;;     - capture if on base
 ;;     - get attacks
 ;;     - attack a random enemy unit if possible
+;;   - for each owned base:
+;;     - build a random unit
 
-;; for each owned base:
-;; - build a random unit
-
-;; new AI logic
-;; - check whether build criteria is met
-;;   - if bases exist that can build
-;;     - pick base to build at
-;;     - pick unit to build
-;;     - build unit
-;; - check for units with actions
-;;     - pick unit
-;;     - pick action
-;;     - perform action
+;; New AI logic
+;;   - check whether build criteria is met
+;;     - if bases exist that can build
+;;       - pick base to build at
+;;       - pick unit to build
+;;       - build unit
+;;   - check for units with actions
+;;       - pick unit
+;;       - pick action
+;;       - perform action
 
 (defn move [conn game-id unit]
   (when-not (:unit/capturing unit)

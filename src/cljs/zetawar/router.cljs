@@ -8,6 +8,11 @@
 
 (defmulti handle-event (fn [ev-ctx [ev-id & _]] ev-id))
 
+(defmethod handle-event :default
+  [_ msg]
+  (log/debugf "Unhandled event: %s" (pr-str msg))
+  nil)
+
 (defn dispatch [ch msg]
   (log/debugf "Dispatching event: %s" (pr-str msg))
   (put! ch msg))

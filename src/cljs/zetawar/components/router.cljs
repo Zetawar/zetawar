@@ -4,7 +4,7 @@
    [com.stuartsierra.component :as component]
    [zetawar.router :as router]))
 
-(defrecord Router [datascript timbre ev-chan conn]
+(defrecord Router [ai datascript timbre ev-chan conn]
   component/Lifecycle
   (start [component]
     (let [{:keys [conn]} datascript]
@@ -12,11 +12,11 @@
     (assoc component :conn (:conn datascript)))
   (stop [component]
     (async/close! ev-chan)
-    (assoc component :datascript nil :timbre nil :ev-chan nil :conn nil)))
+    (assoc component :ai nil :datascript nil :timbre nil :ev-chan nil :conn nil)))
 
 (defn new-router
   ([]
    (new-router (async/chan (async/dropping-buffer 10))))
   ([ev-chan]
    (component/using (map->Router {:ev-chan ev-chan})
-                    [:datascript :timbre])))
+                    [:ai :datascript :timbre])))
