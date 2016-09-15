@@ -1,8 +1,8 @@
 (ns zetawar.components.router
   (:require
-    [cljs.core.async :refer [chan close!]]
-    [com.stuartsierra.component :as component]
-    [zetawar.router :as router]))
+   [cljs.core.async :as async]
+   [com.stuartsierra.component :as component]
+   [zetawar.router :as router]))
 
 (defrecord Router [datascript timbre ev-chan conn]
   component/Lifecycle
@@ -11,12 +11,12 @@
       (router/start {:conn conn :ev-chan ev-chan}))
     (assoc component :conn (:conn datascript)))
   (stop [component]
-    (close! ev-chan)
+    (async/close! ev-chan)
     (assoc component :datascript nil :timbre nil :ev-chan nil :conn nil)))
 
 (defn new-router
   ([]
-   (new-router (chan 1)))
+   (new-router (async/chan (async/dropping-buffer 10))))
   ([ev-chan]
    (component/using (map->Router {:ev-chan ev-chan})
-     [:datascript :timbre])))
+                    [:datascript :timbre])))

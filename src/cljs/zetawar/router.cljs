@@ -8,27 +8,25 @@
 
 (defmulti handle-event (fn [ev-ctx [ev-id & _]] ev-id))
 
-;; TODO: add sync dispatch (?)
+(defn dispatch [ch msg]
+  (log/debugf "Dispatching event: %s" (pr-str msg))
+  (put! ch msg))
 
-(defn dispatch! [ev-chan ev-msg]
-  (log/debugf "Dispatching: %s" (pr-str ev-msg))
-  (put! ev-chan ev-msg))
-
-(defn handle-event* [{:as router-ctx :keys [ev-chan conn]} ev-msg]
+(defn handle-event* [{:as router-ctx :keys [ev-chan conn]} msg]
   (let [ev-ctx (assoc router-ctx :db @conn)
-        {:as ret :keys [tx dispatch]} (handle-event ev-ctx ev-msg)]
+        {:as ret :keys [tx]} (handle-event ev-ctx msg)]
     (log/tracef "Handler returned: %s" (pr-str ret))
     (when tx
       (log/debugf "Transacting: %s" (pr-str tx))
       (d/transact! conn tx))
-    (doseq [ret-ev-msg dispatch]
-      (dispatch! ev-chan ret-ev-msg))))
+    (doseq [new-msg (:dispatch ret)]
+      (dispatch ev-chan new-msg))))
 
-(defn start [{:as router-ctx :keys [ev-chan conn]}]
-  (go-loop [ev-msg (<! ev-chan)]
-    (when ev-msg
-      (log/debugf "Handling: %s" (pr-str ev-msg))
+(defn start [{:as router-ctx :keys [ev-chan]}]
+  (go-loop [msg (<! ev-chan)]
+    (when msg
+      (log/debugf "Handling event: %s" (pr-str msg))
       ;; TODO: validate event
       ;; TODO: validate handler return value
-      (handle-event* router-ctx ev-msg)
+      (handle-event* router-ctx msg)
       (recur (<! ev-chan)))))

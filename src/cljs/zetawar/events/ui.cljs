@@ -1,4 +1,4 @@
-(ns zetawar.events
+(ns zetawar.events.ui
   (:require
    [cljs.core.async :refer [chan close! put!]]
    [datascript.core :as d]
@@ -30,7 +30,7 @@
 ;;       - set target to terrain
 
 (defmethod router/handle-event ::select-hex
-  [{:as ev-ctx :keys [db]} [_ ev-q ev-r]]
+  [{:as handler-ctx :keys [db]} [_ ev-q ev-r]]
   (let [app (app/root db)
         game (app/current-game db)
         [selected-q selected-r] (app/selected-qr db)
@@ -121,7 +121,7 @@
               (conj [:db/retract (e app) :app/targeted-r targeted-r]))))}))
 
 (defmethod router/handle-event ::clear-selection
-  [{:as ev-ctx :keys [db]} _]
+  [{:as handler-ctx :keys [db]} _]
   (let [app (app/root db)
         [selected-q selected-r] (app/selected-qr db)
         [targeted-q targeted-r] (app/targeted-qr db)]
@@ -137,22 +137,22 @@
             (conj [:db/retract (e app) :app/targeted-r targeted-r])))}))
 
 (defmethod router/handle-event ::alert-if-win
-  [{:as ev-ctx :keys [db]} _]
+  [{:as handler-ctx :keys [db]} _]
   (let [app (app/root db)]
     (when (game/current-faction-won? db)
       {:tx [[:db/add (e app) :app/show-win-dialog true]]})))
 
 (defmethod router/handle-event ::move-selected-unit
-  [{:as ev-ctx :keys [db]} _]
+  [{:as handler-ctx :keys [db]} _]
   (let [[selected-q selected-r] (app/selected-qr db)
         [targeted-q targeted-r] (app/targeted-qr db)]
-    {:tx       (game/move-tx db (app/current-game db)
-                             selected-q selected-r
-                             targeted-q targeted-r)
+    {:tx          (game/move-tx db (app/current-game db)
+                                selected-q selected-r
+                                targeted-q targeted-r)
      :dispatch [[::move-selection selected-q selected-r targeted-q targeted-r]]}))
 
 (defmethod router/handle-event ::move-selection
-  [{:as ev-ctx :keys [db]} [_ from-q from-r to-q to-r]]
+  [{:as handler-ctx :keys [db]} [_ from-q from-r to-q to-r]]
   (let [app (app/root db)
         game (app/current-game db)
         unit (game/unit-at db game to-q to-r)
@@ -160,64 +160,64 @@
     (if (or (and (game/can-attack? db game unit)
                  (not-empty (game/enemies-in-range db game unit)))
             (game/can-capture? db game unit terrain))
-      {:tx       [[:db/add (e app) :app/selected-q to-q]
-                  [:db/add (e app) :app/selected-r to-r]
-                  [:db/retract (e app) :app/targeted-q to-q]
-                  [:db/retract (e app) :app/targeted-r to-r]]}
+      {:tx          [[:db/add (e app) :app/selected-q to-q]
+                     [:db/add (e app) :app/selected-r to-r]
+                     [:db/retract (e app) :app/targeted-q to-q]
+                     [:db/retract (e app) :app/targeted-r to-r]]}
       {:dispatch [[::clear-selection]]})))
 
 (defmethod router/handle-event ::attack-targeted
-  [{:as ev-ctx :keys [db]} _]
+  [{:as handler-ctx :keys [db]} _]
   (let [[selected-q selected-r] (app/selected-qr db)
         [targeted-q targeted-r] (app/targeted-qr db)]
-    {:tx       (game/attack-tx db (app/current-game db)
-                               selected-q selected-r
-                               targeted-q targeted-r)
+    {:tx          (game/attack-tx db (app/current-game db)
+                                  selected-q selected-r
+                                  targeted-q targeted-r)
      :dispatch [[::clear-selection]
                 [::alert-if-win]]}))
 
 (defmethod router/handle-event ::repair-selected
-  [{:as ev-ctx :keys [db]} _]
+  [{:as handler-ctx :keys [db]} _]
   (let [[q r] (app/selected-qr db)]
-    {:tx       (game/repair-tx db (app/current-game db) q r)
+    {:tx          (game/repair-tx db (app/current-game db) q r)
      :dispatch [[::clear-selection]]}))
 
 (defmethod router/handle-event ::capture-selected
-  [{:as ev-ctx :keys [db]} _]
+  [{:as handler-ctx :keys [db]} _]
   (let [[q r] (app/selected-qr db)]
-    {:tx       (game/capture-tx db (app/current-game db) q r)
+    {:tx          (game/capture-tx db (app/current-game db) q r)
      :dispatch [[::clear-selection]
                 [::alert-if-win]]}))
 
 (defmethod router/handle-event ::build-unit
-  [{:as ev-ctx :keys [db]} _]
+  [{:as handler-ctx :keys [db]} _]
   (let [[q r] (app/selected-qr db)]
-    {:tx       (game/build-tx db (app/current-game db) q r :unit-type.id/infantry)
+    {:tx          (game/build-tx db (app/current-game db) q r :unit-type.id/infantry)
      :dispatch [[::clear-selection]]}))
 
 ;; TODO: convert to pure function
 (defmethod router/handle-event ::end-turn
-  [{:as ev-ctx :keys [ev-chan conn db]} _]
+  [{:as handler-ctx :keys [ev-chan conn db]} _]
   (let [game-id (app/current-game-id db)
         game (game/game-by-id db game-id)]
-    (router/dispatch! ev-chan [::clear-selection])
+    (router/dispatch ev-chan [::clear-selection])
     (game/end-turn! conn game-id)
     (when (get-in (game/game-by-id @conn game-id) [:game/current-faction :faction/ai])
       (ai/execute-turn conn game-id)
       (game/end-turn! conn game-id)
-      (router/dispatch! ev-chan [::alert-if-win]))
+      (router/dispatch ev-chan [::alert-if-win]))
     (app/set-url-game-state! @conn)))
 
 ;; TODO: convert to pure function
 (defmethod router/handle-event ::new-game
-  [{:as ev-ctx :keys [ev-chan conn db]} _]
+  [{:as handler-ctx :keys [ev-chan conn db]} _]
   (when (js/confirm "Are you sure you want to end your current game and start a new one?")
     (set! js/window.location.hash "")
     (app/start-new-game! conn :sterlings-aruba-multiplayer)))
 
 ;; TODO: convert to pure function
 (defmethod router/handle-event ::toggle-faction-ai
-  [{:as ev-ctx :keys [ev-chan conn db]} [_ faction]]
+  [{:as handler-ctx :keys [ev-chan conn db]} [_ faction]]
   (let [game-id (app/current-game-id db)
         {:keys [faction/ai]} faction
         other-faction-count (oonly (d/q '[:find (count ?f)
@@ -245,6 +245,6 @@
 
 ;; TODO: convert to pure function
 (defmethod router/handle-event ::hide-win-dialog
-  [{:as ev-ctx :keys [ev-chan conn db]} _]
+  [{:as handler-ctx :keys [ev-chan conn db]} _]
   (let [app (app/root db)]
     (d/transact! conn [[:db/add (e app) :app/show-win-dialog false]])))

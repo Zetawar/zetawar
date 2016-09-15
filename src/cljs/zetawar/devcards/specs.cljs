@@ -1,15 +1,15 @@
 (ns zetawar.devcards.specs
   (:require
-    [clojure.spec :as s]
-    [clojure.test.check.generators]
-    [devcards.core :as dc :include-macros true]
-    [zetawar.map-spec]
-    [zetawar.events-spec])
+   [clojure.spec :as s]
+   [clojure.test.check.generators]
+   [devcards.core :as dc :include-macros true]
+   [zetawar.map-spec]
+   [zetawar.events.ui-spec])
   (:require-macros
-    [devcards.core :refer [defcard defcard-rg]]))
+   [devcards.core :refer [defcard defcard-rg]]))
 
 (defcard map-spec
   (s/exercise :zetawar/map 5))
 
 (defcard handler-spec
-  (s/exercise :zetawar.events/select-hex 5))
+  (s/exercise :zetawar.ui.events/select-hex 5))

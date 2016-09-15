@@ -1,20 +1,20 @@
 (ns zetawar.views
   (:require
-    [cljsjs.clipboard]
-    [cljsjs.react-bootstrap]
-    [clojure.string :as string]
-    [datascript.core :as d]
-    [posh.core :as posh]
-    [reagent.core :as r]
-    [zetawar.ai :as ai]
-    [zetawar.db :refer [e qe]]
-    [zetawar.events :as events]
-    [zetawar.game :as game]
-    [zetawar.hex :as hex]
-    [zetawar.router :as router]
-    [zetawar.subs :as subs]
-    [zetawar.util :refer [only oonly spy]]
-    [zetawar.views.common :refer [footer kickstarter-alert navbar]]))
+   [cljsjs.clipboard]
+   [cljsjs.react-bootstrap]
+   [clojure.string :as string]
+   [datascript.core :as d]
+   [posh.core :as posh]
+   [reagent.core :as r]
+   [zetawar.ai :as ai]
+   [zetawar.db :refer [e qe]]
+   [zetawar.events.ui :as events.ui]
+   [zetawar.game :as game]
+   [zetawar.hex :as hex]
+   [zetawar.router :as router]
+   [zetawar.subs :as subs]
+   [zetawar.util :refer [only oonly spy]]
+   [zetawar.views.common :refer [footer kickstarter-alert navbar]]))
 
 ;; Game           => Factions
 ;; Factions       => Units
@@ -121,7 +121,7 @@
        [:image {:x x :y y
                 :width 32 :height 34
                 :xlink-href (str "/images/game/" image)
-                :on-click #(router/dispatch! ev-chan [::events/select-hex q r])}]
+                :on-click #(router/dispatch ev-chan [::events.ui/select-hex q r])}]
        (when (:unit/capturing unit)
          [:image {:x x :y y
                   :width 32 :height 34
@@ -133,16 +133,16 @@
 (defn tile-mask [{:keys [conn] :as app} q r]
   (let [[x y] (hex/offset->pixel q r)]
     (when (or
-            ;; No unit selected and tile contains current unit with no actions
-            (and (not @(subs/unit-selected? conn))
-                 @(subs/current-unit-at? conn q r)
-                 (not @(subs/unit-can-act? conn q r)))
+           ;; No unit selected and tile contains current unit with no actions
+           (and (not @(subs/unit-selected? conn))
+                @(subs/current-unit-at? conn q r)
+                (not @(subs/unit-can-act? conn q r)))
 
-            ;; Unit selected and tile is a valid attack or move target
-            (and @(subs/unit-selected? conn)
-                 (not @(subs/selected? conn q r))
-                 (not @(subs/enemy-in-range-of-selected? conn q r))
-                 (not @(subs/valid-destination-for-selected? conn q r))))
+           ;; Unit selected and tile is a valid attack or move target
+           (and @(subs/unit-selected? conn)
+                (not @(subs/selected? conn q r))
+                (not @(subs/enemy-in-range-of-selected? conn q r))
+                (not @(subs/valid-destination-for-selected? conn q r))))
       [:image {:x x :y y
                :width 32 :height 34
                :xlink-href "/images/game/mask.png"}])))
@@ -163,7 +163,7 @@
 (defn tile [{:keys [conn ev-chan] :as app} terrain]
   (let [{:keys [terrain/q terrain/r]} terrain]
     ^{:key (str q "," r)}
-    [:g {:on-click #(router/dispatch! ev-chan [::events/select-hex q r])}
+    [:g {:on-click #(router/dispatch ev-chan [::events.ui/select-hex q r])}
      [terrain-tile app terrain q r]
      [tile-border app q r]
      [board-unit app q r]
@@ -190,7 +190,7 @@
 (defn end-turn-link [{:keys [conn ev-chan] :as app}]
   (let [clipboard (atom nil)
         text-fn (fn []
-                  (router/dispatch! ev-chan [::events/end-turn])
+                  (router/dispatch ev-chan [::events.ui/end-turn])
                   js/window.location)]
     (r/create-class
      {:component-did-mount
@@ -214,7 +214,7 @@
       [:a {:href "#"
            :on-click (fn [e]
                        (.preventDefault e)
-                       (router/dispatch! ev-chan [::events/new-game]))}
+                       (router/dispatch ev-chan [::events.ui/new-game]))}
        "New Game"]
       " · "
       (str "Round " round)]]))
@@ -232,27 +232,27 @@
      (when @(subs/selected-can-move-to-targeted? conn)
        [:p
         [:button.btn.btn-primary.btn-block
-         {:on-click #(router/dispatch! ev-chan [::events/move-selected-unit])}
+         {:on-click #(router/dispatch ev-chan [::events.ui/move-selected-unit])}
          "Move"]])
      (when @(subs/selected-can-build? conn)
        [:p
         [:button.btn.btn-primary.btn-block
-         {:on-click #(router/dispatch! ev-chan [::events/build-unit])}
+         {:on-click #(router/dispatch ev-chan [::events.ui/build-unit])}
          "Build"]])
      (when @(subs/selected-can-attack-targeted? conn)
        [:p
         [:button.btn.btn-danger.btn-block
-         {:on-click #(router/dispatch! ev-chan [::events/attack-targeted])}
+         {:on-click #(router/dispatch ev-chan [::events.ui/attack-targeted])}
          "Attack"]])
      (when @(subs/selected-can-repair? conn)
        [:p
         [:button.btn.btn-success.btn-block
-         {:on-click #(router/dispatch! ev-chan [::events/repair-selected])}
+         {:on-click #(router/dispatch ev-chan [::events.ui/repair-selected])}
          "Repair"]])
      (when @(subs/selected-can-capture? conn)
        [:p
         [:button.btn.btn-primary.btn-block
-         {:on-click #(router/dispatch! ev-chan [::events/capture-selected])}
+         {:on-click #(router/dispatch ev-chan [::events.ui/capture-selected])}
          "Capture"]])
      ;; TODO: cleanup conditionals
      ;; TODO: make help text a separate component
@@ -299,11 +299,11 @@
               (if (:faction/ai faction)
                 [:span.fa.fa-fw.fa-laptop.clickable
                  {:aria-hidden true
-                  :on-click #(router/dispatch! ev-chan [::events/toggle-faction-ai faction])
+                  :on-click #(router/dispatch ev-chan [::events.ui/toggle-faction-ai faction])
                   :title "Disable AI"}]
                 [:span.fa.fa-fw.fa-user.clickable
                  {:aria-hidden true
-                  :on-click #(router/dispatch! ev-chan [::events/toggle-faction-ai faction])
+                  :on-click #(router/dispatch ev-chan [::events.ui/toggle-faction-ai faction])
                   :title "Enable AI"}])]]))))
 
 ;; TODO: turn entire game interface into it's own component
@@ -311,7 +311,7 @@
 (defn app-root [{:keys [conn ev-chan] :as app}]
   [:div
    [:> js/ReactBootstrap.Modal {:show @(subs/show-win-dialog? conn)
-                                :on-hide #(router/dispatch! ev-chan [::events/hide-win-dialog])}
+                                :on-hide #(router/dispatch ev-chan [::events.ui/hide-win-dialog])}
     [:> js/ReactBootstrap.Modal.Header
      [:> js/ReactBootstrap.Modal.Title
       "Congratulations! You won!"]]
@@ -322,7 +322,7 @@
       "@ZetawarGame"]
      " on Twitter."]
     [:> js/ReactBootstrap.Modal.Footer
-     [:button.btn.btn-default {:on-click #(router/dispatch! ev-chan [::events/hide-win-dialog])}
+     [:button.btn.btn-default {:on-click #(router/dispatch ev-chan [::events.ui/hide-win-dialog])}
       "Close"]]]
    (navbar "Game")
    [:div.container
