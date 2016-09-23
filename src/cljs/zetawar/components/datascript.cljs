@@ -1,7 +1,7 @@
 (ns zetawar.components.datascript
   (:require
-    [com.stuartsierra.component :as component]
-    [datascript.core :as d]))
+   [com.stuartsierra.component :as component]
+   [datascript.core :as d]))
 
 (defrecord Datascript [schema conn]
   component/Lifecycle
