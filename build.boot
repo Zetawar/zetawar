@@ -5,7 +5,7 @@
   '[[adzerk/boot-cljs "1.7.228-1" :scope "test"]
     [adzerk/boot-cljs-repl "0.3.3" :scope "test"]
     [adzerk/boot-reload "0.4.12" :scope "test"]
-    [binaryage/devtools "0.8.1" :scope "test"]
+    [binaryage/devtools "0.8.2" :scope "test"]
     [cljsjs/clipboard "1.5.9-0"]
     [cljsjs/react "15.3.1-0"]
     [cljsjs/react-bootstrap "0.29.2-0"]
@@ -17,14 +17,15 @@
     [com.stuartsierra/component "0.3.1"]
     [com.taoensso/timbre "4.7.4"]
     [crisptrutski/boot-cljs-test "0.2.2-SNAPSHOT" :scope "test"]
-    [datascript "0.15.2"]
+    [datascript "0.15.4"]
     [deraen/boot-less "0.5.0" :scope "test"]
     [devcards "0.2.1-7" :scope "test"]
     [fipp "0.6.6" :scope "test"]
     [hashobject/boot-s3 "0.1.2-SNAPSHOT" :scope "test"]
     [hiccup "1.0.5"]
+    [it.frbracch/boot-marginalia "0.1.3-1" :scope "test"]
     [org.clojure/clojurescript "1.9.225"]
-    [org.clojure/core.async "0.2.385"]
+    [org.clojure/core.async "0.2.391"]
     [org.clojure/test.check "0.9.0"]
     [org.clojure/tools.nrepl "0.2.12" :scope "test"]
     [org.martinklepsch/boot-gzip "0.1.2" :scope "test"]
@@ -34,7 +35,7 @@
     [pandeiro/boot-http "0.7.3" :scope "test"]
     [perun "0.3.0" :scope "test"]
     [posh "0.3.5"]
-    [reagent "0.6.0-rc"]
+    [reagent "0.6.0"]
     [weasel "0.7.0" :scope "test"]])
 
 (require
@@ -47,6 +48,7 @@
   '[deraen.boot-less :refer :all]
   '[hashobject.boot-s3 :refer :all]
   '[io.perun :refer :all]
+  '[it.frbracch.boot-marginalia :refer [marginalia]]
   '[org.martinklepsch.boot-gzip :refer [gzip]]
   '[pandeiro.boot-http :refer :all])
 
@@ -164,6 +166,7 @@
   (comp (build-cljs)
         (build-html :metadata-file (str "perun.base." environment ".edn"))
         (build-css)
+        (marginalia)
         (gzip :regex #{#"\.html$" #"\.css$" #"\.js$"})
         (sift :move {#"^(.*)\.html$" "$1.html.orig"
                      #"^(.*)\.css$" "$1.css.orig"
