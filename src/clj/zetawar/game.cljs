@@ -905,6 +905,7 @@
           (zipmap (range) factions)))
 
 ;; TODO: move starting-faction from map to game
+;; TODO: setup players
 (defn load-scenario! [conn map-defs scenario-def]
   (let [game-id (create-game! conn scenario-def)
         conn-game #(game-by-id @conn game-id)
