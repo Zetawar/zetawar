@@ -137,7 +137,6 @@
         (cljs-repl-env)
         (cljs :ids ["js/main"]
               :optimizations :none
-              :source-map true
               :compiler-options {:devcards true
                                  :preloads '[zetawar.dev]
                                  :parallel-build true})
