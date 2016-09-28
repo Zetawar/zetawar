@@ -1,13 +1,11 @@
 (ns zetawar.events.ui
   (:require
-   [cljs.core.async :refer [chan close! put!]]
    [datascript.core :as d]
-   [posh.core :as posh]
-   [reagent.core :as r]
    [taoensso.timbre :as log]
    [zetawar.ai :as ai]
    [zetawar.app :as app]
    [zetawar.db :refer [e qe qes]]
+   [zetawar.events.game :as e.game]
    [zetawar.game :as game]
    [zetawar.router :as router]
    [zetawar.util :refer [only oonly spy]])
@@ -144,12 +142,10 @@
 
 (defmethod router/handle-event ::move-selected-unit
   [{:as handler-ctx :keys [db]} _]
-  (let [[selected-q selected-r] (app/selected-qr db)
-        [targeted-q targeted-r] (app/targeted-qr db)]
-    {:tx       (game/move-tx db (app/current-game db)
-                             selected-q selected-r
-                             targeted-q targeted-r)
-     :dispatch [[::move-selection selected-q selected-r targeted-q targeted-r]]}))
+  (let [[from-q from-r] (app/selected-qr db)
+        [to-q to-r] (app/targeted-qr db)]
+    {:dispatch [[::e.game/move-unit from-q from-r to-q to-r]
+                [::move-selection from-q from-r to-q to-r]]}))
 
 (defmethod router/handle-event ::move-selection
   [{:as handler-ctx :keys [db]} [_ from-q from-r to-q to-r]]
@@ -168,32 +164,30 @@
 
 (defmethod router/handle-event ::attack-targeted
   [{:as handler-ctx :keys [db]} _]
-  (let [[selected-q selected-r] (app/selected-qr db)
-        [targeted-q targeted-r] (app/targeted-qr db)]
-    {:tx       (game/attack-tx db (app/current-game db)
-                               selected-q selected-r
-                               targeted-q targeted-r)
-     :dispatch [[::clear-selection]
+  (let [[attacker-q attacker-r] (app/selected-qr db)
+        [target-q target-r] (app/targeted-qr db)]
+    {:dispatch [[::e.game/attack-unit attacker-q attacker-r target-q target-r]
+                [::clear-selection]
                 [::alert-if-win]]}))
 
 (defmethod router/handle-event ::repair-selected
   [{:as handler-ctx :keys [db]} _]
   (let [[q r] (app/selected-qr db)]
-    {:tx       (game/repair-tx db (app/current-game db) q r)
-     :dispatch [[::clear-selection]]}))
+    {:dispatch [[::e.game/repair-unit q r]
+                [::clear-selection]]}))
 
 (defmethod router/handle-event ::capture-selected
   [{:as handler-ctx :keys [db]} _]
   (let [[q r] (app/selected-qr db)]
-    {:tx       (game/capture-tx db (app/current-game db) q r)
-     :dispatch [[::clear-selection]
+    {:dispatch [[::e.game/capture-base q r]
+                [::clear-selection]
                 [::alert-if-win]]}))
 
 (defmethod router/handle-event ::build-unit
   [{:as handler-ctx :keys [db]} _]
   (let [[q r] (app/selected-qr db)]
-    {:tx       (game/build-tx db (app/current-game db) q r :unit-type.id/infantry)
-     :dispatch [[::clear-selection]]}))
+    {:dispatch [[::e.game/build-unit q r :unit-type.id/infantry]
+                [::clear-selection]]}))
 
 ;; TODO: convert to pure function
 (defmethod router/handle-event ::end-turn
