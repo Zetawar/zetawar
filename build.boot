@@ -1,72 +1,76 @@
 (set-env!
-  :source-paths #{"src/clj" "src/js" "src/less" "test" "site"}
-  :resource-paths #{"assets"}
-  :dependencies
-  '[[adzerk/boot-cljs "1.7.228-1" :scope "test"]
-    [adzerk/boot-cljs-repl "0.3.3" :scope "test"]
-    [adzerk/boot-reload "0.4.12" :scope "test"]
-    [binaryage/devtools "0.8.2" :scope "test"]
-    [cljsjs/clipboard "1.5.9-0"]
-    [cljsjs/react "15.3.1-0"]
-    [cljsjs/react-bootstrap "0.29.2-0"]
-    [cljsjs/react-dom "15.3.1-0"]
-    [cljsjs/react-dom-server "15.3.1-0"]
-    [com.cemerick/piggieback "0.2.1" :scope "test"]
-    [com.cognitect/transit-cljs "0.8.239"]
-    [com.rpl/specter "0.12.0"]
-    [com.stuartsierra/component "0.3.1"]
-    [com.taoensso/timbre "4.7.4"]
-    [crisptrutski/boot-cljs-test "0.2.2-SNAPSHOT" :scope "test"]
-    [datascript "0.15.4"]
-    [deraen/boot-less "0.5.0" :scope "test"]
-    [devcards "0.2.1-7" :scope "test"]
-    [fipp "0.6.6" :scope "test"]
-    [hashobject/boot-s3 "0.1.2-SNAPSHOT" :scope "test"]
-    [hiccup "1.0.5"]
-    [it.frbracch/boot-marginalia "0.1.3-1" :scope "test"]
-    [org.clojure/clojurescript "1.9.225"]
-    [org.clojure/core.async "0.2.391"]
-    [org.clojure/test.check "0.9.0"]
-    [org.clojure/tools.nrepl "0.2.12" :scope "test"]
-    [org.martinklepsch/boot-gzip "0.1.2" :scope "test"]
-    [org.webjars.npm/bootswatch "3.3.6"]
-    [org.webjars/bootstrap "3.3.6"]
-    [org.webjars/font-awesome "4.6.3"]
-    [pandeiro/boot-http "0.7.3" :scope "test"]
-    [perun "0.3.0" :scope "test"]
-    [posh "0.3.5"]
-    [reagent "0.6.0"]
-    [weasel "0.7.0" :scope "test"]])
+ :source-paths #{"src/clj" "src/js" "src/less" "test" "site"}
+ :resource-paths #{"assets"}
+ :dependencies
+ '[[adzerk/boot-cljs "1.7.228-1" :scope "test"]
+   [adzerk/boot-cljs-repl "0.3.3" :scope "test"]
+   [adzerk/boot-reload "0.4.12" :scope "test"]
+   [adzerk/boot-test "1.1.2" :scope "test"]
+   [binaryage/devtools "0.8.2" :scope "test"]
+   [cljsjs/clipboard "1.5.9-0"]
+   [cljsjs/react "15.3.1-0"]
+   [cljsjs/react-bootstrap "0.29.2-0"]
+   [cljsjs/react-dom "15.3.1-0"]
+   [cljsjs/react-dom-server "15.3.1-0"]
+   [com.cemerick/piggieback "0.2.1" :scope "test"]
+   [com.cognitect/transit-cljs "0.8.239"]
+   [com.rpl/specter "0.12.0"]
+   [com.stuartsierra/component "0.3.1"]
+   [com.taoensso/timbre "4.7.4"]
+   [crisptrutski/boot-cljs-test "0.2.2-SNAPSHOT" :scope "test"]
+   [datascript "0.15.4"]
+   [deraen/boot-less "0.5.0" :scope "test"]
+   [devcards "0.2.1-7" :scope "test"]
+   [fipp "0.6.6" :scope "test"]
+   [hashobject/boot-s3 "0.1.2-SNAPSHOT" :scope "test"]
+   [hiccup "1.0.5"]
+   [it.frbracch/boot-marginalia "0.1.3-1" :scope "test"]
+   [org.clojure/clojure "1.9.0-alpha13"]
+   [org.clojure/clojurescript "1.9.225"]
+   [org.clojure/core.async "0.2.391"]
+   [org.clojure/test.check "0.9.0"]
+   [org.clojure/test.check "0.9.0"]
+   [org.clojure/tools.nrepl "0.2.12" :scope "test"]
+   [org.martinklepsch/boot-gzip "0.1.2" :scope "test"]
+   [org.webjars.npm/bootswatch "3.3.6"]
+   [org.webjars/bootstrap "3.3.6"]
+   [org.webjars/font-awesome "4.6.3"]
+   [pandeiro/boot-http "0.7.3" :scope "test"]
+   [perun "0.3.0" :scope "test"]
+   [posh "0.3.5"]
+   [reagent "0.6.0"]
+   [weasel "0.7.0" :scope "test"]])
 
 (require
-  '[adzerk.boot-cljs :refer :all]
-  '[adzerk.boot-cljs-repl :refer :all]
-  '[adzerk.boot-reload :refer :all]
-  '[clojure.edn :as edn]
-  '[clojure.string :as string]
-  '[crisptrutski.boot-cljs-test :refer [test-cljs]]
-  '[deraen.boot-less :refer :all]
-  '[hashobject.boot-s3 :refer :all]
-  '[io.perun :refer :all]
-  '[it.frbracch.boot-marginalia :refer [marginalia]]
-  '[org.martinklepsch.boot-gzip :refer [gzip]]
-  '[pandeiro.boot-http :refer :all])
+ '[adzerk.boot-cljs :refer :all]
+ '[adzerk.boot-cljs-repl :refer :all]
+ '[adzerk.boot-reload :refer :all]
+ '[adzerk.boot-test :refer :all]
+ '[clojure.edn :as edn]
+ '[clojure.string :as string]
+ '[crisptrutski.boot-cljs-test :refer [test-cljs]]
+ '[deraen.boot-less :refer :all]
+ '[hashobject.boot-s3 :refer :all]
+ '[io.perun :refer :all]
+ '[it.frbracch.boot-marginalia :refer [marginalia]]
+ '[org.martinklepsch.boot-gzip :refer [gzip]]
+ '[pandeiro.boot-http :refer :all])
 
 (task-options!
-  test-cljs {:js-env :phantom})
+ test-cljs {:js-env :phantom})
 
 (deftask build-css
   []
   (comp
-    (sift :add-jar {'org.webjars/bootstrap #"META-INF/resources/webjars/bootstrap/3\.3\.6/less/.*\.less$"
-                    'org.webjars/font-awesome #"META-INF/resources/webjars/font-awesome/4\.6\.3/(fonts|less/.*\.less)"})
-    (sift :move {#"META-INF/resources/webjars/bootstrap/3\.3\.6/less" "bootstrap"
-                 #"META-INF/resources/webjars/font-awesome/4\.6\.3/fonts" "fonts"
-                 #"META-INF/resources/webjars/font-awesome/4\.6\.3/less" "font-awesome"})
-    (sift :to-source #{#"bootstrap" #"font-awesome"})
-    (sift :to-resource #{#"fonts"})
-    (less)
-    (sift :move {#"^main.css$" "css/main.css"})))
+   (sift :add-jar {'org.webjars/bootstrap #"META-INF/resources/webjars/bootstrap/3\.3\.6/less/.*\.less$"
+                   'org.webjars/font-awesome #"META-INF/resources/webjars/font-awesome/4\.6\.3/(fonts|less/.*\.less)"})
+   (sift :move {#"META-INF/resources/webjars/bootstrap/3\.3\.6/less" "bootstrap"
+                #"META-INF/resources/webjars/font-awesome/4\.6\.3/fonts" "fonts"
+                #"META-INF/resources/webjars/font-awesome/4\.6\.3/less" "font-awesome"})
+   (sift :to-source #{#"bootstrap" #"font-awesome"})
+   (sift :to-resource #{#"fonts"})
+   (less)
+   (sift :move {#"^main.css$" "css/main.css"})))
 
 (defn slug-fn [filename]
   (let [[year month day & parts] (string/split filename #"[-\.]")
@@ -124,6 +128,7 @@
   (comp (serve)
         (repl)
         (watch)
+        (test)
         (build-html :metadata-file "perun.base.dev.edn")
         (build-css)
         (reload :on-jsload 'zetawar.core/run

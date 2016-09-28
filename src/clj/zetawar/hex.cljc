@@ -47,9 +47,9 @@
 (defn distance [q1 r1 q2 r2]
   (let [[x1 y1 z1] (offset->cube q1 r1)
         [x2 y2 z2] (offset->cube q2 r2)]
-    (max (js/Math.abs (- x1 x2))
-         (js/Math.abs (- y1 y2))
-         (js/Math.abs (- z1 z2)))))
+    (max (#?(:clj Math/abs :cljs js/Math.abs) (- x1 x2))
+         (#?(:clj Math/abs :cljs js/Math.abs) (- y1 y2))
+         (#?(:clj Math/abs :cljs js/Math.abs) (- z1 z2)))))
 
 (def offset->pixel
   (memoize
