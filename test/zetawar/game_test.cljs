@@ -1,14 +1,14 @@
 (ns zetawar.game-test
   (:require
-    [cljs.test :refer-macros [testing is async use-fixtures]]
-    [datascript.core :as d]
-    [devcards.core :as dc :refer-macros [deftest]]
-    [zetawar.app :as app]
-    [zetawar.db :refer [e qe]]
-    [zetawar.data :as data]
-    [zetawar.game :as game]
-    [zetawar.test-helper :as helper]
-    [zetawar.util :refer [spy]]))
+   [cljs.test :refer-macros [testing is async use-fixtures]]
+   [datascript.core :as d]
+   [devcards.core :as dc :refer-macros [deftest]]
+   [zetawar.app :as app]
+   [zetawar.db :refer [e qe]]
+   [zetawar.data :as data]
+   [zetawar.game :as game]
+   [zetawar.test-helper :as helper]
+   [zetawar.util :refer [breakpoint inspect]]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Util

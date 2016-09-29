@@ -1,4 +1,6 @@
-(ns zetawar.hex)
+(ns zetawar.hex
+  (:require
+   [zetawar.util :refer [abs]]))
 
 (def min-q 0)
 (def min-r 0)
@@ -47,13 +49,13 @@
 (defn distance [q1 r1 q2 r2]
   (let [[x1 y1 z1] (offset->cube q1 r1)
         [x2 y2 z2] (offset->cube q2 r2)]
-    (max (#?(:clj Math/abs :cljs js/Math.abs) (- x1 x2))
-         (#?(:clj Math/abs :cljs js/Math.abs) (- y1 y2))
-         (#?(:clj Math/abs :cljs js/Math.abs) (- z1 z2)))))
+    (max (abs (- x1 x2))
+         (abs (- y1 y2))
+         (abs (- z1 z2)))))
 
 (def offset->pixel
   (memoize
-    (fn [q r]
-      (if (= 0 (mod r 2))
-        [(* q 32) (* r 26)]
-        [(+ 16 (* q 32)) (+ 26 (* (- r 1) 26))]))))
+   (fn [q r]
+     (if (= 0 (mod r 2))
+       [(* q 32) (* r 26)]
+       [(+ 16 (* q 32)) (+ 26 (* (- r 1) 26))]))))

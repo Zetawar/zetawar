@@ -13,7 +13,7 @@
    [zetawar.hex :as hex]
    [zetawar.router :as router]
    [zetawar.subs :as subs]
-   [zetawar.util :refer [only oonly spy]]
+   [zetawar.util :refer [breakpoint inspect only oonly]]
    [zetawar.views.common :refer [footer kickstarter-alert navbar]]))
 
 ;; Game           => Factions

@@ -1,20 +1,20 @@
 (ns zetawar.devcards.selection-and-target
   (:require
-    [com.stuartsierra.component :as component]
-    [datascript.core :as d]
-    [devcards.core :as dc :include-macros true]
-    [posh.core :as posh]
-    [reagent.core :as r]
-    [zetawar.app :as app]
-    [zetawar.data :as data]
-    [zetawar.db :refer [e]]
-    [zetawar.game :as game]
-    [zetawar.subs :as subs]
-    [zetawar.system :refer [new-system]]
-    [zetawar.util :refer [spy]]
-    [zetawar.views :as views])
+   [com.stuartsierra.component :as component]
+   [datascript.core :as d]
+   [devcards.core :as dc :include-macros true]
+   [posh.core :as posh]
+   [reagent.core :as r]
+   [zetawar.app :as app]
+   [zetawar.data :as data]
+   [zetawar.db :refer [e]]
+   [zetawar.game :as game]
+   [zetawar.subs :as subs]
+   [zetawar.system :refer [new-system]]
+   [zetawar.util :refer [breakpoint inspect]]
+   [zetawar.views :as views])
   (:require-macros
-    [devcards.core :refer [defcard defcard-rg]]))
+   [devcards.core :refer [defcard defcard-rg]]))
 
 (defcard-rg unit-selected
   (let [system (component/start (new-system))

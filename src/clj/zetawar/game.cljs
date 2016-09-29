@@ -1,13 +1,13 @@
 (ns zetawar.game
   (:require
-    [com.rpl.specter :refer [ALL LAST collect-one filterer selected?]]
-    [datascript.core :as d]
-    [zetawar.data :as data]
-    [zetawar.db :refer [e find-by qe qes]]
-    [zetawar.hex :as hex]
-    [zetawar.util :refer [oonly spy]])
+   [com.rpl.specter :refer [ALL LAST collect-one filterer selected?]]
+   [datascript.core :as d]
+   [zetawar.data :as data]
+   [zetawar.db :refer [e find-by qe qes]]
+   [zetawar.hex :as hex]
+   [zetawar.util :refer [breakpoint inspect oonly]])
   (:require-macros
-    [com.rpl.specter.macros :refer [select setval transform]]))
+   [com.rpl.specter.macros :refer [select setval transform]]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Util

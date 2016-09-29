@@ -8,7 +8,7 @@
    [zetawar.data :as data]
    [zetawar.game :as game]
    [zetawar.hex :as hex]
-   [zetawar.util :refer [oonly spy]]))
+   [zetawar.util :refer [breakpoint inspect oonly]]))
 
 ;; TODO: rename to root
 (defn app [db]

@@ -8,7 +8,7 @@
    [zetawar.events.game :as e.game]
    [zetawar.game :as game]
    [zetawar.router :as router]
-   [zetawar.util :refer [only oonly spy]])
+   [zetawar.util :refer [breakpoint inspect only oonly]])
   (:require-macros
    [cljs.core.async.macros :refer [go go-loop]]))
 
@@ -39,6 +39,8 @@
         selected-terrain (game/terrain-at db game selected-q selected-r)
         targeted-unit (game/unit-at db game targeted-q targeted-r)
         targeted-terrain (game/terrain-at db game targeted-q targeted-r)]
+    (inspect [selected-q selected-r])
+    (breakpoint)
     {:tx (cond
            ;; selecting selected tile
            (and (= ev-q selected-q) (= ev-r selected-r))

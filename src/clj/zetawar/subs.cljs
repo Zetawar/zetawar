@@ -1,12 +1,12 @@
 (ns zetawar.subs
   (:require
    [datascript.core :as d]
+   [posh.core :as posh]
+   [reagent.core :as r]
    [zetawar.db :refer [e qe]]
    [zetawar.game :as game]
    [zetawar.hex :as hex]
-   [zetawar.util :refer [select-values spy]]
-   [posh.core :as posh]
-   [reagent.core :as r])
+   [zetawar.util :refer [breakpoint inspect select-values]])
   (:require-macros
    [zetawar.subs :refer [deftrack]]))
 

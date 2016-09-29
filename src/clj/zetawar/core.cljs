@@ -9,7 +9,7 @@
     [zetawar.game :as game]
     [zetawar.site :as site]
     [zetawar.system :refer [new-system]]
-    [zetawar.util :refer [spy]]
+    [zetawar.util :refer [breakpoint inspect]]
     [zetawar.views :as views]
     [zetawar.views.common :refer [navbar]]))
 
