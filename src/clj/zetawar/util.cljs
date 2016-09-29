@@ -1,6 +1,6 @@
 (ns zetawar.util
   (:require
-    [fipp.edn]))
+   [fipp.edn]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Accessors
@@ -29,8 +29,9 @@
   [coll]
   (only (only coll)))
 
-;; TODO: check performance
-(defn select-values [m ks]
+(defn select-values
+  "Returns a vector containing only those values who's key is in ks."
+  [m ks]
   (reduce #(if-let [v (m %2)] (conj %1 v) %1) [] ks))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -40,6 +41,6 @@
 
 (defn spy [x]
   (js/console.debug
-    (with-out-str
-      (fipp.edn/pprint x)))
+   (with-out-str
+     (fipp.edn/pprint x)))
   x)
