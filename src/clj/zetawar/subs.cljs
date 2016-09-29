@@ -1,14 +1,14 @@
 (ns zetawar.subs
   (:require
-    [datascript.core :as d]
-    [zetawar.db :refer [e qe]]
-    [zetawar.game :as game]
-    [zetawar.hex :as hex]
-    [zetawar.util :refer [select-values spy]]
-    [posh.core :as posh]
-    [reagent.core :as r])
+   [datascript.core :as d]
+   [zetawar.db :refer [e qe]]
+   [zetawar.game :as game]
+   [zetawar.hex :as hex]
+   [zetawar.util :refer [select-values spy]]
+   [posh.core :as posh]
+   [reagent.core :as r])
   (:require-macros
-    [zetawar.subs :refer [deftrack]]))
+   [zetawar.subs :refer [deftrack]]))
 
 ;; TODO: add asserts to check params for better error messages?
 
@@ -16,25 +16,20 @@
 ;;; App
 
 (deftrack app-eid [conn]
-  (ffirst
-    @(posh/q conn '[:find ?a
-                    :where
-                    [?a :app/game]])))
+  (ffirst @(posh/q conn '[:find ?a
+                          :where
+                          [?a :app/game]])))
 
 (defn app [conn]
   (posh/pull conn '[*] @(app-eid conn)))
-
-(deftrack show-win-dialog? [conn]
-  (:app/show-win-dialog @(app conn)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Game
 
 (deftrack game-eid [conn]
-  (ffirst
-    @(posh/q conn '[:find ?g
-                    :where
-                    [_ :app/game ?g]])))
+  (ffirst @(posh/q conn '[:find ?g
+                          :where
+                          [_ :app/game ?g]])))
 
 (defn game [conn]
   (posh/pull conn '[*] @(game-eid conn)))
@@ -43,11 +38,10 @@
 ;;; Map
 
 (deftrack game-map-eid [conn]
-  (ffirst
-    @(posh/q conn '[:find ?m
-                    :where
-                    [_  :app/game ?g]
-                    [?g :game/map ?m]])))
+  (ffirst @(posh/q conn '[:find ?m
+                          :where
+                          [_  :app/game ?g]
+                          [?g :game/map ?m]])))
 
 (defn game-map [conn]
   (posh/pull conn
@@ -78,8 +72,8 @@
 (deftrack terrains [conn]
   (let [map-eid' @(game-map-eid conn)]
     (:map/terrains
-      @(posh/pull conn [{:map/terrains terrain-pull}]
-                  map-eid'))))
+     @(posh/pull conn [{:map/terrains terrain-pull}]
+                 map-eid'))))
 
 (defn current-base-locations [conn]
   (posh/q conn '[:find ?q ?r
@@ -119,11 +113,10 @@
        (into [])))
 
 (deftrack current-faction-eid [conn]
-  (ffirst
-    @(posh/q conn '[:find ?f
-                    :where
-                    [_  :app/game ?g]
-                    [?g :game/current-faction ?f]])))
+  (ffirst @(posh/q conn '[:find ?f
+                          :where
+                          [_  :app/game ?g]
+                          [?g :game/current-faction ?f]])))
 
 (defn current-faction [conn]
   (posh/pull conn faction-pull @(current-faction-eid conn)))
@@ -166,27 +159,6 @@
                               [(not= ?f ?cf)]]
                        @(current-faction-eid conn)))
       0))
-
-;; TODO: move to units section?
-;; TODO: sort by cost
-(deftrack buildable-unit-type-eids [conn]
-  (->> @(posh/q conn '[:find ?ut
-                       :in $ ?g
-                       :where
-                       [?g  :game/current-faction ?f]
-                       [?f  :faction/credits ?credits]
-                       [?ut :unit-type/cost ?cost]
-                       [?ut :unit-type/id ?unit-type-id]
-                       [(>= ?credits ?cost)]]
-                @(game-eid conn))
-       (map first)
-       (into [])))
-
-;; TODO: move to units section?
-(deftrack buildable-unit-types [conn]
-  (->> @(buildable-unit-type-eids conn)
-       (map (fn [ut] @(posh/pull conn '[*] ut)))
-       (into [])))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Units
@@ -297,6 +269,27 @@
       @(can-capture? conn q r)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Unit Construction
+
+(deftrack buildable-unit-type-eids [conn]
+  (->> @(posh/q conn '[:find ?ut
+                       :in $ ?g
+                       :where
+                       [?g  :game/current-faction ?f]
+                       [?f  :faction/credits ?credits]
+                       [?ut :unit-type/cost ?cost]
+                       [?ut :unit-type/id ?unit-type-id]
+                       [(>= ?credits ?cost)]]
+                @(game-eid conn))
+       (map first)
+       (into [])))
+
+(deftrack buildable-unit-types [conn]
+  (->> @(buildable-unit-type-eids conn)
+       (map (fn [ut] @(posh/pull conn '[*] ut)))
+       (into [])))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Selection and Target
 
 (deftrack selected? [conn q r]
@@ -372,3 +365,6 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; User Interface
+
+(deftrack show-win-dialog? [conn]
+  (:app/show-win-dialog @(app conn)))
