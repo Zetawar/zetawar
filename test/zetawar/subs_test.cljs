@@ -287,37 +287,37 @@
     (testing "returns false if specified coordinates are targeted"
       (is (= false @(subs/targeted? conn 2 2))))))
 
-(deftest test-selected-qr
+(deftest test-selected-hex
   (let [conn (helper/create-aruba-conn)
         db @conn
         game (app/current-game db)
         app (app/app db)]
     (testing "returns selected coordinates"
-      (is (= nil @(subs/selected-qr conn)))
+      (is (= nil @(subs/selected-hex conn)))
       (d/transact! conn [{:db/id (e app)
                           :app/selected-q 1
                           :app/selected-r 2}])
-      (is (= [1 2] @(subs/selected-qr conn)))
+      (is (= [1 2] @(subs/selected-hex conn)))
       (d/transact! conn [{:db/id (e app)
                           :app/selected-q 2
                           :app/selected-r 1}])
-      (is (= [2 1] @(subs/selected-qr conn))))))
+      (is (= [2 1] @(subs/selected-hex conn))))))
 
-(deftest test-targeted-qr
+(deftest test-targeted-hex
   (let [conn (helper/create-aruba-conn)
         db @conn
         game (app/current-game db)
         app (app/app db)]
     (testing "returns selected coordinates"
-      (is (= nil @(subs/targeted-qr conn)))
+      (is (= nil @(subs/targeted-hex conn)))
       (d/transact! conn [{:db/id (e app)
                           :app/targeted-q 1
                           :app/targeted-r 2}])
-      (is (= [1 2] @(subs/targeted-qr conn)))
+      (is (= [1 2] @(subs/targeted-hex conn)))
       (d/transact! conn [{:db/id (e app)
                           :app/targeted-q 2
                           :app/targeted-r 1}])
-      (is (= [2 1] @(subs/targeted-qr conn))))))
+      (is (= [2 1] @(subs/targeted-hex conn))))))
 
 ;; TODO: combine with copy in game-test
 (def valid-destinations
@@ -394,5 +394,5 @@
                           :app/selected-q 6
                           :app/selected-r 8
                           :app/targeted-q 7
-                          :app/targeted-r 7 }])
+                          :app/targeted-r 7}])
       (is (= false @(subs/selected-can-attack-targeted? conn))))))

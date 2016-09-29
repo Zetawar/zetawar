@@ -1,14 +1,14 @@
 (ns zetawar.app
   (:require
-    [cognitect.transit :as transit]
-    [datascript.core :as d]
-    [goog.crypt.base64 :as base64]
-    [lzw]
-    [zetawar.db :refer [e find-by qe qes]]
-    [zetawar.data :as data]
-    [zetawar.game :as game]
-    [zetawar.hex :as hex]
-    [zetawar.util :refer [oonly spy]]))
+   [cognitect.transit :as transit]
+   [datascript.core :as d]
+   [goog.crypt.base64 :as base64]
+   [lzw]
+   [zetawar.db :refer [e find-by qe qes]]
+   [zetawar.data :as data]
+   [zetawar.game :as game]
+   [zetawar.hex :as hex]
+   [zetawar.util :refer [oonly spy]]))
 
 ;; TODO: rename to root
 (defn app [db]
@@ -76,14 +76,14 @@
 (defn current-game-id [db]
   (:game/id (current-game db)))
 
-(defn selected-qr [db]
+(defn selected-hex [db]
   (first (d/q '[:find ?q ?r
                 :where
                 [?a :app/selected-q ?q]
                 [?a :app/selected-r ?r]]
               db)))
 
-(defn targeted-qr [db]
+(defn targeted-hex [db]
   (first (d/q '[:find ?q ?r
                 :where
                 [?a :app/targeted-q ?q]

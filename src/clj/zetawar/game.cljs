@@ -58,7 +58,7 @@
   (= :terrain-type.id/base
      (get-in x [:terrain/type :terrain-type/id])))
 
-(defn terrain-qr [terrain]
+(defn terrain-hex [terrain]
   [(:terrain/q terrain)
    (:terrain/r terrain)])
 
@@ -125,7 +125,7 @@
 (defn unit? [x]
   (contains? x :unit/type))
 
-(defn unit-qr [unit]
+(defn unit-hex [unit]
   [(:unit/q unit)
    (:unit/r unit)])
 
@@ -322,7 +322,7 @@
 (defn move-tx
   ([db game unit to-terrain]
    (let [new-move-count (inc (get unit :unit/move-count 0))
-         [to-q to-r] (terrain-qr to-terrain)]
+         [to-q to-r] (terrain-hex to-terrain)]
      (check-can-move db game unit)
      ;; TODO: check move is valid
      [{:db/id (e unit)
@@ -715,7 +715,7 @@
             closest)))
       terrains)))
 
-(defn closest-move-to-qr [db game unit q r]
+(defn closest-move-to-hex [db game unit q r]
   (reduce
     (fn [closest move]
       (if closest

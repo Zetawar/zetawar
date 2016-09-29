@@ -35,7 +35,7 @@
     (let [db @conn
           game (game/game-by-id db game-id)
           base (game/closest-capturable-base db game unit)
-          move (game/closest-move-to-qr db game unit (:terrain/q base) (:terrain/r base))]
+          move (game/closest-move-to-hex db game unit (:terrain/q base) (:terrain/r base))]
       (if (game/on-capturable-base? db game unit)
         (game/capture! conn game-id (:unit/q unit) (:unit/r unit))
         (when (first move) ; hack to deal with [nil nil]

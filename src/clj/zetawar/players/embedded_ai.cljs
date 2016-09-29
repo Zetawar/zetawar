@@ -8,9 +8,8 @@
 
 #_(defn handle-event* [{:as player-ctx :keys []} msg]
     (let [ev-ctx (assoc player-ctx :db @conn)
-          {:as ret :keys [tx]} (handle-event ev-ctx msg)
-          ]
-      (log/tracef "Handler returned: %s" (pr-str ret))
+          {:as ret :keys [tx]} (handle-event ev-ctx msg)]
+      (log/tracef "Player handler returned: %s" (pr-str ret))
       (when tx
         (log/debugf "Transacting: %s" (pr-str tx))
         (d/transact! conn tx))
@@ -19,7 +18,7 @@
 
 (defn new-player [{:as player-ctx :keys [notify-pub]} faction-color]
   (let [player-chan (async/chan (async/dropping-buffer 10))]
-    (async/sub notify-pub :all player-chan)
+    (async/sub notify-pub :faction.color/all player-chan)
     (async/sub notify-pub faction-color player-chan)
     (go-loop [msg (<! player-chan)]
       (when msg

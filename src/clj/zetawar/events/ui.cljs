@@ -31,8 +31,8 @@
   [{:as handler-ctx :keys [db]} [_ ev-q ev-r]]
   (let [app (app/root db)
         game (app/current-game db)
-        [selected-q selected-r] (app/selected-qr db)
-        [targeted-q targeted-r] (app/targeted-qr db)
+        [selected-q selected-r] (app/selected-hex db)
+        [targeted-q targeted-r] (app/targeted-hex db)
         unit (game/unit-at db game ev-q ev-r)
         terrain (game/terrain-at db game ev-q ev-r)
         selected-unit (game/unit-at db game selected-q selected-r)
@@ -121,8 +121,8 @@
 (defmethod router/handle-event ::clear-selection
   [{:as handler-ctx :keys [db]} _]
   (let [app (app/root db)
-        [selected-q selected-r] (app/selected-qr db)
-        [targeted-q targeted-r] (app/targeted-qr db)]
+        [selected-q selected-r] (app/selected-hex db)
+        [targeted-q targeted-r] (app/targeted-hex db)]
     {:tx (cond-> []
            (and selected-q selected-r)
            (->
@@ -142,8 +142,8 @@
 
 (defmethod router/handle-event ::move-selected-unit
   [{:as handler-ctx :keys [db]} _]
-  (let [[from-q from-r] (app/selected-qr db)
-        [to-q to-r] (app/targeted-qr db)]
+  (let [[from-q from-r] (app/selected-hex db)
+        [to-q to-r] (app/targeted-hex db)]
     {:dispatch [[::e.game/move-unit from-q from-r to-q to-r]
                 [::move-selection from-q from-r to-q to-r]]}))
 
@@ -164,28 +164,28 @@
 
 (defmethod router/handle-event ::attack-targeted
   [{:as handler-ctx :keys [db]} _]
-  (let [[attacker-q attacker-r] (app/selected-qr db)
-        [target-q target-r] (app/targeted-qr db)]
+  (let [[attacker-q attacker-r] (app/selected-hex db)
+        [target-q target-r] (app/targeted-hex db)]
     {:dispatch [[::e.game/attack-unit attacker-q attacker-r target-q target-r]
                 [::clear-selection]
                 [::alert-if-win]]}))
 
 (defmethod router/handle-event ::repair-selected
   [{:as handler-ctx :keys [db]} _]
-  (let [[q r] (app/selected-qr db)]
+  (let [[q r] (app/selected-hex db)]
     {:dispatch [[::e.game/repair-unit q r]
                 [::clear-selection]]}))
 
 (defmethod router/handle-event ::capture-selected
   [{:as handler-ctx :keys [db]} _]
-  (let [[q r] (app/selected-qr db)]
+  (let [[q r] (app/selected-hex db)]
     {:dispatch [[::e.game/capture-base q r]
                 [::clear-selection]
                 [::alert-if-win]]}))
 
 (defmethod router/handle-event ::build-unit
   [{:as handler-ctx :keys [db]} _]
-  (let [[q r] (app/selected-qr db)]
+  (let [[q r] (app/selected-hex db)]
     {:dispatch [[::e.game/build-unit q r :unit-type.id/infantry]
                 [::clear-selection]]}))
 

@@ -18,7 +18,7 @@
 
 (defmethod router/handle-event ::repair-unit
   [{:as handler-ctx :keys [db]} [_ q r]]
-  (let [[q r] (app/selected-qr db)]
+  (let [[q r] (app/selected-hex db)]
     {:tx (game/repair-tx db (app/current-game db) q r)}))
 
 (defmethod router/handle-event ::capture-base

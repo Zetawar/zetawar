@@ -309,38 +309,38 @@
     (and (= q (:app/targeted-q app'))
          (= r (:app/targeted-r app')))))
 
-(deftrack selected-qr [conn]
+(deftrack selected-hex [conn]
   (-> @(app conn)
       (select-values [:app/selected-q
                       :app/selected-r])
       not-empty))
 
-(deftrack targeted-qr [conn]
+(deftrack targeted-hex [conn]
   (-> @(app conn)
       (select-values [:app/targeted-q
                       :app/targeted-r])
       not-empty))
 
 (deftrack selected-unit [conn]
-  @(apply unit-at conn @(selected-qr conn)))
+  @(apply unit-at conn @(selected-hex conn)))
 
 (deftrack unit-selected? [conn]
-  @(apply unit-at? conn @(selected-qr conn)))
+  @(apply unit-at? conn @(selected-hex conn)))
 
 (defn selected-can-move? [conn]
-  (apply can-move? conn @(selected-qr conn)))
+  (apply can-move? conn @(selected-hex conn)))
 
 (defn selected-can-attack? [conn]
-  (apply can-attack? conn @(selected-qr conn)))
+  (apply can-attack? conn @(selected-hex conn)))
 
 (defn selected-can-repair? [conn]
-  (apply can-repair? conn @(selected-qr conn)))
+  (apply can-repair? conn @(selected-hex conn)))
 
 (defn selected-can-capture? [conn]
-  (apply can-capture? conn @(selected-qr conn)))
+  (apply can-capture? conn @(selected-hex conn)))
 
 (deftrack selected-can-build? [conn q r]
-  (let [[q r] @(selected-qr conn q r)]
+  (let [[q r] @(selected-hex conn q r)]
     (and (not @(unit-selected? conn q r))
          @(current-base? conn q r))))
 
@@ -348,7 +348,7 @@
   (if @(selected-can-move? conn)
     (let [db @conn
           game' (d/entity db @(game-eid conn))
-          [q r] @(selected-qr conn)
+          [q r] @(selected-hex conn)
           unit (game/unit-at db game' q r)]
       (game/valid-destinations db game' unit))
     #{}))
@@ -357,16 +357,16 @@
   (contains? @(valid-destinations-for-selected conn) [q r]))
 
 (deftrack selected-can-move-to-targeted? [conn]
-  (let [[tq tr] @(targeted-qr conn)]
+  (let [[tq tr] @(targeted-hex conn)]
     (and @(selected-can-move? conn)
          (contains? @(valid-destinations-for-selected conn) [tq tr]))))
 
 (deftrack enemy-in-range-of-selected? [conn q r]
-  (let [[selected-q selected-r] @(selected-qr conn)]
+  (let [[selected-q selected-r] @(selected-hex conn)]
     @(in-range-of-enemy-at? conn selected-q selected-r q r)))
 
 (deftrack selected-can-attack-targeted? [conn]
-  (let [[tq tr] @(targeted-qr conn)]
+  (let [[tq tr] @(targeted-hex conn)]
     (and @(selected-can-attack? conn)
          @(enemy-in-range-of-selected? conn tq tr))))
 

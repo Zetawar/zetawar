@@ -39,11 +39,11 @@
     (testing "a terrain is a terrain"
       (is (game/terrain? terrain)))))
 
-(deftest test-terrain-qr
+(deftest test-terrain-hex
   (let [db @(helper/create-aruba-conn)
         game (app/current-game db)
         terrain (game/terrain-at db game 1 0)]
-    (is (= [1 0] (game/terrain-qr terrain)))))
+    (is (= [1 0] (game/terrain-hex terrain)))))
 
 (deftest test-terrain-at
   (let [db @(helper/create-aruba-conn)
@@ -100,11 +100,11 @@
     (is (not (game/unit? terrain)))
     (is (game/unit? unit))))
 
-(deftest test-unit-qr
+(deftest test-unit-hex
   (let [db @(helper/create-aruba-conn)
         game (app/current-game db)
         unit (game/unit-at db game 2 2)]
-    (is (= [2 2] (game/unit-qr unit)))))
+    (is (= [2 2] (game/unit-hex unit)))))
 
 (deftest test-unit-at
   (let [db @(helper/create-aruba-conn)
