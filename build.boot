@@ -29,7 +29,6 @@
    [org.clojure/clojurescript "1.9.225"]
    [org.clojure/core.async "0.2.391"]
    [org.clojure/test.check "0.9.0"]
-   [org.clojure/test.check "0.9.0"]
    [org.clojure/tools.nrepl "0.2.12" :scope "test"]
    [org.martinklepsch/boot-gzip "0.1.2" :scope "test"]
    [org.webjars.npm/bootswatch "3.3.6"]
