@@ -1,10 +1,10 @@
 (ns zetawar.db
   (:require
-    [zetawar.util :refer [ssolo]]
-    [datascript.core :as d]))
+   [zetawar.util :refer [ssolo]]
+   [datascript.core :as d]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; Schema
+;;; ## Schema
 
 ;; TODO: add unit/terrain
 (def schema
@@ -43,7 +43,7 @@
                                   :db/index       true}})
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; Util
+;;; ## Utility Functions
 
 (defn qe
   "Returns the single entity returned by a query."
@@ -55,8 +55,8 @@
   "Returns the unique entity identified by attr and val."
   [db attr val]
   (qe '[:find ?e
-	:in $ ?attr ?val
-	:where  [?e ?attr ?val]]
+        :in $ ?attr ?val
+        :where  [?e ?attr ?val]]
       db attr val))
 
 (defn qes
@@ -65,14 +65,14 @@
   [query db & args]
   (->> (apply d/q query db args)
        (mapv (fn [items]
-	       (mapv (partial d/entity db) items)))))
+               (mapv (partial d/entity db) items)))))
 
 (defn find-all-by
   "Returns all entities possessing attr."
   [db attr]
   (qes '[:find ?e
-	 :in $ ?attr
-	 :where [?e ?attr]]
+         :in $ ?attr
+         :where [?e ?attr]]
        db attr))
 
 (defprotocol Eid
