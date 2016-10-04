@@ -1,6 +1,6 @@
 (ns zetawar.players.embedded-ai
   (:require
-   [cljs.core.async :as async]
+   [cljs.core.async :as async :refer [go-loop]]
    [datascript.core :as d]
    [taoensso.timbre :as log]
    [zetawar.app :as app]
