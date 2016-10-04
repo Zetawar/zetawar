@@ -169,7 +169,6 @@
   (comp (build-cljs)
         (build-html :metadata-file (str "perun.base." environment ".edn"))
         (build-css)
-        (codox :name "Zetawar" :language :clojurescript)
         (gzip :regex #{#"\.html$" #"\.css$" #"\.js$"})
         (sift :move {#"^(.*)\.html$" "$1.html.orig"
                      #"^(.*)\.css$" "$1.css.orig"
@@ -178,4 +177,5 @@
         (sift :move {#"^(.*)\.html\.gz$" "$1.html"
                      #"^(.*)\.css\.gz$" "$1.css"
                      #"^(.*)\.js\.gz$" "$1.js"})
+        (codox :name "Zetawar" :language :clojurescript)
         (target)))
