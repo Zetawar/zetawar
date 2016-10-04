@@ -786,31 +786,6 @@
 (defn load-specs! [conn]
   (d/transact! conn data/specs-tx))
 
-(def UNIT (filterer #(:unit/type %)))
-(def TERRAIN (filterer #(:terrain/type %)))
-
-;; TODO: add credits to factions based on map initial-credits
-;; TODO: automatically set unit counts to 10 (?)
-;; TODO: automatically set round-built, move-count, attack-count, repaired, and capturing on units
-(defn setup-game! [conn map-id]
-  (let [game-id (random-uuid)
-        game-temp -1
-        tx-ret (d/transact! conn [{:db/id game-temp
-                                   :game/id game-id
-                                   :game/round 1
-                                   :game/max-unit-count 10}])
-        game (d/resolve-tempid (d/db conn) (:tempids tx-ret) game-temp)
-        add-game-pos-idx (fn add-game-pos-idx [attr q r x]
-                           (assoc x attr (game-pos-idx game q r)))
-        map-tx (->> (data/maps map-id)
-                    (setval [ALL ALL LAST #(= :game %)] (e game))
-                    (transform [UNIT ALL (collect-one :unit/q) (collect-one :unit/r)]
-                               (partial add-game-pos-idx :unit/game-pos-idx))
-                    (transform [TERRAIN ALL (collect-one :terrain/q) (collect-one :terrain/r)]
-                               (partial add-game-pos-idx :terrain/game-pos-idx)))]
-    (d/transact! conn map-tx)
-    game-id))
-
 (defn game-map-tx [game map-def]
   (let [map-eid -101]
     (into [{:db/id map-eid
