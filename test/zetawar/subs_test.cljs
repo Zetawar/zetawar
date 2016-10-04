@@ -1,13 +1,13 @@
 (ns zetawar.subs-test
   (:require
-    [cljs.test :refer-macros [testing is async use-fixtures]]
-    [datascript.core :as d]
-    [devcards.core :as dc :refer-macros [deftest]]
-    [zetawar.app :as app]
-    [zetawar.db :refer [e qe]]
-    [zetawar.game :as game]
-    [zetawar.subs :as subs]
-    [zetawar.test-helper :as helper]))
+   [cljs.test :refer-macros [testing is async use-fixtures]]
+   [datascript.core :as d]
+   [devcards.core :as dc :refer-macros [deftest]]
+   [zetawar.app :as app]
+   [zetawar.db :refer [e qe]]
+   [zetawar.game :as game]
+   [zetawar.subs :as subs]
+   [zetawar.test-helper :as helper]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; App
@@ -265,7 +265,7 @@
   (let [conn (helper/create-aruba-conn)
         db @conn
         game (app/current-game db)
-        app (app/app db)]
+        app (app/root db)]
     (d/transact! conn [{:db/id (e app)
                         :app/selected-q 1
                         :app/selected-r 2}])
@@ -278,7 +278,7 @@
   (let [conn (helper/create-aruba-conn)
         db @conn
         game (app/current-game db)
-        app (app/app db)]
+        app (app/root db)]
     (d/transact! conn [{:db/id (e app)
                         :app/targeted-q 1
                         :app/targeted-r 2}])
@@ -291,7 +291,7 @@
   (let [conn (helper/create-aruba-conn)
         db @conn
         game (app/current-game db)
-        app (app/app db)]
+        app (app/root db)]
     (testing "returns selected coordinates"
       (is (= nil @(subs/selected-hex conn)))
       (d/transact! conn [{:db/id (e app)
@@ -307,7 +307,7 @@
   (let [conn (helper/create-aruba-conn)
         db @conn
         game (app/current-game db)
-        app (app/app db)]
+        app (app/root db)]
     (testing "returns selected coordinates"
       (is (= nil @(subs/targeted-hex conn)))
       (d/transact! conn [{:db/id (e app)
@@ -329,7 +329,7 @@
   (let [conn (helper/create-aruba-conn)
         db @conn
         game (app/current-game db)
-        app (app/app db)]
+        app (app/root db)]
     (testing "returns valid destinations for selected unit"
       (is (= #{} @(subs/valid-destinations-for-selected conn)))
       (d/transact! conn [{:db/id (e app)
@@ -343,7 +343,7 @@
   (let [conn (helper/create-aruba-conn)
         db @conn
         game (app/current-game db)
-        app (app/app db)]
+        app (app/root db)]
     (testing "returns true if selected unit can move to targeted location"
       (d/transact! conn [{:db/id (e app)
                           :app/selected-q 2
@@ -363,7 +363,7 @@
   (let [conn (helper/create-aruba-conn)
         db @conn
         game (app/current-game db)
-        app (app/app db)]
+        app (app/root db)]
     (testing "returns true if selected unit is in range of enemy at specified coordinates"
       (d/transact! conn (conj (game/teleport-tx db game 2 2 6 8)
                               {:db/id (e app)
@@ -380,7 +380,7 @@
   (let [conn (helper/create-aruba-conn)
         db @conn
         game (app/current-game db)
-        app (app/app db)]
+        app (app/root db)]
     (testing "returns true if selected unit can attack targeted unit"
       (d/transact! conn (conj (game/teleport-tx db game 2 2 6 8)
                               {:db/id (e app)

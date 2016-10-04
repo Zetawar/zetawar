@@ -1,19 +1,17 @@
 (ns zetawar.benchmarks
   (:require
-    [clojure.string :as string]
-    [datascript.core :as d]
-    [zetawar.data :as data]
-    [zetawar.db :as db :refer [qe]]
-    [zetawar.game :as game]
-    [zetawar.hex :as hex]
-    [reagent.core :as r]))
+   [clojure.string :as string]
+   [datascript.core :as d]
+   [reagent.core :as r]
+   [zetawar.app :as app]
+   [zetawar.data :as data]
+   [zetawar.db :as db :refer [qe]]
+   [zetawar.game :as game]
+   [zetawar.hex :as hex]))
 
 (defn setup-conn []
   (let [conn (d/create-conn db/schema)]
-    (game/load-specs! conn)
-    (let [game-id (game/setup-game! conn "Sterling's Aruba")]
-      (d/transact! conn [{:db/id -1
-                          :app/game [:game/id game-id]}]))
+    (app/start-new-game! conn :sterlings-aruba-multiplayer)
     conn))
 
 (defn run-benchmarks []

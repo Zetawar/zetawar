@@ -10,13 +10,6 @@
    [zetawar.hex :as hex]
    [zetawar.util :refer [breakpoint inspect oonly]]))
 
-;; TODO: rename to root
-(defn app [db]
-  (qe '[:find ?a
-        :where
-        [?a :app/game]]
-      db))
-
 (defn root [db]
   (qe '[:find ?a
         :where
@@ -35,7 +28,7 @@
     (game/load-specs! conn))
   (let [scenario-def (data/scenario-definitions scenario-id)
         game-id (game/load-scenario! conn data/map-definitions scenario-def)
-        app-eid (or (some-> (app @conn) e) -101)]
+        app-eid (or (some-> (root @conn) e) -101)]
     (d/transact! conn [{:db/id app-eid
                         :app/game [:game/id game-id]}])))
 
