@@ -122,7 +122,7 @@
                     :page "blog/index.html")))
 
 (deftask dev
-  "Run dev environment."
+  "Run full dev environment."
   [H host HOST str]
   (comp (serve)
         (repl)
@@ -140,6 +140,13 @@
                                  :preloads '[zetawar.dev]
                                  :parallel-build true})
         (target)))
+
+(deftask clj-dev
+  "Watch code and run Clojure tests without building ClojureScript or site."
+  [H host HOST str]
+  (comp (repl)
+        (watch)
+        (test)))
 
 (deftask ci
   "Run CI tests."
