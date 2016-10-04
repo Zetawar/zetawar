@@ -12,6 +12,7 @@
    [cljsjs/react-bootstrap "0.29.2-0"]
    [cljsjs/react-dom "15.3.1-0"]
    [cljsjs/react-dom-server "15.3.1-0"]
+   [boot-codox "0.10.0" :scope "test"]
    [com.cemerick/piggieback "0.2.1" :scope "test"]
    [com.cognitect/transit-cljs "0.8.239"]
    [com.rpl/specter "0.12.0"]
@@ -24,7 +25,6 @@
    [fipp "0.6.6" :scope "test"]
    [hashobject/boot-s3 "0.1.2-SNAPSHOT" :scope "test"]
    [hiccup "1.0.5"]
-   [it.frbracch/boot-marginalia "0.1.3-1" :scope "test"]
    [org.clojure/clojure "1.9.0-alpha13"]
    [org.clojure/clojurescript "1.9.225"]
    [org.clojure/core.async "0.2.391"]
@@ -47,11 +47,11 @@
  '[adzerk.boot-test :refer :all]
  '[clojure.edn :as edn]
  '[clojure.string :as string]
+ '[codox.boot :refer [codox]]
  '[crisptrutski.boot-cljs-test :refer [test-cljs]]
  '[deraen.boot-less :refer :all]
  '[hashobject.boot-s3 :refer :all]
  '[io.perun :refer :all]
- '[it.frbracch.boot-marginalia :refer [marginalia]]
  '[org.martinklepsch.boot-gzip :refer [gzip]]
  '[pandeiro.boot-http :refer :all])
 
@@ -169,7 +169,7 @@
   (comp (build-cljs)
         (build-html :metadata-file (str "perun.base." environment ".edn"))
         (build-css)
-        (marginalia)
+        (codox :name "Zetawar" :language :clojurescript)
         (gzip :regex #{#"\.html$" #"\.css$" #"\.js$"})
         (sift :move {#"^(.*)\.html$" "$1.html.orig"
                      #"^(.*)\.css$" "$1.css.orig"
