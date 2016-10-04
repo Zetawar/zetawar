@@ -1,10 +1,12 @@
 (ns zetawar.players.embedded-ai
   (:require
-   [cljs.core.async :as async :refer [go-loop]]
+   [cljs.core.async :as async]
    [datascript.core :as d]
    [taoensso.timbre :as log]
    [zetawar.app :as app]
-   [zetawar.game :as game]))
+   [zetawar.game :as game])
+  (:require-macros
+   [cljs.core.async.macros :refer [go go-loop]]))
 
 #_(defn handle-event* [{:as player-ctx :keys []} msg]
     (let [ev-ctx (assoc player-ctx :db @conn)
