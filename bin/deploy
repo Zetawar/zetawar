@@ -56,4 +56,4 @@ s3cmd sync --exclude '*'         $img_include_opts                              
 s3cmd sync --exclude '*'         --include '*.svg'  -m 'image/svg+xml'          $public_opt "$cache_opt" target/ $destination
 s3cmd sync --exclude '.htaccess' --delete-removed                               $public_opt              target/ $destination
 
-s3cmd sync $public_opt "$cache_opt" target/doc $destination/doc
+s3cmd sync $public_opt "$cache_opt" target/doc/ $destination/doc/
