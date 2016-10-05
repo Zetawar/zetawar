@@ -7,8 +7,7 @@
    [zetawar.db :refer [e find-by qe qes]]
    [zetawar.data :as data]
    [zetawar.game :as game]
-   [zetawar.hex :as hex]
-   [zetawar.util :refer [breakpoint inspect oonly]]))
+   [zetawar.util :refer [breakpoint inspect]]))
 
 (defn root [db]
   (qe '[:find ?a
