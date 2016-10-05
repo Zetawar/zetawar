@@ -1,7 +1,7 @@
 (ns zetawar.db
   (:require
-   [zetawar.util :refer [ssolo]]
-   [datascript.core :as d]))
+   [datascript.core :as d]
+   [zetawar.util :refer [breakpoint inspect solo ssolo]]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; ## Schema
@@ -66,6 +66,13 @@
   (->> (apply d/q query db args)
        (mapv (fn [items]
                (mapv (partial d/entity db) items)))))
+
+(defn qess
+  "Return a sequence of entities returned by a query, assuming
+  that each :find result contains a single entity id."
+  [query db & args]
+  (->> (apply d/q query db args)
+       (map #(d/entity db (solo %)))))
 
 (defn find-all-by
   "Returns all entities possessing attr."

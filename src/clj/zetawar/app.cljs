@@ -4,9 +4,13 @@
    [datascript.core :as d]
    [goog.crypt.base64 :as base64]
    [lzw]
-   [zetawar.db :refer [e find-by qe qes]]
+   [taoensso.timbre :as log]
    [zetawar.data :as data]
+   [zetawar.db :refer [e find-by qe qes qess]]
    [zetawar.game :as game]
+   [zetawar.players :as players]
+   [zetawar.players.embedded-ai]
+   [zetawar.players.human]
    [zetawar.util :refer [breakpoint inspect]]))
 
 (defn root [db]
@@ -21,7 +25,19 @@
         [_ :app/game ?g]]
       db))
 
-(defn start-new-game! [conn scenario-id]
+(defn create-players! [{:as app-ctx :keys [conn players]}]
+  (let [factions (qess '[:find ?f
+                         :where
+                         [_  :app/game ?g]
+                         [?g :game/factions ?f]]
+                       @conn)]
+    (doseq [{:keys [faction/ai faction/color]} factions]
+      (let [player-type (if ai ::players/embeded-ai ::players/human)
+            player (players/new-player app-ctx player-type color)]
+        (players/start player)
+        (swap! players assoc color player)))))
+
+(defn start-new-game! [{:as app-ctx :keys [conn]} scenario-id]
   (if-let [game (current-game @conn)]
     (d/transact! conn [[:db.fn/retractEntity (e game)]])
     (game/load-specs! conn))
@@ -29,7 +45,8 @@
         game-id (game/load-scenario! conn data/map-definitions scenario-def)
         app-eid (or (some-> (root @conn) e) -101)]
     (d/transact! conn [{:db/id app-eid
-                        :app/game [:game/id game-id]}])))
+                        :app/game [:game/id game-id]}])
+    (create-players! app-ctx)))
 
 (defn encode-game-state [game-state]
   (let [writer (transit/writer :json)]
@@ -48,7 +65,7 @@
                                js/lzwDecode)]
     (transit/read reader transit-game-state)))
 
-(defn load-encoded-game-state! [conn encoded-game-state]
+(defn load-encoded-game-state! [{:as app-ctx :keys [conn]} encoded-game-state]
   (game/load-specs! conn)
   (let [game-state (decode-game-state encoded-game-state)
         game-id (game/load-game-state! conn
@@ -56,7 +73,8 @@
                                        data/scenario-definitions
                                        game-state)]
     (d/transact! conn [{:db/id -1
-                        :app/game [:game/id game-id]}])))
+                        :app/game [:game/id game-id]}])
+    (create-players! app-ctx)))
 
 ;; TODO: put URL in paste buffer
 (defn set-url-game-state! [db]

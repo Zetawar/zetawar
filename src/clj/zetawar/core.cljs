@@ -44,11 +44,11 @@
 
 (defn ^:export init []
   (when-not (site/viewing-devcards?)
-    (let [conn (get-in system [:datascript :conn])
+    (let [app-ctx (:app system)
           encoded-game-state (some-> js/window.location.hash
                                      not-empty
                                      (subs 1))]
       (if encoded-game-state
-        (app/load-encoded-game-state! conn encoded-game-state)
-        (app/start-new-game! conn :sterlings-aruba-multiplayer))
+        (app/load-encoded-game-state! app-ctx encoded-game-state)
+        (app/start-new-game! app-ctx :sterlings-aruba-multiplayer))
       (set! (.-onload js/window) run))))

@@ -40,7 +40,6 @@
         targeted-unit (game/unit-at db game targeted-q targeted-r)
         targeted-terrain (game/terrain-at db game targeted-q targeted-r)]
     (inspect [selected-q selected-r])
-    (breakpoint)
     {:tx (cond
            ;; selecting selected tile
            (and (= ev-q selected-q) (= ev-r selected-r))
@@ -202,7 +201,8 @@
       (ai/execute-turn conn game-id)
       (game/end-turn! conn game-id)
       (router/dispatch ev-chan [::alert-if-win]))
-    (app/set-url-game-state! @conn)))
+    (app/set-url-game-state! @conn)
+    {:notify [[:faction.color/all "testing"]]}))
 
 ;; TODO: convert to pure function
 (defmethod router/handle-event ::new-game

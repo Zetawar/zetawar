@@ -1,19 +1,17 @@
 (ns zetawar.players
   (:require
-   [zetawar.players.embedded-ai :as players.embedded-ai]))
+   [cljs.core.async :as async]
+   [taoensso.timbre :as log]))
 
 (defprotocol Player
   (start [player])
   (stop [player]))
 
-;; TODO: could this be a multimethod or would it result in a circular dep?
-(defn new-player [player-ctx player-type faction-color]
-  (case player-type
-    :zetawar.players/embedded-ai
-    (players.embedded-ai/new-player player-ctx faction-color)))
+(defmulti new-player (fn [player-ctx player-type faction-color] player-type))
 
-(defn notify [{:as router-ctx :keys [notify-chan]} faction-color msg]
-  (put! notify-chan [faction-color msg]))
+(defn notify [notify-chan msg]
+  (log/debugf "Notifying player: %s" (pr-str msg))
+  (async/put! notify-chan msg))
 
 ;; TODO: handle-request is probably unecessary, can be part of regular event processing
 

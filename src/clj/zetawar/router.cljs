@@ -2,7 +2,8 @@
   (:require
    [cljs.core.async :refer [chan close! put!]]
    [datascript.core :as d]
-   [taoensso.timbre :as log])
+   [taoensso.timbre :as log]
+   [zetawar.players :as players])
   (:require-macros
    [cljs.core.async.macros :refer [go go-loop]]))
 
@@ -17,7 +18,7 @@
   (log/debugf "Dispatching event: %s" (pr-str msg))
   (put! ch msg))
 
-(defn handle-event* [{:as router-ctx :keys [ev-chan conn]} msg]
+(defn handle-event* [{:as router-ctx :keys [conn ev-chan notify-chan]} msg]
   (let [ev-ctx (assoc router-ctx :db @conn)
         {:as ret :keys [tx]} (handle-event ev-ctx msg)]
     (log/tracef "Handler returned: %s" (pr-str ret))
@@ -25,7 +26,9 @@
       (log/debugf "Transacting: %s" (pr-str tx))
       (d/transact! conn tx))
     (doseq [new-msg (:dispatch ret)]
-      (dispatch ev-chan new-msg))))
+      (dispatch ev-chan new-msg))
+    (doseq [notify-msg (:notify ret)]
+      (players/notify notify-chan notify-msg))))
 
 (defn start [{:as router-ctx :keys [ev-chan]}]
   (go-loop [msg (<! ev-chan)]
