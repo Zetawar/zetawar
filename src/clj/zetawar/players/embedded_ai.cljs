@@ -3,6 +3,7 @@
    [cljs.core.async :as async]
    [datascript.core :as d]
    [taoensso.timbre :as log]
+   [zetawar.players :as players]
    [zetawar.app :as app]
    [zetawar.game :as game])
   (:require-macros
@@ -17,6 +18,7 @@
         (d/transact! conn tx))
       (doseq [new-msg (:dispatch ret)]
         (dispatch ev-chan new-msg))))
+
 
 (defn new-player [{:as player-ctx :keys [notify-pub]} faction-color]
   (let [player-chan (async/chan (async/dropping-buffer 10))]
