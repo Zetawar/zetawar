@@ -38,15 +38,16 @@
         (swap! players assoc color player)))))
 
 (defn start-new-game! [{:as app-ctx :keys [conn]} scenario-id]
-  (if-let [game (current-game @conn)]
-    (d/transact! conn [[:db.fn/retractEntity (e game)]])
-    (game/load-specs! conn))
-  (let [scenario-def (data/scenario-definitions scenario-id)
-        game-id (game/load-scenario! conn data/map-definitions scenario-def)
-        app-eid (or (some-> (root @conn) e) -101)]
-    (d/transact! conn [{:db/id app-eid
-                        :app/game [:game/id game-id]}])
-    (create-players! app-ctx)))
+  (let [game (current-game @conn)]
+    (when-not game
+      (game/load-specs! conn))
+    (let [scenario-def (data/scenario-definitions scenario-id)
+          game-id (game/load-scenario! conn data/map-definitions scenario-def)
+          app-eid (or (some-> (root @conn) e) -101)]
+      (d/transact! conn (cond-> [{:db/id app-eid
+                                  :app/game [:game/id game-id]}]
+                          game (conj [:db.fn/retractEntity (e game)])))
+      (create-players! app-ctx))))
 
 (defn encode-game-state [game-state]
   (let [writer (transit/writer :json)]
