@@ -123,16 +123,18 @@
 
 (deftask dev
   "Run full dev environment."
-  [H host HOST str]
+  [_ reload-host HOST str "Reload WebSocket host"
+   _ reload-port PORT int "Reload WebSocket port"]
   (comp (serve)
         (repl)
         (watch)
-        (test)
+        ;(test)
         (build-html :metadata-file "perun.base.dev.edn")
         (build-css)
         (reload :on-jsload 'zetawar.core/run
                 :cljs-asset-path ""
-                :ws-host host)
+                :ws-host reload-host
+                :ws-port reload-port)
         (cljs-repl-env)
         (cljs :ids ["js/main"]
               :optimizations :none
