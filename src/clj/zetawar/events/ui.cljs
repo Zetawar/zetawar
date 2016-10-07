@@ -4,13 +4,17 @@
    [taoensso.timbre :as log]
    [zetawar.ai :as ai]
    [zetawar.app :as app]
-   [zetawar.db :refer [e qe qes]]
+   [zetawar.db :refer [e qe qes qess]]
    [zetawar.events.game :as e.game]
    [zetawar.game :as game]
    [zetawar.router :as router]
    [zetawar.util :refer [breakpoint inspect only oonly]])
   (:require-macros
    [cljs.core.async.macros :refer [go go-loop]]))
+
+(defmethod router/handle-event ::alert
+  [{:as handler-ctx :keys [ev-chan conn db]} [_ message]]
+  (js/alert "Enabling AI on all factions is not yet supported."))
 
 ;; New click logic:
 ;; - no selection?
@@ -46,13 +50,13 @@
            (cond-> []
              (and selected-q selected-r)
              (->
-              (conj [:db/retract (e app) :app/selected-q selected-q])
-              (conj [:db/retract (e app) :app/selected-r selected-r]))
+              (conj [:db/retract (e app) :app/selected-q selected-q]
+                    [:db/retract (e app) :app/selected-r selected-r]))
 
              (and targeted-q targeted-r)
              (->
-              (conj [:db/retract (e app) :app/targeted-q targeted-q])
-              (conj [:db/retract (e app) :app/targeted-r targeted-r])))
+              (conj [:db/retract (e app) :app/targeted-q targeted-q]
+                    [:db/retract (e app) :app/targeted-r targeted-r])))
 
            ;; selecting targeted tile
            (and (= ev-q targeted-q) (= ev-r targeted-r))
@@ -88,8 +92,8 @@
                      :app/selected-r ev-r}]
              (and targeted-q targeted-r)
              (->
-              (conj [:db/retract (e app) :app/targeted-q targeted-q])
-              (conj [:db/retract (e app) :app/targeted-r targeted-r])))
+              (conj [:db/retract (e app) :app/targeted-q targeted-q]
+                    [:db/retract (e app) :app/targeted-r targeted-r])))
 
            ;; selecting owned base with no unit selected
            (and terrain
@@ -101,8 +105,8 @@
                      :app/selected-r ev-r}]
              (and targeted-q targeted-r)
              (->
-              (conj [:db/retract (e app) :app/targeted-q targeted-q])
-              (conj [:db/retract (e app) :app/targeted-r targeted-r])))
+              (conj [:db/retract (e app) :app/targeted-q targeted-q]
+                    [:db/retract (e app) :app/targeted-r targeted-r])))
 
            ;; selecting unselected friendly unit
            (and unit
@@ -116,8 +120,8 @@
                      :app/selected-r ev-r}]
              (and targeted-q targeted-r)
              (->
-              (conj [:db/retract (e app) :app/targeted-q targeted-q])
-              (conj [:db/retract (e app) :app/targeted-r targeted-r]))))}))
+              (conj [:db/retract (e app) :app/targeted-q targeted-q]
+                    [:db/retract (e app) :app/targeted-r targeted-r]))))}))
 
 (defmethod router/handle-event ::clear-selection
   [{:as handler-ctx :keys [db]} _]
@@ -127,13 +131,13 @@
     {:tx (cond-> []
            (and selected-q selected-r)
            (->
-            (conj [:db/retract (e app) :app/selected-q selected-q])
-            (conj [:db/retract (e app) :app/selected-r selected-r]))
+            (conj [:db/retract (e app) :app/selected-q selected-q]
+                  [:db/retract (e app) :app/selected-r selected-r]))
 
            (and targeted-q targeted-r)
            (->
-            (conj [:db/retract (e app) :app/targeted-q targeted-q])
-            (conj [:db/retract (e app) :app/targeted-r targeted-r])))}))
+            (conj [:db/retract (e app) :app/targeted-q targeted-q]
+                  [:db/retract (e app) :app/targeted-r targeted-r])))}))
 
 (defmethod router/handle-event ::alert-if-win
   [{:as handler-ctx :keys [db]} _]
@@ -202,45 +206,26 @@
       (ai/execute-turn conn game-id)
       (game/end-turn! conn game-id)
       (router/dispatch ev-chan [::alert-if-win]))
-    (app/set-url-game-state! @conn)
-    {:notify [[:faction.color/all "testing"]]}))
+    (app/set-url-game-state! @conn)))
 
 (defmethod router/handle-event ::new-game
-  [{:as handler-ctx :keys [ev-chan conn db]} _]
+  [{:as handler-ctx :keys [ev-chan conn]} _]
   (when (js/confirm "Are you sure you want to end your current game and start a new one?")
     (set! js/window.location.hash "")
-    (app/start-new-game! conn :sterlings-aruba-multiplayer)))
+    (app/start-new-game! handler-ctx :sterlings-aruba-multiplayer)))
 
-;; TODO: convert to pure function
 (defmethod router/handle-event ::toggle-faction-ai
   [{:as handler-ctx :keys [ev-chan conn db]} [_ faction]]
-  (let [game-id (app/current-game-id db)
+  (let [{:keys [game/factions]} (app/current-game db)
         {:keys [faction/ai]} faction
-        other-faction-count (oonly (d/q '[:find (count ?f)
-                                          :in $ ?game-id ?f-arg
-                                          :where
-                                          [?g :game/id ?game-id]
-                                          [?g :game/factions ?f]
-                                          [(not= ?f ?f-arg)]]
-                                        db game-id (e faction)
-                                        ))
-        other-faction-ai-count (-> (d/q '[:find (count ?f)
-                                          :in $ ?game-id ?f-arg
-                                          :where
-                                          [?g :game/id ?game-id]
-                                          [?g :game/factions ?f]
-                                          [?f :faction/ai true]
-                                          [(not= ?f ?f-arg)]]
-                                        db game-id (e faction))
-                                   ffirst
-                                   (or 0))]
+        other-factions (remove #(= (e faction) (e %)) factions)]
     (if (and (not ai)
-             (= other-faction-count other-faction-ai-count))
-      (js/alert "Enabling AI on all factions is not yet supported.")
-      (d/transact! conn [[:db/add (e faction) :faction/ai (not ai)]]))))
+             (= (count other-factions)
+                (count (filter :faction/ai other-factions))))
+      {:dispatch [[::alert "Enabling AI on all factions is not yet supported."]]}
+      {:tx [[:db/add (e faction) :faction/ai (not ai)]]})))
 
-;; TODO: convert to pure function
 (defmethod router/handle-event ::hide-win-dialog
-  [{:as handler-ctx :keys [ev-chan conn db]} _]
+  [{:as handler-ctx :keys [ev-chan db]} _]
   (let [app (app/root db)]
-    (d/transact! conn [[:db/add (e app) :app/show-win-dialog false]])))
+    {:tx [[:db/add (e app) :app/show-win-dialog false]]}))

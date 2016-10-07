@@ -12,7 +12,8 @@
       (router/start {:ev-chan ev-chan
                      :notify-chan notify-chan
                      :notify-pub notify-pub
-                     :conn conn})
+                     :conn conn
+                     :players players})
       (assoc component :conn (:conn datascript) :notify-pub notify-pub)))
   (stop [component]
     (async/close! ev-chan)
