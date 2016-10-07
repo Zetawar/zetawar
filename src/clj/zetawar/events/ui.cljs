@@ -13,8 +13,8 @@
    [cljs.core.async.macros :refer [go go-loop]]))
 
 (defmethod router/handle-event ::alert
-  [{:as handler-ctx :keys [ev-chan conn db]} [_ message]]
-  (js/alert "Enabling AI on all factions is not yet supported."))
+  [{:as handler-ctx :keys [ev-chan conn db]} [_ text]]
+  (js/alert text))
 
 ;; New click logic:
 ;; - no selection?
