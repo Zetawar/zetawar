@@ -163,6 +163,7 @@
                   [:db/retract (e app) :app/targeted-r to-r]]}
       {:dispatch [[::clear-selection]]})))
 
+
 (defmethod router/handle-event ::attack-targeted
   [{:as handler-ctx :keys [db]} _]
   (let [[attacker-q attacker-r] (app/selected-hex db)
@@ -204,7 +205,6 @@
     (app/set-url-game-state! @conn)
     {:notify [[:faction.color/all "testing"]]}))
 
-;; TODO: convert to pure function
 (defmethod router/handle-event ::new-game
   [{:as handler-ctx :keys [ev-chan conn db]} _]
   (when (js/confirm "Are you sure you want to end your current game and start a new one?")
