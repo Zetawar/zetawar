@@ -37,7 +37,7 @@
         (players/start player)
         (swap! players assoc color player)))))
 
-(defn start-new-game! [{:as app-ctx :keys [conn]} scenario-id]
+(defn start-new-game! [{:as app-ctx :keys [conn players]} scenario-id]
   (let [game (current-game @conn)]
     (when-not game
       (game/load-specs! conn))
@@ -47,7 +47,9 @@
       (d/transact! conn (cond-> [{:db/id app-eid
                                   :app/game [:game/id game-id]}]
                           game (conj [:db.fn/retractEntity (e game)])))
-      (create-players! app-ctx))))
+      (if players
+        (create-players! app-ctx)
+        (log/warnf "Skipping player creation for tests")))))
 
 (defn encode-game-state [game-state]
   (let [writer (transit/writer :json)]
@@ -66,7 +68,7 @@
                                js/lzwDecode)]
     (transit/read reader transit-game-state)))
 
-(defn load-encoded-game-state! [{:as app-ctx :keys [conn]} encoded-game-state]
+(defn load-encoded-game-state! [{:as app-ctx :keys [conn players]} encoded-game-state]
   (game/load-specs! conn)
   (let [game-state (decode-game-state encoded-game-state)
         game-id (game/load-game-state! conn
@@ -75,7 +77,10 @@
                                        game-state)]
     (d/transact! conn [{:db/id -1
                         :app/game [:game/id game-id]}])
-    (create-players! app-ctx)))
+
+    (if players
+      (create-players! app-ctx)
+      (log/warnf "Skipping player creation for tests"))))
 
 ;; TODO: put URL in paste buffer
 (defn set-url-game-state! [db]
