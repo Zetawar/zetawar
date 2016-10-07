@@ -3,6 +3,7 @@
    [datascript.core :as d]
    [posh.core :as posh]
    [reagent.core :as r]
+   [taoensso.timbre :as log]
    [zetawar.db :refer [e qe]]
    [zetawar.game :as game]
    [zetawar.hex :as hex]
@@ -112,6 +113,36 @@
        (map (fn [f] @(posh/pull conn faction-pull f)))
        (into [])))
 
+(deftrack faction-eid->base-count [conn]
+  (->> @(posh/q conn '[:find ?f (count ?t)
+                       :where
+                       [_  :app/game ?g]
+                       [?g :game/factions ?f]
+                       [?t :terrain/owner ?f]])
+       (into {})))
+
+(deftrack faction-eid->unit-count [conn]
+  (->> @(posh/q conn '[:find ?f (count ?u)
+                       :where
+                       [_  :app/game ?g]
+                       [?g :game/factions ?f]
+                       [?f :faction/units ?u]])
+       (into {})))
+
+(deftrack winning-faction-eid [conn]
+  (let [faction-eids-with-bases (into []
+                                      (comp (filter #(> (second %) 0))
+                                            (map first))
+                                      @(faction-eid->base-count conn))
+        faction-eids-with-units (into []
+                                      (comp (filter #(> (second %) 0))
+                                            (map first))
+                                      @(faction-eid->unit-count conn))]
+    (when (and (= (count faction-eids-with-bases) 1)
+               (= (count faction-eids-with-units) 1)
+               (= faction-eids-with-bases faction-eids-with-units))
+      (first faction-eids-with-bases))))
+
 (deftrack current-faction-eid [conn]
   (ffirst @(posh/q conn '[:find ?f
                           :where
@@ -121,21 +152,15 @@
 (defn current-faction [conn]
   (posh/pull conn faction-pull @(current-faction-eid conn)))
 
-(deftrack current-unit-count [conn]
-  (or (ffirst @(posh/q conn '[:find (count ?u)
-                              :in $ ?f
-                              :where
-                              [?f :faction/units ?u]]
-                       @(current-faction-eid conn)))
-      0))
+(deftrack current-faction-won? [conn]
+  (= @(current-faction-eid conn)
+     @(winning-faction-eid conn)))
 
 (deftrack current-base-count [conn]
-  (or (ffirst @(posh/q conn '[:find (count ?b)
-                              :in $ ?f
-                              :where
-                              [?b :terrain/owner ?f]]
-                       @(current-faction-eid conn)))
-      0))
+  (get @(faction-eid->base-count conn) @(current-faction-eid conn)))
+
+(deftrack current-unit-count [conn]
+  (get @(faction-eid->unit-count conn) @(current-faction-eid conn)))
 
 (deftrack current-income [conn]
   (let [{:keys [map/credits-per-base]} @(game-map conn)]
@@ -367,4 +392,6 @@
 ;;; User Interface
 
 (deftrack show-win-dialog? [conn]
-  (:app/show-win-dialog @(app conn)))
+  (and @(current-faction-won? conn)
+       (not (:faction/ai @(current-faction conn)))
+       (not (:app/hide-win-dialog @(app conn)))))

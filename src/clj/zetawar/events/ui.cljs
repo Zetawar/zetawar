@@ -139,12 +139,6 @@
             (conj [:db/retract (e app) :app/targeted-q targeted-q]
                   [:db/retract (e app) :app/targeted-r targeted-r])))}))
 
-(defmethod router/handle-event ::alert-if-win
-  [{:as handler-ctx :keys [db]} _]
-  (let [app (app/root db)]
-    (when (game/current-faction-won? db)
-      {:tx [[:db/add (e app) :app/show-win-dialog true]]})))
-
 (defmethod router/handle-event ::move-selected-unit
   [{:as handler-ctx :keys [db]} _]
   (let [[from-q from-r] (app/selected-hex db)
@@ -173,8 +167,7 @@
   (let [[attacker-q attacker-r] (app/selected-hex db)
         [target-q target-r] (app/targeted-hex db)]
     {:dispatch [[::e.game/attack-unit attacker-q attacker-r target-q target-r]
-                [::clear-selection]
-                [::alert-if-win]]}))
+                [::clear-selection]]}))
 
 (defmethod router/handle-event ::repair-selected
   [{:as handler-ctx :keys [db]} _]
@@ -186,8 +179,7 @@
   [{:as handler-ctx :keys [db]} _]
   (let [[q r] (app/selected-hex db)]
     {:dispatch [[::e.game/capture-base q r]
-                [::clear-selection]
-                [::alert-if-win]]}))
+                [::clear-selection]]}))
 
 (defmethod router/handle-event ::build-unit
   [{:as handler-ctx :keys [db]} _]
@@ -204,8 +196,7 @@
     (game/end-turn! conn game-id)
     (when (get-in (game/game-by-id @conn game-id) [:game/current-faction :faction/ai])
       (ai/execute-turn conn game-id)
-      (game/end-turn! conn game-id)
-      (router/dispatch ev-chan [::alert-if-win]))
+      (game/end-turn! conn game-id))
     (app/set-url-game-state! @conn)))
 
 (defmethod router/handle-event ::new-game
@@ -228,4 +219,4 @@
 (defmethod router/handle-event ::hide-win-dialog
   [{:as handler-ctx :keys [ev-chan db]} _]
   (let [app (app/root db)]
-    {:tx [[:db/add (e app) :app/show-win-dialog false]]}))
+    {:tx [[:db/add (e app) :app/hide-win-dialog true]]}))
