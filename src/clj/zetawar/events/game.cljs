@@ -10,6 +10,8 @@
   [{:as handler-ctx :keys [db]} [_ from-q from-r to-q to-r]]
   {:tx (game/move-tx db (app/current-game db) from-q from-r to-q to-r)})
 
+;; TODO: attack calculation and tx creation should be separated splits so that
+;; results of attack calculation can be sent to players
 (defmethod router/handle-event ::attack-unit
   [{:as handler-ctx :keys [db]} [_ attacker-q attacker-r target-q target-r]]
   {:tx (game/attack-tx db (app/current-game db)

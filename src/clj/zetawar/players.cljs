@@ -13,12 +13,6 @@
   (log/debugf "Notifying player: %s" (pr-str msg))
   (async/put! notify-chan msg))
 
-;; TODO: handle-request is probably unecessary, can be part of regular event processing
-
-;; handler-request - implemented by zetawar "server"
-(defn handle-request [{:keys [conn ev-chan players]} faction-color msg]
-  )
-
 ;; requests
 ;; - get-state
 ;; - move

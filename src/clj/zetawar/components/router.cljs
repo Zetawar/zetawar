@@ -8,7 +8,7 @@
   component/Lifecycle
   (start [component]
     (let [{:keys [conn]} datascript
-          notify-pub (async/pub notify-chan #(nth % 0))]
+          notify-pub (async/pub notify-chan #(nth % 1))]
       (router/start {:ev-chan ev-chan
                      :notify-chan notify-chan
                      :notify-pub notify-pub

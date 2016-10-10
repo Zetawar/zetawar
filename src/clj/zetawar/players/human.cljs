@@ -2,7 +2,7 @@
   (:require
    [zetawar.players :as players]))
 
-(defrecord HumanPlayer [player-ctx faction-color]
+(defrecord HumanPlayer [faction-color]
   players/Player
   (start [player]
     nil)
@@ -11,4 +11,4 @@
 
 (defmethod players/new-player ::players/human
   [{:as player-ctx :keys [notify-pub]} player-type faction-color]
-  (HumanPlayer. player-ctx faction-color))
+  (HumanPlayer. faction-color))

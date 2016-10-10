@@ -7,7 +7,7 @@
   (:require-macros
    [cljs.core.async.macros :refer [go go-loop]]))
 
-(defmulti handle-event (fn [ev-ctx [ev-id & _]] ev-id))
+(defmulti handle-event (fn [ev-ctx [ev-type & _]] ev-type))
 
 (defmethod handle-event :default
   [_ msg]
