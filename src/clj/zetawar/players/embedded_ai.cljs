@@ -40,6 +40,16 @@
   (stop [player]
     (async/close! player-chan)))
 
+(defmethod players/new-player ::players/embeded-ai
+  [{:as app-ctx :keys [ev-chan notify-pub]} player-type faction-color]
+  (let [player-chan (async/chan (async/dropping-buffer 10))
+        conn (d/create-conn db/schema)]
+    (EmbeddedAIPlayer. faction-color ev-chan notify-pub player-chan conn)))
+
+(defmethod handle-event ::players/start-turn
+  [{:as player :keys [faction-color conn]} _]
+  {:dispatch [[:zetawar.events.player/send-game-state faction-color]]})
+
 (defn get-game [db]
   (qe '[:find ?g
         :where
@@ -95,15 +105,6 @@
     (when (and unit-type base
                (not (game/unit-at db game (:terrain/q base) (:terrain/r base))))
       [:zetawar.events.game/build-unit (:terrain/q base) (:terrain/r base) (:unit-type/id unit-type)])))
-
-(defmethod players/new-player ::players/embeded-ai
-  [{:as app-ctx :keys [ev-chan notify-pub]} player-type faction-color]
-  (let [player-chan (async/chan (async/dropping-buffer 10))]
-    (EmbeddedAIPlayer. faction-color ev-chan notify-pub player-chan (d/create-conn db/schema))))
-
-(defmethod handle-event ::players/start-turn
-  [{:as player :keys [conn]} _]
-  {:dispatch [[:zetawar.events.player/send-game-state (:faction-color player)]]})
 
 (defmethod handle-event ::players/update-game-state
   [{:as player :keys [conn]} [_ faction-color game-state]]
