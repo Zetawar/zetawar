@@ -196,8 +196,9 @@
           cur-faction (:game/current-faction game)]
       (when (:faction/ai cur-faction)
         (players/notify notify-chan [::players/start-turn (:faction/color cur-faction)])
-        (ai/execute-turn conn game-id)
-        (game/end-turn! conn game-id)))
+        #_(ai/execute-turn conn game-id)
+        #_(game/end-turn! conn game-id)
+        ))
     (app/set-url-game-state! @conn)))
 
 (defmethod router/handle-event ::new-game

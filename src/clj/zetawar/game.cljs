@@ -943,41 +943,50 @@
     game-id))
 
 ;; TODO: figure out better name
-(defn get-game-state [db game]
-  (let [factions (->> game :game/factions (sort-by :order))]
-    {:scenario-id (:game/scenario-id game)
-     :round (:game/round game)
-     :current-faction (-> game
-                          :game/current-faction
-                          :faction/color
+(defn get-game-state
+  ([db game]
+   (get-game-state db game :minimal))
+  ([db game dump-type]
+   (let [factions (->> game :game/factions (sort-by :order))]
+     {:scenario-id (:game/scenario-id game)
+      :round (:game/round game)
+      :current-faction (-> game
+                           :game/current-faction
+                           :faction/color
+                           name
+                           keyword)
+      :factions
+      (into []
+            (for [faction factions]
+              {:credits (:faction/credits faction)
+               :ai (:faction/ai faction)
+               :color (-> (:faction/color faction)
                           name
                           keyword)
-     :factions
-     (into []
-           (for [faction factions]
-             {:credits (:faction/credits faction)
-              :ai (:faction/ai faction)
-              :color (-> (:faction/color faction)
-                         name
-                         keyword)
-              :bases
-              (into []
-                    (for [base (faction-bases db faction)]
-                      {:q (:terrain/q base)
-                       :r (:terrain/r base)}))
-              :units
-              (into []
-                    (for [unit (:faction/units faction)]
-                      (cond-> {:q (:unit/q unit)
-                               :r (:unit/r unit)
-                               :unit-type (-> unit
-                                              :unit/type
-                                              :unit-type/id
-                                              name
-                                              keyword)
-                               :count (:unit/count unit)}
-                        (:unit/capturing unit)
-                        (assoc :capturing true
-                               :capture-round (:unit/capture-round unit)))))
-              }))
-     }))
+               :bases
+               (into []
+                     (for [base (faction-bases db faction)]
+                       {:q (:terrain/q base)
+                        :r (:terrain/r base)}))
+               :units
+               (into []
+                     (for [unit (:faction/units faction)]
+                       (cond-> {:q (:unit/q unit)
+                                :r (:unit/r unit)
+                                :unit-type (-> unit
+                                               :unit/type
+                                               :unit-type/id
+                                               name
+                                               keyword)
+                                :count (:unit/count unit)}
+                         (:unit/capturing unit)
+                         (assoc :capturing true
+                                :capture-round (:unit/capture-round unit))
+
+                         (= dump-type :full)
+                         (assoc :move-count (:unit/move-count unit)
+                                :repaired (:unit/repaired unit)
+                                :round-built (:unit/round-built unit))
+                         )))
+               }))
+      })))

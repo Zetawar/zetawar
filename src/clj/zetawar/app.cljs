@@ -9,8 +9,6 @@
    [zetawar.db :refer [e find-by qe qes qess]]
    [zetawar.game :as game]
    [zetawar.players :as players]
-   [zetawar.players.embedded-ai]
-   [zetawar.players.human]
    [zetawar.util :refer [breakpoint inspect]]))
 
 (defn root [db]

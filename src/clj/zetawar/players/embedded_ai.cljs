@@ -3,8 +3,9 @@
    [cljs.core.async :as async]
    [datascript.core :as d]
    [taoensso.timbre :as log]
+   [zetawar.app :as app]
    [zetawar.data :as data]
-   [zetawar.db :as db]
+   [zetawar.db :as db :refer [e qe qes qess]]
    [zetawar.game :as game]
    [zetawar.players :as players]
    [zetawar.router :as router])
@@ -39,6 +40,62 @@
   (stop [player]
     (async/close! player-chan)))
 
+(defn get-game [db]
+  (qe '[:find ?g
+        :where
+        [?g :game/id]]
+      db))
+
+;; TODO: need a can-act? predicate
+(defn pick-unit [db game]
+  (let [faction (:game/current-faction game)
+        units (:faction/units faction)]
+    (->> game
+         :game/current-faction
+         :faction/units
+         (remove #(= (:game/round game) (:unit/round-built %)))
+         (remove :unit/repaired)
+         (remove :unit/capturing)
+         (remove #(let [terrain (game/terrain-at db game (:unit/q %) (:unit/r %))]
+                    (and (not (game/can-capture? db game % terrain))
+                         (> (:unit/move-count %) 0))))
+         shuffle
+         first)))
+
+;; TODO: this is terrible, clean it up
+(defn unit-action [db game unit]
+  (let [base (game/closest-capturable-base db game unit)
+        move (game/closest-move-to-hex db game unit (:terrain/q base) (:terrain/r base))]
+    (if (and (game/on-capturable-base? db game unit)
+             (game/can-capture? db game unit base))
+      [:zetawar.events.game/capture-base (:unit/q unit) (:unit/r unit)]
+      (if (first move)
+        (into [:zetawar.events.game/move-unit] (concat (:from move) (:to move)))
+        (when-let [enemy (-> (game/enemies-in-range db game unit) shuffle first)]
+          (when (game/can-attack? db game unit)
+            [:zetawar.events.game/attack-unit (:unit/q unit) (:unit/r unit) (:unit/q enemy) (:unit/r enemy)]))))))
+
+(defn build-action [db game]
+  (let [current-faction (:game/current-faction game)
+        owned-bases (->> (qes '[:find ?t
+                                :in $ ?g
+                                :where
+                                [?g  :game/map ?m]
+                                [?m  :map/terrains ?t]
+                                [?t  :terrain/type ?tt]
+                                [?tt :terrain-type/id :terrain-type.id/base]]
+                              db (e game))
+                         (apply concat)
+                         (filter #(= current-faction (:terrain/owner %)))
+                         (remove #(game/unit-at db game (:terrain/q %) (:terrain/r %)))
+                         (into #{}))
+        unit-types (game/buildable-unit-types db game)
+        base (-> owned-bases shuffle first)
+        unit-type (-> unit-types shuffle first)]
+    (when (and unit-type base
+               (not (game/unit-at db game (:terrain/q base) (:terrain/r base))))
+      [:zetawar.events.game/build-unit (:terrain/q base) (:terrain/r base) (:unit-type/id unit-type)])))
+
 (defmethod players/new-player ::players/embeded-ai
   [{:as app-ctx :keys [ev-chan notify-pub]} player-type faction-color]
   (let [player-chan (async/chan (async/dropping-buffer 10))]
@@ -56,12 +113,15 @@
       (game/load-game-state! new-conn data/map-definitions data/scenario-definitions game-state)
       (reset! conn @new-conn)
 
-      ;; build units if possible
-
-      ;; select unit to move
-      ;; move unit
-      ;; attack if possible
-
-      {}
+      (let [db @conn
+            game (get-game db)
+            unit (pick-unit db game)]
+        (if-let [b-action (build-action db game)]
+          {:dispatch [b-action
+                      [:zetawar.events.player/send-game-state (:faction-color player)]]}
+          (if-let [u-action (when unit (unit-action db game unit))]
+            {:dispatch [u-action
+                        [:zetawar.events.player/send-game-state (:faction-color player)]]}
+            {:dispatch [[:zetawar.events.ui/end-turn (:faction-color player)]]})))
 
       )))

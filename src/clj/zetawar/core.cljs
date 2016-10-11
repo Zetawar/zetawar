@@ -11,6 +11,8 @@
    [zetawar.events.player]
    [zetawar.events.ui]
    [zetawar.game :as game]
+   [zetawar.players.embedded-ai]
+   [zetawar.players.human]
    [zetawar.site :as site]
    [zetawar.system :refer [new-system]]
    [zetawar.util :refer [breakpoint inspect]]

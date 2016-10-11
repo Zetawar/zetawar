@@ -9,5 +9,5 @@
 (defmethod router/handle-event ::send-game-state
   [{:as handler-ctx :keys [db]} [_ faction-color]]
   (let [game (app/current-game db)
-        game-state (game/get-game-state db game)]
+        game-state (game/get-game-state db game :full)]
     {:notify [[:zetawar.players/update-game-state faction-color game-state]]}))
