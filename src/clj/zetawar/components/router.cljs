@@ -18,6 +18,8 @@
   (stop [component]
     (async/close! ev-chan)
     (async/close! notify-chan)
+    (doseq [player players]
+      (stop player))
     (assoc component
            :datascript nil
            :timbre nil

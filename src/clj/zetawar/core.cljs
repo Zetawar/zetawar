@@ -4,6 +4,7 @@
    [datascript.core :as d]
    [posh.core :as posh]
    [reagent.core :as r]
+   [taoensso.timbre :as log]
    [zetawar.app :as app]
    [zetawar.benchmarks :as benchmarks]
    [zetawar.events.game]
@@ -16,8 +17,7 @@
    [zetawar.views :as views]
    [zetawar.views.common :refer [navbar]]))
 
-(when-not (site/viewing-devcards?)
-  (defonce system (component/start (new-system))))
+(defonce system (atom nil))
 
 (defn ^:export run []
   (let [body-id (-> js/document
@@ -26,10 +26,9 @@
                     .-id)]
     (case body-id
       "app"
-      (let [target (.getElementById js/document "main")
-            {:keys [app]} system]
+      (let [target (.getElementById js/document "main")]
         (r/render-component
-         [views/app-root app]
+         [views/app-root (:app @system)]
          target))
 
       "site"
@@ -47,7 +46,8 @@
 
 (defn ^:export init []
   (when-not (site/viewing-devcards?)
-    (let [app-ctx (:app system)
+    (reset! system (component/start (new-system)))
+    (let [app-ctx (:app @system)
           encoded-game-state (some-> js/window.location.hash
                                      not-empty
                                      (subs 1))]
