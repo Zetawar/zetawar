@@ -3,7 +3,7 @@
    [com.rpl.specter :refer [ALL LAST collect-one filterer selected?]]
    [datascript.core :as d]
    [zetawar.data :as data]
-   [zetawar.db :refer [e find-by qe qes]]
+   [zetawar.db :refer [e find-by qe qes qess]]
    [zetawar.hex :as hex]
    [zetawar.util :refer [breakpoint inspect oonly]])
   (:require-macros
@@ -42,11 +42,49 @@
       db (e game) (to-faction-color color)))
 
 (defn faction-bases [db faction]
-  (apply concat (qes '[:find ?t
-                       :in $ ?f
-                       :where
-                       [?t :terrain/owner ?f]]
-                     db (e faction))))
+  (qess '[:find ?t
+          :in $ ?f
+          :where
+          [?t :terrain/owner ?f]]
+        db (e faction)))
+
+(defn faction-base-count [db faction]
+  (-> (d/q '[:find (count ?b)
+             :in $ ?f
+             :where
+             [?b :terrain/owner ?f]]
+           db (e faction))
+      ffirst
+      (or 0)))
+
+(defn enemy-base-count [db faction]
+  (-> (d/q '[:find (count ?b)
+             :in $ ?f
+             :where
+             [?b :terrain/owner ?ef]
+             [(not= ?ef ?f)]]
+           db (e faction))
+      ffirst
+      (or 0)))
+
+(defn faction-unit-count [db faction]
+  (-> (d/q '[:find (count ?u)
+             :in $ ?f
+             :where
+             [?f :faction/units ?u]]
+           db (e faction))
+      ffirst
+      (or 0)))
+
+(defn enemy-unit-count [db faction]
+  (-> (d/q '[:find (count ?u)
+             :in $ ?f
+             :where
+             [?f :faction/units ?u]
+             [(not= ?f ?cf)]]
+           db (e faction))
+      ffirst
+      (or 0)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Terrain
@@ -618,19 +656,8 @@
 ;; x update round number if appropriate <=
 
 (defn income [db game faction]
-  (let [base-count (-> (d/q '[:find (count ?b)
-                              :in $ ?f
-                              :where
-                              [?b :terrain/owner ?f]]
-                            db (e faction))
-                       ffirst
-                       (or 0))
-        credits-per-base (oonly (d/q '[:find ?c
-                                       :in $ ?g
-                                       :where
-                                       [?g :game/map ?m]
-                                       [?m :map/credits-per-base ?c]]
-                                     db (e game)))]
+  (let [base-count (faction-base-count db faction)
+        credits-per-base (get-in game [:game/map :map/credits-per-base])]
     (* base-count credits-per-base)))
 
 ;; TODO: cleanup
@@ -651,8 +678,8 @@
          [:db/add (e unit) :unit/attack-count 0]
          [:db/add (e unit) :unit/attacked-count 0]]
         (cond->
-          (and (:unit/capturing unit)
-               (= (:unit/capture-round unit) (:game/round game)))
+            (and (:unit/capturing unit)
+                 (= (:unit/capture-round unit) (:game/round game)))
           (into (end-turn-capture-tx db game unit))))))
 
 ;; TODO: separate into end-turn! and end-turn-tx
@@ -672,12 +699,7 @@
         round (if (= starting-faction next-faction)
                 (inc (:game/round game))
                 (:game/round game))
-        ;; TODO: replace "apply concat" with transducer (?)
-        units (apply concat (qes '[:find ?u
-                                   :in $ ?f
-                                   :where
-                                   [?f :faction/units ?u]]
-                                 db (e cur-faction)))]
+        units (:faction/units cur-faction)]
     (d/transact! conn (into [{:db/id (e next-faction)
                               :faction/credits credits}
                              {:db/id (e game)
@@ -688,32 +710,35 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; AI Helpers
 
+(defn capturable-bases [db game unit]
+  (when (get-in unit [:unit/type :unit-type/can-capture])
+    (let [u-faction (unit-faction db unit)]
+      (into []
+            (filter #(not= u-faction (:terrain/owner %)))
+            (qess '[:find ?t
+                    :in $ ?g
+                    :where
+                    [?g  :game/map ?m]
+                    [?m  :map/terrains ?t]
+                    [?t  :terrain/type ?tt]
+                    [?tt :terrain-type/id :terrain-type.id/base]]
+                  db (e game))))))
+
 (defn closest-capturable-base [db game unit]
-  (let [u-faction (unit-faction db unit)
-        unit-q (:unit/q unit)
+  (let [unit-q (:unit/q unit)
         unit-r (:unit/r unit)
-        ;; TODO: use transducers
-        terrains (->> (qes '[:find ?t
-                             :in $ ?g
-                             :where
-                             [?g  :game/map ?m]
-                             [?m  :map/terrains ?t]
-                             [?t  :terrain/type ?tt]
-                             [?tt :terrain-type/id :terrain-type.id/base]]
-                           db (e game))
-                      (apply concat)
-                      (filter #(not= u-faction (:terrain/owner %))))]
+        bases (capturable-bases db game unit)]
     (reduce
-      (fn [closest terrain]
-        (let [terrain-q (:terrain/q terrain)
-              terrain-r (:terrain/r terrain)
-              closest-q (:terrain/q closest)
-              closest-r (:terrain/r closest)]
-          (if (< (hex/distance unit-q unit-r terrain-q terrain-r)
-                 (hex/distance unit-q unit-r closest-q closest-r))
-            terrain
-            closest)))
-      terrains)))
+     (fn [closest terrain]
+       (let [terrain-q (:terrain/q terrain)
+             terrain-r (:terrain/r terrain)
+             closest-q (:terrain/q closest)
+             closest-r (:terrain/r closest)]
+         (if (< (hex/distance unit-q unit-r terrain-q terrain-r)
+                (hex/distance unit-q unit-r closest-q closest-r))
+           terrain
+           closest)))
+     bases)))
 
 (defn closest-move-to-hex [db game unit q r]
   (reduce
@@ -729,19 +754,16 @@
     (valid-moves db game unit)))
 
 (defn enemies-in-range [db game unit]
-  (let [u-faction (unit-faction db unit)
-        unit-q (:unit/q unit)
-        unit-r (:unit/r unit)]
-    ;; TODO: use transducers
-    (->> (qes '[:find ?u
-                :in $ ?g
-                :where
-                [?g :game/factions ?f]
-                [?f :faction/units ?u]]
-              db (e game))
-         (apply concat)
-         (filter #(not= u-faction (unit-faction db %)))
-         (filter #(in-range? db unit %)))))
+  (let [u-faction (unit-faction db unit)]
+    (into []
+          (filter #(in-range? db unit %))
+          (qess '[:find ?u
+                  :in $ ?g ?f-arg
+                  :where
+                  [?g :game/factions ?f]
+                  [?f :faction/units ?u]
+                  [(not= ?f ?f-arg)]]
+                db (e game) (e u-faction)))))
 
 ;; TODO: remove restriction to infantry
 (defn buildable-unit-types [db game]
@@ -754,31 +776,6 @@
                        [?ut :unit-type/id :unit-type.id/infantry]
                        [(>= ?credits ?cost)]]
                      db (e game))))
-
-;; TODO: pass in game
-(defn current-faction-won? [db]
-  (let [current-faction (qe '[:find ?f
-                              :where
-                              [_ :game/current-faction ?f]]
-                            db)
-        enemy-base-count (-> (d/q '[:find (count ?b)
-                                    :in $ ?cf
-                                    :where
-                                    [?b :terrain/owner ?f]
-                                    [(not= ?f ?cf)]]
-                                  db (e current-faction))
-                             ffirst
-                             (or 0))
-        enemy-unit-count (-> (d/q '[:find (count ?u)
-                                    :in $ ?cf
-                                    :where
-                                    [?f :faction/units ?u]
-                                    [(not= ?f ?cf)]]
-                                  db (e current-faction))
-                             ffirst
-                             (or 0))]
-    (and (= 0 enemy-base-count)
-         (= 0 enemy-unit-count))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Setup

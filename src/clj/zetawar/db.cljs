@@ -4,7 +4,7 @@
    [zetawar.util :refer [breakpoint inspect solo ssolo]]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; ## Schema
+;;; Schema
 
 ;; TODO: add unit/terrain
 (def schema
@@ -43,7 +43,7 @@
                                   :db/index       true}})
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; ## Utility Functions
+;;; Utils
 
 (defn qe
   "Returns the single entity returned by a query."
@@ -72,7 +72,7 @@
   that each :find result contains a single entity id."
   [query db & args]
   (->> (apply d/q query db args)
-       (map #(d/entity db (solo %)))))
+       (mapv #(d/entity db (solo %)))))
 
 (defn find-all-by
   "Returns all entities possessing attr."

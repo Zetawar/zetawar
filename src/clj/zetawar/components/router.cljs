@@ -2,6 +2,7 @@
   (:require
    [cljs.core.async :as async]
    [com.stuartsierra.component :as component]
+   [zetawar.players :as players]
    [zetawar.router :as router]))
 
 (defrecord Router [datascript timbre conn ev-chan notify-chan notify-pub players]
@@ -19,7 +20,7 @@
     (async/close! ev-chan)
     (async/close! notify-chan)
     (doseq [player players]
-      (stop player))
+      (players/stop player))
     (assoc component
            :datascript nil
            :timbre nil

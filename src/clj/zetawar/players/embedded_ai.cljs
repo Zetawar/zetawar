@@ -58,19 +58,17 @@
 
 ;; TODO: need a can-act? predicate
 (defn pick-unit [db game]
-  (let [faction (:game/current-faction game)
-        units (:faction/units faction)]
-    (->> game
-         :game/current-faction
-         :faction/units
-         (remove #(= (:game/round game) (:unit/round-built %)))
-         (remove :unit/repaired)
-         (remove :unit/capturing)
-         (remove #(let [terrain (game/terrain-at db game (:unit/q %) (:unit/r %))]
-                    (and (not (game/can-capture? db game % terrain))
-                         (> (:unit/move-count %) 0))))
-         shuffle
-         first)))
+  (->> game
+       :game/current-faction
+       :faction/units
+       (remove #(= (:game/round game) (:unit/round-built %)))
+       (remove :unit/repaired)
+       (remove :unit/capturing)
+       (remove #(let [terrain (game/terrain-at db game (:unit/q %) (:unit/r %))]
+                  (and (not (game/can-capture? db game % terrain))
+                       (> (:unit/move-count %) 0))))
+       shuffle
+       first))
 
 ;; TODO: this is terrible, clean it up
 (defn unit-action [db game unit]
