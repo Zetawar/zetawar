@@ -710,6 +710,16 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; AI Helpers
 
+(defn buildable-unit-types [db game]
+  (qess '[:find ?ut
+          :in $ ?g
+          :where
+          [?g  :game/current-faction ?f]
+          [?f  :faction/credits ?credits]
+          [?ut :unit-type/cost ?cost]
+          [(>= ?credits ?cost)]]
+        db (e game)))
+
 (defn capturable-bases [db game unit]
   (when (get-in unit [:unit/type :unit-type/can-capture])
     (let [u-faction (unit-faction db unit)]
@@ -742,16 +752,16 @@
 
 (defn closest-move-to-hex [db game unit q r]
   (reduce
-    (fn [closest move]
-      (if closest
-        (let [[closest-q closest-r] (:to closest)
-              [move-q move-r] (:to move)]
-          (if (< (hex/distance move-q move-r q r)
-                 (hex/distance closest-q closest-r q r))
-            move
-            closest))
-        move))
-    (valid-moves db game unit)))
+   (fn [closest move]
+     (if closest
+       (let [[closest-q closest-r] (:to closest)
+             [move-q move-r] (:to move)]
+         (if (< (hex/distance move-q move-r q r)
+                (hex/distance closest-q closest-r q r))
+           move
+           closest))
+       move))
+   (valid-moves db game unit)))
 
 (defn enemies-in-range [db game unit]
   (let [u-faction (unit-faction db unit)]
@@ -764,18 +774,6 @@
                   [?f :faction/units ?u]
                   [(not= ?f ?f-arg)]]
                 db (e game) (e u-faction)))))
-
-;; TODO: remove restriction to infantry
-(defn buildable-unit-types [db game]
-  (apply concat (qes '[:find ?ut
-                       :in $ ?g
-                       :where
-                       [?g  :game/current-faction ?f]
-                       [?f  :faction/credits ?credits]
-                       [?ut :unit-type/cost ?cost]
-                       [?ut :unit-type/id :unit-type.id/infantry]
-                       [(>= ?credits ?cost)]]
-                     db (e game))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Setup
