@@ -54,7 +54,7 @@
 ;; TODO: add base-score-fn
 ;; TODO: add unit-type-score-fn
 
-(defn choose-build-action [db game]
+(defn choose-build-action [player db game]
   (let [cur-faction (:game/current-faction game)
         possible-bases (into []
                              (remove #(game/unit-at db game (:terrain/q %) (:terrain/r %)))
@@ -62,9 +62,12 @@
         unit-types (game/buildable-unit-types db game)
         chosen-base (-> possible-bases shuffle first)
         chosen-unit-type (-> unit-types shuffle first)]
-    (when (and chosen-base chosen-unit-type)
-      [:zetawar.events.game/build-unit
-       (:terrain/q chosen-base) (:terrain/r chosen-base) (:unit-type/id chosen-unit-type)])))
+    (log/debug (pr-str chosen-base) [(:terrain/q chosen-base) (:terrain/r chosen-base)])
+    (log/debug (pr-str (game/unit-at db game (:terrain/q chosen-base) (:terrain/r chosen-base))))
+    (when (and chosen-base chosen-unit-type
+               (not (game/unit-at db game (:terrain/q chosen-base) (:terrain/r chosen-base))))
+      [:zetawar.events.player/build-unit
+       (:faction-color player) (:terrain/q chosen-base) (:terrain/r chosen-base) (:unit-type/id chosen-unit-type)])))
 
 ;; TODO: add unit-score-fn
 
@@ -83,17 +86,18 @@
        first))
 
 ;; TODO: this is terrible, clean it up
-(defn choose-unit-action [db game unit]
+(defn choose-unit-action [player db game unit]
   (let [base (game/closest-capturable-base db game unit)
         move (game/closest-move-to-hex db game unit (:terrain/q base) (:terrain/r base))]
     (if (and (game/on-capturable-base? db game unit)
              (game/can-capture? db game unit base))
-      [:zetawar.events.game/capture-base (:unit/q unit) (:unit/r unit)]
+      [:zetawar.events.player/capture-base (:faction-color player) (:unit/q unit) (:unit/r unit)]
       (if (first move)
-        (into [:zetawar.events.game/move-unit] (concat (:from move) (:to move)))
+        (into [:zetawar.events.player/move-unit (:faction-color player)] (concat (:from move) (:to move)))
         (when-let [enemy (-> (game/enemies-in-range db game unit) shuffle first)]
           (when (game/can-attack? db game unit)
-            [:zetawar.events.game/attack-unit (:unit/q unit) (:unit/r unit) (:unit/q enemy) (:unit/r enemy)]))))))
+            [:zetawar.events.player/attack-unit
+             (:faction-color player) (:unit/q unit) (:unit/r unit) (:unit/q enemy) (:unit/r enemy)]))))))
 
 (defmethod handle-event ::players/update-game-state
   [{:as player :keys [conn]} [_ faction-color game-state]]
@@ -103,11 +107,9 @@
       (reset! conn @new-conn)
       (let [db @conn
             game (game/game-by-id db game-id)]
-        (if-let [build-action (choose-build-action db game)]
-          {:dispatch [build-action
-                      [:zetawar.events.player/send-game-state (:faction-color player)]]}
+        (if-let [build-action (choose-build-action player db game)]
+          {:dispatch [build-action]}
           (let [unit (choose-unit db game)]
-            (if-let [unit-action (and unit (choose-unit-action db game unit))]
-              {:dispatch [unit-action
-                          [:zetawar.events.player/send-game-state (:faction-color player)]]}
+            (if-let [unit-action (and unit (choose-unit-action player db game unit))]
+              {:dispatch [unit-action]}
               {:dispatch [[:zetawar.events.ui/end-turn (:faction-color player)]]})))))))
