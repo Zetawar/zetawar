@@ -6,9 +6,6 @@
    [zetawar.game :as game]
    [zetawar.router :as router]))
 
-;; TODO: notify players of game actions
-;;   example: notify zetawar.players/apply-action zetawar.actions/move ...
-
 (defmethod router/handle-event ::move-unit
   [{:as handler-ctx :keys [db]} [_ from-q from-r to-q to-r]]
   {:tx (game/move-tx db (app/current-game db) from-q from-r to-q to-r)
@@ -24,8 +21,7 @@
                          attacker-q attacker-r defender-q defender-r
                          damage)
      :notify [[:zetawar.players/apply-action :faction.color/all
-               :zetawar.actions/attack
-               attacker-q attacker-r defender-q defender-r
+               :zetawar.actions/attack attacker-q attacker-r defender-q defender-r
                (::game/attacker-damage damage) (::game/defender-damage damage)]]}))
 
 (defmethod router/handle-event ::repair-unit

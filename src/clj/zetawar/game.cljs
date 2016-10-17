@@ -735,7 +735,6 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; AI Helpers
 
-
 (defn buildable-unit-types [db game]
   (qess '[:find ?ut
           :in $ ?g
@@ -776,6 +775,7 @@
            closest)))
      bases)))
 
+;; TODO: return nil if no move is found
 (defn closest-move-to-hex [db game unit q r]
   (reduce
    (fn [closest move]

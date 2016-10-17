@@ -160,7 +160,6 @@
                   [:db/retract (e app) :app/targeted-r to-r]]}
       {:dispatch [[::clear-selection]]})))
 
-
 (defmethod router/handle-event ::attack-targeted
   [{:as handler-ctx :keys [db]} _]
   (let [[attacker-q attacker-r] (app/selected-hex db)
@@ -187,6 +186,7 @@
                 [::clear-selection]]}))
 
 ;; TODO: convert to pure function
+;; TODO: notify players (AIs) when turn ends
 (defmethod router/handle-event ::end-turn
   [{:as handler-ctx :keys [ev-chan notify-chan conn db]} _]
   (let [game-id (app/current-game-id db)]
@@ -195,10 +195,7 @@
     (let [game (game/game-by-id @conn game-id)
           cur-faction (:game/current-faction game)]
       (when (:faction/ai cur-faction)
-        (players/notify notify-chan [::players/start-turn (:faction/color cur-faction)])
-        #_(ai/execute-turn conn game-id)
-        #_(game/end-turn! conn game-id)
-        ))
+        (players/notify notify-chan [::players/start-turn (:faction/color cur-faction)])))
     (app/set-url-game-state! @conn)))
 
 (defmethod router/handle-event ::new-game
