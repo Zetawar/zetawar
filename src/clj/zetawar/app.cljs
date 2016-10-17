@@ -30,7 +30,7 @@
                          [?g :game/factions ?f]]
                        @conn)]
     (doseq [{:keys [faction/ai faction/color]} factions]
-      (let [player-type (if ai ::players/embeded-ai ::players/human)
+      (let [player-type (if ai ::players/embedded-ai ::players/human)
             player (players/new-player app-ctx player-type color)]
         (players/start player)
         (swap! players assoc color player)))))

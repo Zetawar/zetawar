@@ -41,7 +41,7 @@
   (stop [player]
     (async/close! player-chan)))
 
-(defmethod players/new-player ::players/embeded-ai
+(defmethod players/new-player ::players/embedded-ai
   [{:as app-ctx :keys [ev-chan notify-pub]} player-type faction-color]
   (let [player-chan (async/chan (async/dropping-buffer 10))
         conn (d/create-conn db/schema)]
