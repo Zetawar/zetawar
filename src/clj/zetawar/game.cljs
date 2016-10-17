@@ -2,6 +2,7 @@
   (:require
    [com.rpl.specter :refer [ALL LAST collect-one filterer selected?]]
    [datascript.core :as d]
+   [taoensso.timbre :as log]
    [zetawar.data :as data]
    [zetawar.db :refer [e find-by qe qes qess]]
    [zetawar.hex :as hex]
@@ -449,41 +450,65 @@
                                   [?e  :terrain-effect/armor-bonus ?d]]
                                 db (e defender) (e defender-terrain)))]
     (js/Math.round
-      (max 0 (* (:unit/count attacker)
-                (+ 0.5 (* 0.05 (+ (- (+ attack-strength attack-bonus)
-                                     (+ armor armor-bonus))
-                                  (:unit/attacked-count defender)))))))))
+     (max 0 (* (:unit/count attacker)
+               (+ 0.5 (* 0.05 (+ (- (+ attack-strength attack-bonus)
+                                    (+ armor armor-bonus))
+                                 (:unit/attacked-count defender)))))))))
 
-(defn attack-tx
+(defn battle-damage
   ([db game attacker defender]
-   (check-can-attack db game attacker)
-   (check-in-range db attacker defender)
    (let [attacker-terrain (terrain-at db game (:unit/q attacker) (:unit/r attacker))
          defender-terrain (terrain-at db game (:unit/q defender) (:unit/r defender))
          attack-count (get attacker :unit/attack-count 0)
          defender-damage (attack-damage db attacker defender attacker-terrain defender-terrain)
          attacker-damage (if (in-range? db defender attacker)
                            (attack-damage db defender attacker defender-terrain attacker-terrain)
-                           0)
-         attacker-count (- (:unit/count attacker) attacker-damage)
-         defender-count (- (:unit/count defender) defender-damage)]
-     (cond-> [[:db/add (e attacker) :unit/attack-count (inc attack-count)]]
-       (>  defender-count 0)
+                           0)]
+     {::attacker-damage (min (:unit/count attacker) attacker-damage)
+      ::defender-damage (min (:unit/count defender) defender-damage)}))
+  ([db game attacker-q attacker-r defender-q defender-r]
+   (let [attacker (checked-unit-at db game attacker-q attacker-r)
+         defender (checked-unit-at db game defender-q defender-r)]
+     (battle-damage db game attacker defender))))
+
+;; TODO: add attacked unit to unit/attacked-units
+(defn battle-tx
+  ([db game attacker defender damage]
+   (check-can-attack db game attacker)
+   (check-in-range db attacker defender)
+   (let [{:keys [::attacker-damage ::defender-damage]} damage
+         attacker-terrain (terrain-at db game (:unit/q attacker) (:unit/r attacker))
+         defender-terrain (terrain-at db game (:unit/q defender) (:unit/r defender))
+         attack-count (get attacker :unit/attack-count 0)
+         attacker-count (:unit/count attacker)
+         defender-count (:unit/count defender)]
+     (cond-> []
+       (> defender-count defender-damage)
        (conj {:db/id (e defender)
-              :unit/count defender-count
+              :unit/count (- defender-count defender-damage)
               :unit/attacked-count (inc (:unit/attacked-count defender))})
 
-       (<= defender-count 0)
+       (= defender-count defender-damage)
        (conj [:db.fn/retractEntity (e defender)])
 
-       (and (> attacker-damage 0)
-            (> attacker-count 0))
-       (conj [:db/add (e attacker) :unit/count attacker-count])
+       (> attacker-count attacker-damage)
+       (conj {:db/id (e attacker)
+              :unit/count (- attacker-count attacker-damage)
+              :unit/attack-count (inc attack-count)})
 
-       (<= attacker-count 0)
-       (conj [:db.fn/retractEntity (e attacker)]))
-     ;; TODO: add attacked unit to attacked-units
-     ))
+       (= attacker-count attacker-damage)
+       (conj [:db.fn/retractEntity (e attacker)]))))
+  ([db game attacker-q attacker-r defender-q defender-r damage]
+   (let [attacker (checked-unit-at db game attacker-q attacker-r)
+         defender (checked-unit-at db game defender-q defender-r)]
+     (battle-tx db game attacker defender damage))))
+
+;; TODO: remove attack-tx (superceded by battle-tx)
+(defn attack-tx
+  ([db game attacker defender]
+   (check-can-attack db game attacker)
+   (check-in-range db attacker defender)
+   (battle-tx db game attacker defender (battle-damage db game attacker defender)))
   ([db game attacker-q attacker-r defender-q defender-r]
    (let [attacker (checked-unit-at db game attacker-q attacker-r)
          defender (checked-unit-at db game defender-q defender-r)]
