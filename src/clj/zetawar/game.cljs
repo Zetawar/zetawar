@@ -735,6 +735,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; AI Helpers
 
+
 (defn buildable-unit-types [db game]
   (qess '[:find ?ut
           :in $ ?g
@@ -799,6 +800,14 @@
                   [?f :faction/units ?u]
                   [(not= ?f ?f-arg)]]
                 db (e game) (e u-faction)))))
+
+(defn can-act? [db game unit]
+  (let [terrain (terrain-at db game (:unit/q unit) (:unit/r unit))]
+    (or (can-move? db game unit)
+        (and (can-attack? db game unit)
+             (> (enemies-in-range db game unit) 0))
+        (can-repair? db game unit)
+        (can-capture? db game unit terrain))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Setup
