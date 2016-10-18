@@ -42,20 +42,17 @@
         selected-terrain (game/terrain-at db game selected-q selected-r)
         targeted-unit (game/unit-at db game targeted-q targeted-r)
         targeted-terrain (game/terrain-at db game targeted-q targeted-r)]
-    (inspect [selected-q selected-r])
     {:tx (cond
            ;; selecting selected tile
            (and (= ev-q selected-q) (= ev-r selected-r))
            (cond-> []
              (and selected-q selected-r)
-             (->
-              (conj [:db/retract (e app) :app/selected-q selected-q]
-                    [:db/retract (e app) :app/selected-r selected-r]))
+             (conj [:db/retract (e app) :app/selected-q selected-q]
+                   [:db/retract (e app) :app/selected-r selected-r])
 
              (and targeted-q targeted-r)
-             (->
-              (conj [:db/retract (e app) :app/targeted-q targeted-q]
-                    [:db/retract (e app) :app/targeted-r targeted-r])))
+             (conj [:db/retract (e app) :app/targeted-q targeted-q]
+                   [:db/retract (e app) :app/targeted-r targeted-r]))
 
            ;; selecting targeted tile
            (and (= ev-q targeted-q) (= ev-r targeted-r))
@@ -90,9 +87,8 @@
                      :app/selected-q ev-q
                      :app/selected-r ev-r}]
              (and targeted-q targeted-r)
-             (->
-              (conj [:db/retract (e app) :app/targeted-q targeted-q]
-                    [:db/retract (e app) :app/targeted-r targeted-r])))
+             (conj [:db/retract (e app) :app/targeted-q targeted-q]
+                   [:db/retract (e app) :app/targeted-r targeted-r]))
 
            ;; selecting owned base with no unit selected
            (and terrain
@@ -103,9 +99,8 @@
                      :app/selected-q ev-q
                      :app/selected-r ev-r}]
              (and targeted-q targeted-r)
-             (->
-              (conj [:db/retract (e app) :app/targeted-q targeted-q]
-                    [:db/retract (e app) :app/targeted-r targeted-r])))
+             (conj [:db/retract (e app) :app/targeted-q targeted-q]
+                   [:db/retract (e app) :app/targeted-r targeted-r]))
 
            ;; selecting unselected friendly unit
            (and unit
@@ -118,9 +113,8 @@
                      :app/selected-q ev-q
                      :app/selected-r ev-r}]
              (and targeted-q targeted-r)
-             (->
-              (conj [:db/retract (e app) :app/targeted-q targeted-q]
-                    [:db/retract (e app) :app/targeted-r targeted-r]))))}))
+             (conj [:db/retract (e app) :app/targeted-q targeted-q]
+                   [:db/retract (e app) :app/targeted-r targeted-r])))}))
 
 (defmethod router/handle-event ::clear-selection
   [{:as handler-ctx :keys [db]} _]

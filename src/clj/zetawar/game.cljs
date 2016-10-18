@@ -26,6 +26,9 @@
 (defn game-by-id [db game-id]
   (find-by db :game/id game-id))
 
+(defn current-faction-color [game]
+  (get-in game [:game/current-faction :faction/color]))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Factions
 
@@ -805,7 +808,7 @@
   (let [terrain (terrain-at db game (:unit/q unit) (:unit/r unit))]
     (or (can-move? db game unit)
         (and (can-attack? db game unit)
-             (> (enemies-in-range db game unit) 0))
+             (> (count (enemies-in-range db game unit)) 0))
         (can-repair? db game unit)
         (can-capture? db game unit terrain))))
 
@@ -1013,7 +1016,8 @@
                                 :capture-round (:unit/capture-round unit))
 
                          (= dump-type :full)
-                         (assoc :move-count (:unit/move-count unit)
+                         (assoc :attack-count (:unit/attack-count unit)
+                                :move-count (:unit/move-count unit)
                                 :repaired (:unit/repaired unit)
                                 :round-built (:unit/round-built unit))
                          )))

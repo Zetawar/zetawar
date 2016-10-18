@@ -48,12 +48,13 @@
     (EmbeddedAIPlayer. faction-color ev-chan notify-pub player-chan conn)))
 
 (defmethod handle-event ::players/start-turn
-  [{:as player :keys [faction-color conn]} _]
+  [{:as player :keys [faction-color]} _]
   {:dispatch [[:zetawar.events.player/send-game-state faction-color]]})
 
 (defmethod handle-event ::players/apply-action
-  [{:as player :keys [conn faction-color]} _]
-  {:dispatch [[:zetawar.events.player/send-game-state faction-color]]})
+  [{:as player :keys [db faction-color]} [_ _ cur-faction-color]]
+  (when (= faction-color cur-faction-color)
+    {:dispatch [[:zetawar.events.player/send-game-state faction-color]]}))
 
 (defn base-score-fn [db game]
   (fn [base]
@@ -113,24 +114,23 @@
     (if (and (game/on-capturable-base? db game unit)
              (game/can-capture? db game unit base))
       [:zetawar.events.player/capture-base (:faction-color player) (:unit/q unit) (:unit/r unit)]
-      (if (first move)
+      (if (and (game/can-move? db game unit) (first move))
         (into [:zetawar.events.player/move-unit (:faction-color player)] (concat (:from move) (:to move)))
-        (when-let [enemy (choose-enemy db game unit)]
-          (when (game/can-attack? db game unit)
+        (when (game/can-attack? db game unit)
+          (when-let [enemy (choose-enemy db game unit)]
             [:zetawar.events.player/attack-unit
              (:faction-color player) (:unit/q unit) (:unit/r unit) (:unit/q enemy) (:unit/r enemy)]))))))
 
 (defmethod handle-event ::players/update-game-state
-  [{:as player :keys [conn faction-color]} [_ ev-faction-color game-state]]
-  (when (= ev-faction-color faction-color)
-    (let [new-conn (d/create-conn db/schema)
-          game-id (players/load-player-game-state! new-conn game-state)]
-      (reset! conn @new-conn)
-      (let [db @conn
-            game (game/game-by-id db game-id)]
-        (if-let [build-action (choose-build-action player db game)]
-          {:dispatch [build-action]}
-          (let [unit (choose-unit db game)]
-            (if-let [unit-action (and unit (choose-unit-action player db game unit))]
-              {:dispatch [unit-action]}
-              {:dispatch [[:zetawar.events.ui/end-turn faction-color]]})))))))
+  [{:as player :keys [conn faction-color]} [_ _ game-state]]
+  (let [new-conn (d/create-conn db/schema)
+        game-id (players/load-player-game-state! new-conn game-state)]
+    (reset! conn @new-conn)
+    (let [db @conn
+          game (game/game-by-id db game-id)]
+      (if-let [build-action (choose-build-action player db game)]
+        {:dispatch [build-action]}
+        (let [unit (choose-unit db game)]
+          (if-let [unit-action (and unit (choose-unit-action player db game unit))]
+            {:dispatch [unit-action]}
+            {:dispatch [[:zetawar.events.ui/end-turn faction-color]]}))))))
