@@ -1,0 +1,4 @@
+--exclude=*.svg
+--exclude=*.yml
+--exclude=target
+--exclude=vendor
