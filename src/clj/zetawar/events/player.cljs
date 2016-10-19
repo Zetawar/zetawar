@@ -31,3 +31,9 @@
 (defmethod router/handle-event ::build-unit
   [{:as handler-ctx :keys [db]} [_ faction-color q r unit-type-id]]
   {:dispatch [[:zetawar.events.game/build-unit q r unit-type-id]]})
+
+(defmethod router/handle-event ::end-turn
+  [{:as handler-ctx :keys [db]} _]
+  (let [app (app/root db)]
+    (when-not (:app/ai-turn-stepping app)
+      {:dispatch [[:zetawar.events.game/end-turn]]})))

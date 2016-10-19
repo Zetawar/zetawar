@@ -179,18 +179,17 @@
     {:dispatch [[::events.game/build-unit q r :unit-type.id/infantry]
                 [::clear-selection]]}))
 
-;; TODO: convert to pure function
-;; TODO: notify players (AIs) when turn ends
 (defmethod router/handle-event ::end-turn
   [{:as handler-ctx :keys [ev-chan notify-chan conn db]} _]
-  (let [game-id (app/current-game-id db)]
-    (router/dispatch ev-chan [::clear-selection])
-    (game/end-turn! conn game-id)
-    (let [game (game/game-by-id @conn game-id)
-          cur-faction (:game/current-faction game)]
-      (when (:faction/ai cur-faction)
-        (players/notify notify-chan [::players/start-turn (:faction/color cur-faction)])))
-    (app/set-url-game-state! @conn)))
+  (let [game (app/current-game db)
+        game-id (:game/game-id game)
+        next-faction-color (game/next-faction-color game)]
+    {:dispatch [[::clear-selection]
+                [::events.game/end-turn]]}))
+
+(defmethod router/handle-event ::set-url-game-state
+  [{:as handler-ctx :keys [ev-chan conn db]} _]
+  (app/set-url-game-state! @conn))
 
 (defmethod router/handle-event ::new-game
   [{:as handler-ctx :keys [ev-chan conn]} _]
@@ -199,15 +198,25 @@
     (app/start-new-game! handler-ctx :sterlings-aruba-multiplayer)))
 
 (defmethod router/handle-event ::toggle-faction-ai
-  [{:as handler-ctx :keys [ev-chan conn db]} [_ faction]]
-  (let [{:keys [game/factions]} (app/current-game db)
-        {:keys [faction/ai]} faction
-        other-factions (remove #(= (e faction) (e %)) factions)]
+  [{:as handler-ctx :keys [ev-chan conn db players]} [_ faction]]
+  (let [{:as app :keys [ai-turn-stepping]} (app/root db)
+        {:keys [game/factions]} (app/current-game db)
+        {:keys [faction/ai faction/color]} faction
+        other-factions (remove #(= (e faction) (e %)) factions)
+        tx [[:db/add (e faction) :faction/ai (not ai)]]
+        cur-player (@players color)
+        new-player (if ai
+                     (players/new-player handler-ctx ::players/human color)
+                     (players/new-player handler-ctx ::players/embedded-ai color))]
+    (players/stop cur-player)
+    (players/start new-player)
+    (swap! players color new-player)
     (if (and (not ai)
              (= (count other-factions)
                 (count (filter :faction/ai other-factions))))
-      {:dispatch [[::alert "Enabling AI on all factions is not yet supported."]]}
-      {:tx [[:db/add (e faction) :faction/ai (not ai)]]})))
+      {:tx (conj tx [:db/add (e app) :app/ai-turn-stepping (not ai-turn-stepping)])
+       :dispatch [[::alert "AI enabled for all factions, enabling AI turn stepping."]]}
+      {:tx tx})))
 
 (defmethod router/handle-event ::hide-win-dialog
   [{:as handler-ctx :keys [ev-chan db]} _]

@@ -52,8 +52,9 @@
   {:dispatch [[:zetawar.events.player/send-game-state faction-color]]})
 
 (defmethod handle-event ::players/apply-action
-  [{:as player :keys [db faction-color]} [_ _ cur-faction-color]]
-  (when (= faction-color cur-faction-color)
+  [{:as player :keys [db faction-color]} [_ _ cur-faction-color action-type]]
+  (when (and (= faction-color cur-faction-color)
+             (not= action-type :zetawar.actions/end-turn))
     {:dispatch [[:zetawar.events.player/send-game-state faction-color]]}))
 
 (defn base-score-fn [db game]
@@ -133,4 +134,4 @@
         (let [unit (choose-unit db game)]
           (if-let [unit-action (and unit (choose-unit-action player db game unit))]
             {:dispatch [unit-action]}
-            {:dispatch [[:zetawar.events.ui/end-turn faction-color]]}))))))
+            {:dispatch [[:zetawar.events.player/end-turn faction-color]]}))))))

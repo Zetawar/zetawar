@@ -29,6 +29,9 @@
 (defn current-faction-color [game]
   (get-in game [:game/current-faction :faction/color]))
 
+(defn next-faction-color [game]
+  (get-in game [:game/current-faction :faction/next-faction :faction/color]))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Factions
 
@@ -710,12 +713,9 @@
                  (= (:unit/capture-round unit) (:game/round game)))
           (into (end-turn-capture-tx db game unit))))))
 
-;; TODO: separate into end-turn! and end-turn-tx
 ;; TODO: cleanup
-(defn end-turn! [conn game-id]
-  (let [db @conn
-        game (game-by-id db game-id)
-        starting-faction (qe '[:find ?f
+(defn end-turn-tx [db game]
+  (let [starting-faction (qe '[:find ?f
                                :in $ ?g
                                :where
                                [?g :game/map ?m]
@@ -728,12 +728,17 @@
                 (inc (:game/round game))
                 (:game/round game))
         units (:faction/units cur-faction)]
-    (d/transact! conn (into [{:db/id (e next-faction)
-                              :faction/credits credits}
-                             {:db/id (e game)
-                              :game/round round
-                              :game/current-faction (e next-faction)}]
-                            (mapcat #(unit-end-turn-tx db game %) units)))))
+    (into [{:db/id (e next-faction)
+            :faction/credits credits}
+           {:db/id (e game)
+            :game/round round
+            :game/current-faction (e next-faction)}]
+          (mapcat #(unit-end-turn-tx db game %) units))))
+
+(defn end-turn! [conn game-id]
+  (let [db @conn
+        game (game-by-id db game-id)]
+    (d/transact! conn (end-turn-tx db game))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; AI Helpers
