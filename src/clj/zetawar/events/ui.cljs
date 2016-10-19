@@ -197,6 +197,7 @@
     (set! js/window.location.hash "")
     (app/start-new-game! handler-ctx :sterlings-aruba-multiplayer)))
 
+;; TODO: find a way to make player swapping nicer (maybe put in router?)
 (defmethod router/handle-event ::toggle-faction-ai
   [{:as handler-ctx :keys [ev-chan conn db players]} [_ faction]]
   (let [{:as app :keys [ai-turn-stepping]} (app/root db)
