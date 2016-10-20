@@ -2,7 +2,6 @@
   (:require
    [datascript.core :as d]
    [taoensso.timbre :as log]
-   [zetawar.ai :as ai]
    [zetawar.app :as app]
    [zetawar.db :refer [e qe qes qess]]
    [zetawar.events.game :as events.game]
@@ -123,14 +122,12 @@
         [targeted-q targeted-r] (app/targeted-hex db)]
     {:tx (cond-> []
            (and selected-q selected-r)
-           (->
-            (conj [:db/retract (e app) :app/selected-q selected-q]
-                  [:db/retract (e app) :app/selected-r selected-r]))
+           (conj [:db/retract (e app) :app/selected-q selected-q]
+                 [:db/retract (e app) :app/selected-r selected-r])
 
            (and targeted-q targeted-r)
-           (->
-            (conj [:db/retract (e app) :app/targeted-q targeted-q]
-                  [:db/retract (e app) :app/targeted-r targeted-r])))}))
+           (conj [:db/retract (e app) :app/targeted-q targeted-q]
+                 [:db/retract (e app) :app/targeted-r targeted-r]))}))
 
 (defmethod router/handle-event ::move-selected-unit
   [{:as handler-ctx :keys [db]} _]

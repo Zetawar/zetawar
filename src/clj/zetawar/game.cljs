@@ -93,6 +93,11 @@
       ffirst
       (or 0)))
 
+(defn income [db game faction]
+  (let [base-count (faction-base-count db faction)
+        credits-per-base (get-in game [:game/map :map/credits-per-base])]
+    (* base-count credits-per-base)))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Terrain
 
@@ -188,6 +193,10 @@
                       {:q q :r r})))
     unit))
 
+(defn unit-terrain [db game unit]
+  (let [{:keys [unit/q unit/r]} unit]
+    (terrain-at db game q r)))
+
 (defn unit-faction [db unit]
   (if (:faction/_units unit)
     (:faction/_units unit)
@@ -259,13 +268,13 @@
                                                  db (adjacent-idxs q r)))))
         adjacent-enemy? (memoize (fn adjacent-enemy? [q r]
                                    (transduce
-                                     (comp (map #(-> (d/datoms db :avet :unit/game-pos-idx %) first :e))
-                                           (remove nil?)
-                                           (map #(-> (d/datoms db :avet :faction/units %) first :e))
-                                           (map #(not= u-faction %)))
-                                     #(or %1 %2)
-                                     false
-                                     (adjacent-idxs q r))))
+                                    (comp (map #(-> (d/datoms db :avet :unit/game-pos-idx %) first :e))
+                                          (remove nil?)
+                                          (map #(-> (d/datoms db :avet :faction/units %) first :e))
+                                          (map #(not= u-faction %)))
+                                    #(or %1 %2)
+                                    false
+                                    (adjacent-idxs q r))))
         ;; TODO: rename moves arg to move-costs
         ;; TODO: track move costs instead of remaining movement
         expand-frontier (fn [frontier moves]
@@ -274,22 +283,22 @@
                               (let [costs (adjacent-costs q r)
                                     ;; TODO: simplify
                                     new-moves (into
-                                                {}
-                                                (comp
-                                                  (map (fn [[q r cost]]
-                                                         ;; moving into zone of control depletes movement
-                                                         (if (adjacent-enemy? q r)
-                                                           [q r (max movement cost)]
-                                                           [q r cost])))
-                                                  (remove nil?)
-                                                  (map (fn [[q r cost]]
-                                                         (let [new-movement (- movement cost)]
-                                                           (when (and (> new-movement (get moves [q r] -1))
-                                                                      (> new-movement (get frontier [q r] -1))
-                                                                      (> new-movement (get new-frontier [q r] -1)))
-                                                             [[q r] new-movement]))))
-                                                  (remove nil?))
-                                                costs)]
+                                               {}
+                                               (comp
+                                                (map (fn [[q r cost]]
+                                                       ;; moving into zone of control depletes movement
+                                                       (if (adjacent-enemy? q r)
+                                                         [q r (max movement cost)]
+                                                         [q r cost])))
+                                                (remove nil?)
+                                                (map (fn [[q r cost]]
+                                                       (let [new-movement (- movement cost)]
+                                                         (when (and (> new-movement (get moves [q r] -1))
+                                                                    (> new-movement (get frontier [q r] -1))
+                                                                    (> new-movement (get new-frontier [q r] -1)))
+                                                           [[q r] new-movement]))))
+                                                (remove nil?))
+                                               costs)]
                                 (recur remaining-frontier (conj new-frontier new-moves)))
                               new-frontier)))]
     (loop [frontier {start (get-in unit [:unit/type :unit-type/movement])} moves {}]
@@ -440,20 +449,20 @@
         attack-bonus (oonly (d/q '[:find ?a
                                    :in $ ?u ?t
                                    :where
-                                   [?u  :unit/type ?ut]
-                                   [?t  :terrain/type ?tt]
-                                   [?e  :terrain-effect/terrain-type ?tt]
-                                   [?e  :terrain-effect/unit-type ?ut]
-                                   [?e  :terrain-effect/attack-bonus ?a]]
+                                   [?u :unit/type ?ut]
+                                   [?t :terrain/type ?tt]
+                                   [?e :terrain-effect/terrain-type ?tt]
+                                   [?e :terrain-effect/unit-type ?ut]
+                                   [?e :terrain-effect/attack-bonus ?a]]
                                  db (e attacker) (e attacker-terrain)))
         armor-bonus (oonly (d/q '[:find ?d
                                   :in $ ?u ?t
                                   :where
-                                  [?u  :unit/type ?ut]
-                                  [?t  :terrain/type ?tt]
-                                  [?e  :terrain-effect/terrain-type ?tt]
-                                  [?e  :terrain-effect/unit-type ?ut]
-                                  [?e  :terrain-effect/armor-bonus ?d]]
+                                  [?u :unit/type ?ut]
+                                  [?t :terrain/type ?tt]
+                                  [?e :terrain-effect/terrain-type ?tt]
+                                  [?e :terrain-effect/unit-type ?ut]
+                                  [?e :terrain-effect/armor-bonus ?d]]
                                 db (e defender) (e defender-terrain)))]
     (js/Math.round
      (max 0 (* (:unit/count attacker)
@@ -686,34 +695,22 @@
 ;; x add credits <=
 ;; x update round number if appropriate <=
 
-(defn income [db game faction]
-  (let [base-count (faction-base-count db faction)
-        credits-per-base (get-in game [:game/map :map/credits-per-base])]
-    (* base-count credits-per-base)))
-
-;; TODO: cleanup
 (defn end-turn-capture-tx [db game unit]
-  (let [q (:unit/q unit)
-        r (:unit/r unit)
-        capture-round (:unit/capture-round unit)
+  (let [{:keys [unit/capture-round unit/q unit/r]} unit
         faction (unit-faction db unit)
         terrain (checked-base-at db game q r)]
     [[:db/add (e terrain) :terrain/owner (e faction)]
      [:db.fn/retractEntity (e unit)]]))
 
 (defn unit-end-turn-tx [db game unit]
-  (let [attack-count (:unit/attack-count unit)
-        move-count (:unit/move-count unit)]
-    (-> [[:db/add (e unit) :unit/repaired false]
-         [:db/add (e unit) :unit/move-count 0]
-         [:db/add (e unit) :unit/attack-count 0]
-         [:db/add (e unit) :unit/attacked-count 0]]
-        (cond->
-            (and (:unit/capturing unit)
-                 (= (:unit/capture-round unit) (:game/round game)))
-          (into (end-turn-capture-tx db game unit))))))
+  (let [{:keys [unit/capturing unit/capture-round]} unit]
+    (cond-> [[:db/add (e unit) :unit/repaired false]
+             [:db/add (e unit) :unit/move-count 0]
+             [:db/add (e unit) :unit/attack-count 0]
+             [:db/add (e unit) :unit/attacked-count 0]]
+      (and capturing (= capture-round (:game/round game)))
+      (into (end-turn-capture-tx db game unit)))))
 
-;; TODO: cleanup
 (defn end-turn-tx [db game]
   (let [starting-faction (qe '[:find ?f
                                :in $ ?g
@@ -724,14 +721,15 @@
         cur-faction (:game/current-faction game)
         next-faction (:faction/next-faction cur-faction)
         credits (+ (:faction/credits next-faction) (income db game next-faction))
-        round (if (= starting-faction next-faction)
-                (inc (:game/round game))
-                (:game/round game))
+        cur-round (:game/round game)
+        new-round (if (= starting-faction next-faction)
+                    (inc cur-round)
+                    cur-round)
         units (:faction/units cur-faction)]
     (into [{:db/id (e next-faction)
             :faction/credits credits}
            {:db/id (e game)
-            :game/round round
+            :game/round new-round
             :game/current-faction (e next-faction)}]
           (mapcat #(unit-end-turn-tx db game %) units))))
 

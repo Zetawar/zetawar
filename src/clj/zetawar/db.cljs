@@ -9,34 +9,55 @@
 ;; TODO: add unit/terrain
 (def schema
   {:db/ident                     {:db/unique      :db.unique/identity}
+
+   ;; App
    :app/game                     {:db/valueType   :db.type/ref}
+
+   ;; Game
    :game/id                      {:db/unique      :db.unique/identity}
    :game/map                     {:db/valueType   :db.type/ref}
    :game/factions                {:db/valueType   :db.type/ref
                                   :db/cardinality :db.cardinality/many
                                   :db/isComponent true}
    :game/current-faction         {:db/valueType   :db.type/ref}
+
+   ;; Faction
    :faction/next-faction         {:db/valueType   :db.type/ref}
    :faction/units                {:db/valueType   :db.type/ref
                                   :db/cardinality :db.cardinality/many
                                   :db/isComponent true
                                   :db/index       true}
+
+   ;; Unit
    :unit/type                    {:db/valueType   :db.type/ref}
    :unit/game-pos-idx            {:db/unique      :db.unique/identity}
    :unit/attacked-units          {:db/valueType   :db.type/ref
                                   :db/cardinality :db.cardinality/many}
+
+   ;; Unit type
    :unit-type/id                 {:db/unique      :db.unique/identity}
    :unit-type/name               {:db/unique      :db.unique/identity}
+
+
+   ;; Map
    :map/starting-faction         {:db/valueType   :db.type/ref}
    :map/terrains                 {:db/valueType   :db.type/ref
                                   :db/cardinality :db.cardinality/many
                                   :db/isComponent true}
+
+   ;; Terrain
    :terrain/owner                {:db/valueType   :db.type/ref}
    :terrain/type                 {:db/valueType   :db.type/ref}
    :terrain/game-pos-idx         {:db/unique      :db.unique/identity}
+
+   ;; Terrain type
    :terrain-type/id              {:db/unique      :db.unique/identity}
    :terrain-type/name            {:db/unique      :db.unique/identity}
+
+   ;; Unit strength
    :unit-strength/unit-type      {:db/valueType   :db.type/ref}
+
+   ;; Terrain effects
    :terrain-effect/unit-type     {:db/valueType   :db.type/ref
                                   :db/index       true}
    :terrain-effect/terrain-type  {:db/valueType   :db.type/ref

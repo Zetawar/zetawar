@@ -57,28 +57,26 @@
              (not= action-type :zetawar.actions/end-turn))
     {:dispatch [[:zetawar.events.player/send-game-state faction-color]]}))
 
-(defn base-score-fn [db game]
+(defn build-at-score-fn [db game]
   (fn [base]
     (rand)))
 
-(defn unit-type-score-fn [db game]
+(defn to-build-score-fn [db game]
   (fn [unit-type]
     (rand)))
 
 (defn choose-build-action [player db game]
-  (let [base-score (base-score-fn db game)
-        unit-type-score (unit-type-score-fn db game)
+  (let [build-at-score (build-at-score-fn db game)
+        to-build-score (to-build-score-fn db game)
         cur-faction (:game/current-faction game)
         base (->> (game/faction-bases db cur-faction)
                   (remove #(game/unit-at db game (:terrain/q %) (:terrain/r %)))
-                  (map (juxt identity base-score))
-                  (sort-by #(nth % 1))
-                  ffirst)
+                  (sort-by (memoize #(build-at-score %)))
+                  first)
         [base-q base-r] (game/terrain-hex base)
         unit-type (->> (game/buildable-unit-types db game)
-                       (map (juxt identity unit-type-score))
-                       (sort-by #(nth % 1))
-                       ffirst)]
+                       (sort-by (memoize #(to-build-score %)))
+                       first)]
     (when (and base unit-type (not (game/unit-at db game base-q base-r)))
       [:zetawar.events.player/build-unit
        (:faction-color player) base-q base-r (:unit-type/id unit-type)])))
@@ -93,34 +91,35 @@
          :game/current-faction
          :faction/units
          (filter #(game/can-act? db game %))
-         (map (juxt identity unit-score))
-         (sort-by #(nth % 1))
-         ffirst)))
+         (sort-by (memoize #(unit-score %)))
+         first)))
 
-(defn enemy-score-fn [db game unit]
-  (fn [enemy]
+(defn target-score-fn [db game unit]
+  (fn [target]
     (rand)))
 
-(defn choose-enemy [db game unit]
-  (let [enemy-score (enemy-score-fn db game unit)]
-    (->> (game/enemies-in-range db game unit )
-         (map (juxt identity enemy-score))
-         (sort-by #(nth % 1))
-         ffirst)))
+(defn chose-move [db game unit]
+  (let [closest-base (game/closest-capturable-base db game unit)]
+    (game/closest-move-to-hex db game unit (:terrain/q closest-base) (:terrain/r closest-base))))
 
-;; TODO: this is terrible, clean it up
+(defn choose-target [db game unit]
+  (let [target-score (target-score-fn db game unit)]
+    (->> (game/enemies-in-range db game unit)
+         (sort-by (memoize #(target-score %)))
+         first)))
+
 (defn choose-unit-action [player db game unit]
-  (let [base (game/closest-capturable-base db game unit)
-        move (game/closest-move-to-hex db game unit (:terrain/q base) (:terrain/r base))]
+  (let [terrain (game/unit-terrain db game unit)]
     (if (and (game/on-capturable-base? db game unit)
-             (game/can-capture? db game unit base))
+             (game/can-capture? db game unit terrain))
       [:zetawar.events.player/capture-base (:faction-color player) (:unit/q unit) (:unit/r unit)]
-      (if (and (game/can-move? db game unit) (first move))
+      (if-let [move (when (game/can-move? db game unit)
+                      (not-empty (chose-move db game unit)))]
         (into [:zetawar.events.player/move-unit (:faction-color player)] (concat (:from move) (:to move)))
-        (when (game/can-attack? db game unit)
-          (when-let [enemy (choose-enemy db game unit)]
-            [:zetawar.events.player/attack-unit
-             (:faction-color player) (:unit/q unit) (:unit/r unit) (:unit/q enemy) (:unit/r enemy)]))))))
+        (when-let [target (when (game/can-attack? db game unit)
+                            (choose-target db game unit))]
+          [:zetawar.events.player/attack-unit
+           (:faction-color player) (:unit/q unit) (:unit/r unit) (:unit/q target) (:unit/r target)])))))
 
 (defmethod handle-event ::players/update-game-state
   [{:as player :keys [conn faction-color]} [_ _ game-state]]

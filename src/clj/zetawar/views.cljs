@@ -6,7 +6,6 @@
    [datascript.core :as d]
    [posh.core :as posh]
    [reagent.core :as r]
-   [zetawar.ai :as ai]
    [zetawar.db :refer [e qe]]
    [zetawar.events.ui :as events.ui]
    [zetawar.game :as game]

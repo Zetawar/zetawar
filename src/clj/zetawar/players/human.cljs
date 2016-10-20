@@ -4,11 +4,9 @@
 
 (defrecord HumanPlayer [faction-color]
   players/Player
-  (start [player]
-    nil)
-  (stop [player]
-    nil))
+  (start [player])
+  (stop [player]))
 
 (defmethod players/new-player ::players/human
-  [{:as player-ctx :keys [notify-pub]} player-type faction-color]
+  [_ _ faction-color]
   (HumanPlayer. faction-color))
