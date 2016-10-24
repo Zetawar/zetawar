@@ -12,27 +12,34 @@
         game-state (game/get-game-state db game :full)]
     {:notify [[:zetawar.players/update-game-state faction-color game-state]]}))
 
-(defmethod router/handle-event ::move-unit
-  [{:as handler-ctx :keys [db]} [_ faction-color from-q from-r to-q to-r]]
-  {:dispatch [[:zetawar.events.game/move-unit from-q from-r to-q to-r]]})
+;; TODO: extract action => event logic into separate function
+;; TODO: should faction-color be part of the event vector too?
 
-(defmethod router/handle-event ::attack-unit
-  [{:as handler-ctx :keys [db]} [_ faction-color attacker-q attacker-r target-q target-r]]
-  {:dispatch [[:zetawar.events.game/attack-unit attacker-q attacker-r target-q target-r]]})
+(defmethod router/handle-event ::execute-action
+  [{:as handler-ctx :keys [db]} [_ action]]
+  (case (:action/type action)
+    :action.type/build-unit
+    (let [{:keys [action/q action/r action/unit-type-id]} action]
+      {:dispatch [[:zetawar.events.game/build-unit q r unit-type-id]]})
 
-(defmethod router/handle-event ::repair-unit
-  [{:as handler-ctx :keys [db]} [_ faction-color q r]]
-  {:dispatch [[:zetawar.events.game/repair-unit q r]]})
+    :action.type/move-unit
+    (let [{:keys [action/from-q action/from-r
+                  action/to-q action/to-r]} action]
+      {:dispatch [[:zetawar.events.game/move-unit from-q from-r to-q to-r]]})
 
-(defmethod router/handle-event ::capture-base
-  [{:as handler-ctx :keys [db]} [_ faction-color q r]]
-  {:dispatch [[:zetawar.events.game/capture-base q r]]})
+    :action.type/attack-unit
+    (let [{:keys [action/attacker-q action/attacker-r
+                  action/defender-q action/defender-r]} action]
+      {:dispatch [[:zetawar.events.game/attack-unit
+                   attacker-q attacker-r defender-q defender-r]]})
 
-(defmethod router/handle-event ::build-unit
-  [{:as handler-ctx :keys [db]} [_ faction-color q r unit-type-id]]
-  {:dispatch [[:zetawar.events.game/build-unit q r unit-type-id]]})
+    :action.type/repair-unit
+    (let [{:keys [action/q action/r]} action]
+      {:dispatch [[:zetawar.events.game/repair-unit q r]]})
 
-;; TODO: add execute-action
+    :action.type/capture-base
+    (let [{:keys [action/q action/r]} action]
+      {:dispatch [[:zetawar.events.game/capture-base q r]]})))
 
 (defmethod router/handle-event ::end-turn
   [{:as handler-ctx :keys [db]} _]

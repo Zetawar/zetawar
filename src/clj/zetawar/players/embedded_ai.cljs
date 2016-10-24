@@ -78,8 +78,11 @@
                        (sort-by (memoize #(to-build-score %)))
                        first)]
     (when (and base unit-type (not (game/unit-at db game base-q base-r)))
-      [:zetawar.events.player/build-unit
-       (:faction-color player) base-q base-r (:unit-type/id unit-type)])))
+      {:action/type :action.type/build-unit
+       :action/faction-color (:faction-color player)
+       :action/q base-q
+       :action/r base-r
+       :action/unit-type-id (:unit-type/id unit-type)})))
 
 (defn act-score-fn [db game]
   (fn [unit]
@@ -114,14 +117,35 @@
   (let [terrain (game/unit-terrain db game unit)]
     (if (and (game/on-capturable-base? db game unit)
              (game/can-capture? db game unit terrain))
-      [:zetawar.events.player/capture-base (:faction-color player) (:unit/q unit) (:unit/r unit)]
+      {:action/type :action.type/capture-base
+       :action/faction-color (:faction-color player)
+       :action/q (:unit/q unit)
+       :action/r (:unit/r unit)}
       (if-let [move (when (game/can-move? db game unit)
                       (not-empty (chose-move db game unit)))]
-        (into [:zetawar.events.player/move-unit (:faction-color player)] (concat (:from move) (:to move)))
+        (let [[from-q from-r] (:from move)
+              [to-q to-r] (:to move)]
+          {:action/type :action.type/move-unit
+           :action/faction-color (:faction-color player)
+           :action/from-q from-q
+           :action/from-r from-r
+           :action/to-q to-q
+           :action/to-r to-r})
         (when-let [target (when (game/can-attack? db game unit)
                             (choose-target db game unit))]
-          [:zetawar.events.player/attack-unit
-           (:faction-color player) (:unit/q unit) (:unit/r unit) (:unit/q target) (:unit/r target)])))))
+          {:action/type :action.type/attack-unit
+           :action/faction-color (:faction-color player)
+           :action/attacker-q (:unit/q unit)
+           :action/attacker-r (:unit/r unit)
+           :action/defender-q (:unit/q target)
+           :action/defender-r (:unit/r target)})))))
+
+(defn choose-action [player db game]
+  (if-let [build-action (choose-build-action player db game)]
+    build-action
+    (let [unit (choose-unit db game)]
+      (when-let [unit-action (and unit (choose-unit-action player db game unit))]
+        unit-action))))
 
 (defmethod handle-event ::players/update-game-state
   [{:as player :keys [conn faction-color]} [_ _ game-state]]
@@ -129,10 +153,8 @@
         game-id (players/load-player-game-state! new-conn game-state)]
     (reset! conn @new-conn)
     (let [db @conn
-          game (game/game-by-id db game-id)]
-      (if-let [build-action (choose-build-action player db game)]
-        {:dispatch [build-action]}
-        (let [unit (choose-unit db game)]
-          (if-let [unit-action (and unit (choose-unit-action player db game unit))]
-            {:dispatch [unit-action]}
-            {:dispatch [[:zetawar.events.player/end-turn faction-color]]}))))))
+          game (game/game-by-id db game-id)
+          action (choose-action player db game )]
+      (if action
+        {:dispatch [[:zetawar.events.player/execute-action action]]}
+        {:dispatch [[:zetawar.events.player/end-turn faction-color]]}))))

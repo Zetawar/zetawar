@@ -739,13 +739,13 @@
 
 (defn move-actions [db game unit]
   (map (fn [m]
-         (conj m [:action/type :action.type/move]))
+         (conj m [:action/type :action.type/move-unit]))
        (valid-moves db game unit)))
 
 (defn attack-actions [db game unit]
   (if (can-attack? db game unit)
     (map (fn [defender]
-           {:action/type :action.type/attack
+           {:action/type :action.type/attack-unit
             :action/attacker-q (:unit/q unit)
             :action/attacker-r (:unit/r unit)
             :action/defender-q (:unit/q defender)
@@ -755,7 +755,7 @@
 
 (defn repair-actions [db game unit]
   (if (can-repair? db game unit)
-    [{:action/type :action.type/repair
+    [{:action/type :action.type/repair-unit
       :action/q (:unit/q unit)
       :action/r (:unit/r unit)}]
     []))
@@ -764,7 +764,7 @@
   (let [{:keys [q r]} unit
         terrain (terrain-at db game q r)]
     (if (can-capture? db game unit terrain)
-      [{:action/type :action.type/capture
+      [{:action/type :action.type/capture-base
         :action/q q
         :action/r r}]
       [])))
@@ -778,12 +778,12 @@
 ;; TODO: make this a multimethod
 (defn action-tx [db game action]
   (case (:action-type action)
-    :action.type/move
+    :action.type/move-unit
     (let [{:keys [action/from-q action/from-r
                   action/to-q action/to-r]} action]
       (move-tx db game from-q from-r to-q to-r))
 
-    :action.type/attack
+    :action.type/attack-unit
     (let [{:keys [action/attacker-q action/attacker-r
                   action/defender-q action/defender-r
                   action/attacker-damage
@@ -792,11 +792,11 @@
         (battle-tx db game attacker-q attacker-r defender-q defender-r attacker-damage defender-damage)
         (attack-tx db game attacker-q attacker-r defender-q defender-r)))
 
-    :action.type/repair
+    :action.type/repair-unit
     (let [{:keys [action/q action/r]} action]
       (repair-tx db game q r))
 
-    :action.type/capture
+    :action.type/capture-base
     (let [{:keys [action/q action/r]} action]
       (repair-tx db game q r))))
 
