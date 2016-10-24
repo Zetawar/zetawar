@@ -328,12 +328,6 @@
     (throw (ex-info "Specified destination is not a valid move"
                     {:q q :r r}))))
 
-;; Moveable
-;; - member of active faction
-;; - not repaired
-;; - not capturing
-;; - hasn't attacked
-
 (defn check-can-move [db game unit]
   (check-unit-current db game unit)
   (when (= (:unit/round-built unit) (:game/round game))
@@ -360,12 +354,6 @@
 ;; - add legal moves to frontier
 ;; - repeat with updated movement points + frontier
 
-;; Move
-;; x check can move
-;; - check valid move
-;; x update coordinates
-;; x update move-count
-
 (defn teleport-tx [db game from-q from-r to-q to-r]
   (let [unit (checked-unit-at db game from-q from-r)]
     [{:db/id (e unit)
@@ -373,12 +361,13 @@
       :unit/q to-q
       :unit/r to-r}]))
 
+;; TODO: check move is valid
 (defn move-tx
+  "Returns a transaction that updates the unit's location and move count."
   ([db game unit to-terrain]
    (let [new-move-count (inc (get unit :unit/move-count 0))
          [to-q to-r] (terrain-hex to-terrain)]
      (check-can-move db game unit)
-     ;; TODO: check move is valid
      [{:db/id (e unit)
        :unit/game-pos-idx (game-pos-idx game to-q to-r)
        :unit/q to-q
@@ -559,6 +548,8 @@
       false)))
 
 (defn repair-tx
+  "Returns a transaction that increments unit count and sets the unit repaired
+  flag to true."
   ([db game unit]
    (check-can-repair db game unit)
    [{:db/id (e unit)
@@ -604,13 +595,9 @@
     (catch :default ex
       false)))
 
-;; Capture
-;; x check unit can capture
-;; x check base capturable
-;; x set state to capturing
-;; x set capture round
 
 (defn capture-tx
+  "Returns a transaction that sets the unit capturing flag and capture round."
   ([db game unit]
    (let [base (base-at db game (:unit/q unit) (:unit/r unit))
          round (:game/round game)]
@@ -639,14 +626,8 @@
       ;; TODO: include info about occupying unit
       (throw (ex-info "Base is occupied" {:q q :r r})))))
 
-;; Build
-;; x check base ownership
-;; x check credits
-;; x check space unoccupied
-;; x create new unit
-;; x update credits
-
 (defn build-tx
+  "Returns a transaction that creates a new unit and updates faction credits."
   ([db game q r unit-type-id]
    (let [base (checked-base-at db game q r)]
      (build-tx db game base unit-type-id)))
@@ -688,13 +669,6 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; End Turn
 
-;; End Turn
-;; x complete captures
-;; x clear per round unit flags
-;; x update active faction <=
-;; x add credits <=
-;; x update round number if appropriate <=
-
 (defn end-turn-capture-tx [db game unit]
   (let [{:keys [unit/capture-round unit/q unit/r]} unit
         faction (unit-faction db unit)
@@ -711,7 +685,10 @@
       (and capturing (= capture-round (:game/round game)))
       (into (end-turn-capture-tx db game unit)))))
 
-(defn end-turn-tx [db game]
+(defn end-turn-tx
+  "Return a transaction that completes captures, clears per round unit flags,
+  updates the current faction, adds faction credits, and updates the round."
+  [db game]
   (let [starting-faction (qe '[:find ?f
                                :in $ ?g
                                :where
