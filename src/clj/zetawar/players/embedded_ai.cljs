@@ -24,7 +24,7 @@
     (doseq [new-msg (:dispatch ret)]
       (router/dispatch ev-chan new-msg))))
 
-(defrecord EmbeddedAIPlayer [faction-color ev-chan notify-pub player-chan conn]
+(defrecord SimpleAIPlayer [faction-color ev-chan notify-pub player-chan conn]
   players/Player
   (start [player]
     (let [{:keys [notify-pub]} player]
@@ -45,16 +45,16 @@
   [{:as app-ctx :keys [ev-chan notify-pub]} player-type faction-color]
   (let [player-chan (async/chan (async/dropping-buffer 10))
         conn (d/create-conn db/schema)]
-    (EmbeddedAIPlayer. faction-color ev-chan notify-pub player-chan conn)))
+    (SimpleAIPlayer. faction-color ev-chan notify-pub player-chan conn)))
 
 (defmethod handle-event ::players/start-turn
   [{:as player :keys [faction-color]} _]
   {:dispatch [[:zetawar.events.player/send-game-state faction-color]]})
 
 (defmethod handle-event ::players/apply-action
-  [{:as player :keys [db faction-color]} [_ _ cur-faction-color action-type]]
-  (when (and (= faction-color cur-faction-color)
-             (not= action-type :zetawar.actions/end-turn))
+  [{:as player :keys [db faction-color]} [_ _ action]]
+  (when (and (= faction-color (:action/faction-color action))
+             (not= (:action/type action) :action.type/end-turn))
     {:dispatch [[:zetawar.events.player/send-game-state faction-color]]}))
 
 (defn build-at-score-fn [db game]
@@ -81,26 +81,28 @@
       [:zetawar.events.player/build-unit
        (:faction-color player) base-q base-r (:unit-type/id unit-type)])))
 
-(defn unit-score-fn [db game]
+(defn act-score-fn [db game]
   (fn [unit]
     (rand)))
 
 (defn choose-unit [db game]
-  (let [unit-score (unit-score-fn db game)]
+  (let [act-score (act-score-fn db game)]
     (->> game
          :game/current-faction
          :faction/units
-         (filter #(game/can-act? db game %))
-         (sort-by (memoize #(unit-score %)))
+         (filter #(game/unit-can-act? db game %))
+         (sort-by (memoize #(act-score %)))
          first)))
 
-(defn target-score-fn [db game unit]
-  (fn [target]
-    (rand)))
+;; TODO: generalize action code; return list of all actions and compute score for each
 
 (defn chose-move [db game unit]
   (let [closest-base (game/closest-capturable-base db game unit)]
     (game/closest-move-to-hex db game unit (:terrain/q closest-base) (:terrain/r closest-base))))
+
+(defn target-score-fn [db game unit]
+  (fn [target]
+    (rand)))
 
 (defn choose-target [db game unit]
   (let [target-score (target-score-fn db game unit)]

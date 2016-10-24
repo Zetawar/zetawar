@@ -468,8 +468,8 @@
          attacker-damage (if (in-range? db defender attacker)
                            (attack-damage db defender attacker defender-terrain attacker-terrain)
                            0)]
-     {::attacker-damage (min (:unit/count attacker) attacker-damage)
-      ::defender-damage (min (:unit/count defender) defender-damage)}))
+     [(min (:unit/count attacker) attacker-damage)
+      (min (:unit/count defender) defender-damage)]))
   ([db game attacker-q attacker-r defender-q defender-r]
    (let [attacker (checked-unit-at db game attacker-q attacker-r)
          defender (checked-unit-at db game defender-q defender-r)]
@@ -477,11 +477,10 @@
 
 ;; TODO: add attacked unit to unit/attacked-units
 (defn battle-tx
-  ([db game attacker defender damage]
+  ([db game attacker defender attacker-damage defender-damage]
    (check-can-attack db game attacker)
    (check-in-range db attacker defender)
-   (let [{:keys [::attacker-damage ::defender-damage]} damage
-         attacker-terrain (terrain-at db game (:unit/q attacker) (:unit/r attacker))
+   (let [attacker-terrain (terrain-at db game (:unit/q attacker) (:unit/r attacker))
          defender-terrain (terrain-at db game (:unit/q defender) (:unit/r defender))
          attack-count (get attacker :unit/attack-count 0)
          attacker-count (:unit/count attacker)
@@ -502,17 +501,17 @@
 
        (= attacker-count attacker-damage)
        (conj [:db.fn/retractEntity (e attacker)]))))
-  ([db game attacker-q attacker-r defender-q defender-r damage]
+  ([db game attacker-q attacker-r defender-q defender-r attacker-damage defender-damage]
    (let [attacker (checked-unit-at db game attacker-q attacker-r)
          defender (checked-unit-at db game defender-q defender-r)]
-     (battle-tx db game attacker defender damage))))
+     (battle-tx db game attacker defender attacker-damage defender-damage))))
 
 ;; TODO: remove attack-tx (superceded by battle-tx)
 (defn attack-tx
   ([db game attacker defender]
    (check-can-attack db game attacker)
    (check-in-range db attacker defender)
-   (battle-tx db game attacker defender (battle-damage db game attacker defender)))
+   (apply battle-tx db game attacker defender (battle-damage db game attacker defender)))
   ([db game attacker-q attacker-r defender-q defender-r]
    (let [attacker (checked-unit-at db game attacker-q attacker-r)
          defender (checked-unit-at db game defender-q defender-r)]
@@ -716,6 +715,92 @@
     (d/transact! conn (end-turn-tx db game))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Unit Actions
+
+(defn enemies-in-range [db game unit]
+  (let [u-faction (unit-faction db unit)]
+    (into []
+          (filter #(in-range? db unit %))
+          (qess '[:find ?u
+                  :in $ ?g ?f-arg
+                  :where
+                  [?g :game/factions ?f]
+                  [?f :faction/units ?u]
+                  [(not= ?f ?f-arg)]]
+                db (e game) (e u-faction)))))
+
+(defn unit-can-act? [db game unit]
+  (let [terrain (terrain-at db game (:unit/q unit) (:unit/r unit))]
+    (or (can-move? db game unit)
+        (and (can-attack? db game unit)
+             (> (count (enemies-in-range db game unit)) 0))
+        (can-repair? db game unit)
+        (can-capture? db game unit terrain))))
+
+(defn move-actions [db game unit]
+  (map (fn [m]
+         (conj m [:action/type :action.type/move]))
+       (valid-moves db game unit)))
+
+(defn attack-actions [db game unit]
+  (if (can-attack? db game unit)
+    (map (fn [defender]
+           {:action/type :action.type/attack
+            :action/attacker-q (:unit/q unit)
+            :action/attacker-r (:unit/r unit)
+            :action/defender-q (:unit/q defender)
+            :action/defender-r (:unit/r defender)})
+         (enemies-in-range db game unit))
+    []))
+
+(defn repair-actions [db game unit]
+  (if (can-repair? db game unit)
+    [{:action/type :action.type/repair
+      :action/q (:unit/q unit)
+      :action/r (:unit/r unit)}]
+    []))
+
+(defn capture-actions [db game unit]
+  (let [{:keys [q r]} unit
+        terrain (terrain-at db game q r)]
+    (if (can-capture? db game unit terrain)
+      [{:action/type :action.type/capture
+        :action/q q
+        :action/r r}]
+      [])))
+
+(defn unit-actions [db game unit]
+  (concat (move-actions db game unit)
+          (attack-actions db game unit)
+          (repair-actions db game unit)
+          (capture-actions db game unit)))
+
+;; TODO: make this a multimethod
+(defn action-tx [db game action]
+  (case (:action-type action)
+    :action.type/move
+    (let [{:keys [action/from-q action/from-r
+                  action/to-q action/to-r]} action]
+      (move-tx db game from-q from-r to-q to-r))
+
+    :action.type/attack
+    (let [{:keys [action/attacker-q action/attacker-r
+                  action/defender-q action/defender-r
+                  action/attacker-damage
+                  action/defender-damage]} action]
+      (if (and attacker-damage defender-damage)
+        (battle-tx db game attacker-q attacker-r defender-q defender-r attacker-damage defender-damage)
+        (attack-tx db game attacker-q attacker-r defender-q defender-r)))
+
+    :action.type/repair
+    (let [{:keys [action/q action/r]} action]
+      (repair-tx db game q r))
+
+    :action.type/capture
+    (let [{:keys [action/q action/r]} action]
+      (repair-tx db game q r))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; AI Helpers
 
 (defn buildable-unit-types [db game]
@@ -771,26 +856,6 @@
            closest))
        move))
    (valid-moves db game unit)))
-
-(defn enemies-in-range [db game unit]
-  (let [u-faction (unit-faction db unit)]
-    (into []
-          (filter #(in-range? db unit %))
-          (qess '[:find ?u
-                  :in $ ?g ?f-arg
-                  :where
-                  [?g :game/factions ?f]
-                  [?f :faction/units ?u]
-                  [(not= ?f ?f-arg)]]
-                db (e game) (e u-faction)))))
-
-(defn can-act? [db game unit]
-  (let [terrain (terrain-at db game (:unit/q unit) (:unit/r unit))]
-    (or (can-move? db game unit)
-        (and (can-attack? db game unit)
-             (> (count (enemies-in-range db game unit)) 0))
-        (can-repair? db game unit)
-        (can-capture? db game unit terrain))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Setup

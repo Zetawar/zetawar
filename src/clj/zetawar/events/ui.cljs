@@ -4,10 +4,9 @@
    [taoensso.timbre :as log]
    [zetawar.app :as app]
    [zetawar.db :refer [e qe qes qess]]
-   [zetawar.events.game :as events.game]
    [zetawar.game :as game]
-   [zetawar.router :as router]
    [zetawar.players :as players]
+   [zetawar.router :as router]
    [zetawar.util :refer [breakpoint inspect only oonly]]))
 
 (defmethod router/handle-event ::alert
@@ -133,7 +132,7 @@
   [{:as handler-ctx :keys [db]} _]
   (let [[from-q from-r] (app/selected-hex db)
         [to-q to-r] (app/targeted-hex db)]
-    {:dispatch [[::events.game/move-unit from-q from-r to-q to-r]
+    {:dispatch [[:zetawar.events.game/move-unit from-q from-r to-q to-r]
                 [::move-selection from-q from-r to-q to-r]]}))
 
 (defmethod router/handle-event ::move-selection
@@ -155,25 +154,25 @@
   [{:as handler-ctx :keys [db]} _]
   (let [[attacker-q attacker-r] (app/selected-hex db)
         [target-q target-r] (app/targeted-hex db)]
-    {:dispatch [[::events.game/attack-unit attacker-q attacker-r target-q target-r]
+    {:dispatch [[:zetawar.events.game/attack-unit attacker-q attacker-r target-q target-r]
                 [::clear-selection]]}))
 
 (defmethod router/handle-event ::repair-selected
   [{:as handler-ctx :keys [db]} _]
   (let [[q r] (app/selected-hex db)]
-    {:dispatch [[::events.game/repair-unit q r]
+    {:dispatch [[:zetawar.events.game/repair-unit q r]
                 [::clear-selection]]}))
 
 (defmethod router/handle-event ::capture-selected
   [{:as handler-ctx :keys [db]} _]
   (let [[q r] (app/selected-hex db)]
-    {:dispatch [[::events.game/capture-base q r]
+    {:dispatch [[:zetawar.events.game/capture-base q r]
                 [::clear-selection]]}))
 
 (defmethod router/handle-event ::build-unit
   [{:as handler-ctx :keys [db]} _]
   (let [[q r] (app/selected-hex db)]
-    {:dispatch [[::events.game/build-unit q r :unit-type.id/infantry]
+    {:dispatch [[:zetawar.events.game/build-unit q r :unit-type.id/infantry]
                 [::clear-selection]]}))
 
 (defmethod router/handle-event ::end-turn
@@ -182,7 +181,7 @@
         game-id (:game/game-id game)
         next-faction-color (game/next-faction-color game)]
     {:dispatch [[::clear-selection]
-                [::events.game/end-turn]]}))
+                [:zetawar.events.game/end-turn]]}))
 
 (defmethod router/handle-event ::set-url-game-state
   [{:as handler-ctx :keys [ev-chan conn db]} _]

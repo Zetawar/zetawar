@@ -32,6 +32,8 @@
   [{:as handler-ctx :keys [db]} [_ faction-color q r unit-type-id]]
   {:dispatch [[:zetawar.events.game/build-unit q r unit-type-id]]})
 
+;; TODO: add execute-action
+
 (defmethod router/handle-event ::end-turn
   [{:as handler-ctx :keys [db]} _]
   (let [app (app/root db)]
