@@ -625,6 +625,13 @@
       ;; TODO: include info about occupying unit
       (throw (ex-info "Base is occupied" {:q q :r r})))))
 
+(defn unoccupied? [db game q r]
+  (try
+    (check-unoccupied db game q r)
+    true
+    (catch :default ex
+      false)))
+
 (defn build-tx
   "Returns a transaction that creates a new unit and updates faction credits."
   ([db game q r unit-type-id]
@@ -715,7 +722,7 @@
     (d/transact! conn (end-turn-tx db game))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; Unit Actions
+;;; Actions
 
 (defn enemies-in-range [db game unit]
   (let [u-faction (unit-faction db unit)]
@@ -775,33 +782,9 @@
           (repair-actions db game unit)
           (capture-actions db game unit)))
 
-;; TODO: make this a multimethod
-(defn action-tx [db game action]
-  (case (:action-type action)
-    :action.type/move-unit
-    (let [{:keys [action/from-q action/from-r
-                  action/to-q action/to-r]} action]
-      (move-tx db game from-q from-r to-q to-r))
-
-    :action.type/attack-unit
-    (let [{:keys [action/attacker-q action/attacker-r
-                  action/defender-q action/defender-r
-                  action/attacker-damage
-                  action/defender-damage]} action]
-      (if (and attacker-damage defender-damage)
-        (battle-tx db game attacker-q attacker-r defender-q defender-r attacker-damage defender-damage)
-        (attack-tx db game attacker-q attacker-r defender-q defender-r)))
-
-    :action.type/repair-unit
-    (let [{:keys [action/q action/r]} action]
-      (repair-tx db game q r))
-
-    :action.type/capture-base
-    (let [{:keys [action/q action/r]} action]
-      (repair-tx db game q r))))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; AI Helpers
+(defn actionable-units [db game]
+  (let [units (get-in game [:game/current-faction :faction/units])]
+    (map #(unit-can-act? db game %) units)))
 
 (defn buildable-unit-types [db game]
   (qess '[:find ?ut
@@ -812,6 +795,61 @@
           [?ut :unit-type/cost ?cost]
           [(>= ?credits ?cost)]]
         db (e game)))
+
+(defn base-can-act? [db game base]
+  (let [{:keys [terrain/q terrain/r]} base]
+    (and (> 0 (count (buildable-unit-types db game)))
+         (unoccupied? db game q r))))
+
+(defn base-actions [db game base]
+  (let [{:keys [terrain/q terrain/r]} base]
+    (map (fn [ut]
+           {:action/type :action.type/build-unit
+            :action/q q
+            :action/r r
+            :action/unit-type-id (:unit-type/id ut)})
+         (buildable-unit-types db game))))
+
+(defn actionable-bases [db game]
+  (let [faction (:game/current-faction game)
+        bases (faction-bases db faction)]
+    (map #(base-can-act? db game %) bases)))
+
+(defn action-tx [db game action]
+  (case (:action/type action)
+    :action.type/build-unit
+    (let [{:keys [action/q action/r action/unit-type-id]} action]
+      (build-tx db game q r unit-type-id))
+
+    :action.type/move-unit
+    (let [{:keys [action/from-q action/from-r
+                  action/to-q action/to-r]} action]
+      (move-tx db game from-q from-r to-q to-r))
+
+    :action.type/attack-unit
+    (let [{:keys [action/attacker-q action/attacker-r
+                  action/defender-q action/defender-r
+                  action/attacker-damage
+                  action/defender-damage]} action]
+      (battle-tx db game
+                 attacker-q attacker-r
+                 defender-q defender-r
+                 attacker-damage
+                 defender-damage))
+
+    :action.type/repair-unit
+    (let [{:keys [action/q action/r]} action]
+      (repair-tx db game q r))
+
+    :action.type/capture-base
+    (let [{:keys [action/q action/r]} action]
+      (capture-tx db game q r))
+
+    :action.type/end-turn
+    (end-turn-tx db game)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; AI Helpers
 
 (defn capturable-bases [db game unit]
   (when (get-in unit [:unit/type :unit-type/can-capture])

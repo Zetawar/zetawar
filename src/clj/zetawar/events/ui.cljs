@@ -130,9 +130,17 @@
 
 (defmethod router/handle-event ::move-selected-unit
   [{:as handler-ctx :keys [db]} _]
-  (let [[from-q from-r] (app/selected-hex db)
+  (let [game (app/current-game db)
+        cur-faction-color (game/current-faction-color game)
+        [from-q from-r] (app/selected-hex db)
         [to-q to-r] (app/targeted-hex db)]
-    {:dispatch [[:zetawar.events.game/move-unit from-q from-r to-q to-r]
+    {:dispatch [[:zetawar.events.game/execute-action
+                 {:action/type :action.type/move-unit
+                  :action/faction-color cur-faction-color
+                  :action/from-q from-q
+                  :action/from-r from-r
+                  :action/to-q to-q
+                  :action/to-r to-r}]
                 [::move-selection from-q from-r to-q to-r]]}))
 
 (defmethod router/handle-event ::move-selection
@@ -152,36 +160,70 @@
 
 (defmethod router/handle-event ::attack-targeted
   [{:as handler-ctx :keys [db]} _]
-  (let [[attacker-q attacker-r] (app/selected-hex db)
-        [target-q target-r] (app/targeted-hex db)]
-    {:dispatch [[:zetawar.events.game/attack-unit attacker-q attacker-r target-q target-r]
+  (let [game (app/current-game db)
+        cur-faction-color (game/current-faction-color game)
+        [attacker-q attacker-r] (app/selected-hex db)
+        [defender-q defender-r] (app/targeted-hex db)
+        [attacker-damage defender-damage] (game/battle-damage db game
+                                                              attacker-q attacker-r
+                                                              defender-q defender-r)]
+    {:dispatch [[:zetawar.events.game/execute-action
+                 {:action/type :action.type/attack-unit
+                  :action/faction-color cur-faction-color
+                  :action/attacker-q attacker-q
+                  :action/attacker-r attacker-r
+                  :action/defender-q defender-q
+                  :action/defender-r defender-r
+                  :action/attacker-damage attacker-damage
+                  :action/defender-damage defender-damage}]
                 [::clear-selection]]}))
 
 (defmethod router/handle-event ::repair-selected
   [{:as handler-ctx :keys [db]} _]
-  (let [[q r] (app/selected-hex db)]
-    {:dispatch [[:zetawar.events.game/repair-unit q r]
+  (let [game (app/current-game db)
+        cur-faction-color (game/current-faction-color game)
+        [q r] (app/selected-hex db)]
+    {:dispatch [[:zetawar.events.game/execute-action
+                 {:action/type :action.type/repair-unit
+                  :action/faction-color cur-faction-color
+                  :action/q q
+                  :action/r r}]
                 [::clear-selection]]}))
 
 (defmethod router/handle-event ::capture-selected
   [{:as handler-ctx :keys [db]} _]
-  (let [[q r] (app/selected-hex db)]
-    {:dispatch [[:zetawar.events.game/capture-base q r]
+  (let [game (app/current-game db)
+        cur-faction-color (game/current-faction-color game)
+        [q r] (app/selected-hex db)]
+    {:dispatch [[:zetawar.events.game/execute-action
+                 {:action/type :action.type/capture-base
+                  :action/faction-color cur-faction-color
+                  :action/q q
+                  :action/r r}]
                 [::clear-selection]]}))
 
+;; TODO: remove unit type hard coding
 (defmethod router/handle-event ::build-unit
   [{:as handler-ctx :keys [db]} _]
-  (let [[q r] (app/selected-hex db)]
-    {:dispatch [[:zetawar.events.game/build-unit q r :unit-type.id/infantry]
+  (let [game (app/current-game db)
+        cur-faction-color (game/current-faction-color game)
+        [q r] (app/selected-hex db)]
+    {:dispatch [[:zetawar.events.game/execute-action
+                 {:action/type :action.type/build-unit
+                  :action/faction-color cur-faction-color
+                  :action/q q
+                  :action/r r
+                  :action/unit-type-id :unit-type.id/infantry}]
                 [::clear-selection]]}))
 
 (defmethod router/handle-event ::end-turn
   [{:as handler-ctx :keys [ev-chan notify-chan conn db]} _]
   (let [game (app/current-game db)
-        game-id (:game/game-id game)
-        next-faction-color (game/next-faction-color game)]
+        cur-faction-color (game/current-faction-color game)]
     {:dispatch [[::clear-selection]
-                [:zetawar.events.game/end-turn]]}))
+                [:zetawar.events.game/execute-action
+                 {:action/type :action.type/end-turn
+                  :action/faction-color cur-faction-color}]]}))
 
 (defmethod router/handle-event ::set-url-game-state
   [{:as handler-ctx :keys [ev-chan conn db]} _]

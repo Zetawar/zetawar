@@ -154,7 +154,7 @@
     (reset! conn @new-conn)
     (let [db @conn
           game (game/game-by-id db game-id)
-          action (choose-action player db game )]
-      (if action
-        {:dispatch [[:zetawar.events.player/execute-action action]]}
-        {:dispatch [[:zetawar.events.player/end-turn faction-color]]}))))
+          action (or (choose-action player db game)
+                     {:action/type :action.type/end-turn
+                      :action/faction-color faction-color})]
+      {:dispatch [[:zetawar.events.player/execute-action action]]})))
