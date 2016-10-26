@@ -110,6 +110,8 @@
       (game/unit? actor)
       (choose-unit-action db game actor))))
 
+;; TODO: consider adding choice context function (called before chosing actor + action)
+
 (defmethod handle-event ::players/update-game-state
   [{:as player :keys [conn faction-color]} [_ _ game-state]]
   (let [new-conn (d/create-conn db/schema)
