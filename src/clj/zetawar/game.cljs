@@ -724,97 +724,6 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Actions
 
-(defn enemies-in-range [db game unit]
-  (let [u-faction (unit-faction db unit)]
-    (into []
-          (filter #(in-range? db unit %))
-          (qess '[:find ?u
-                  :in $ ?g ?f-arg
-                  :where
-                  [?g :game/factions ?f]
-                  [?f :faction/units ?u]
-                  [(not= ?f ?f-arg)]]
-                db (e game) (e u-faction)))))
-
-(defn unit-can-act? [db game unit]
-  (let [terrain (terrain-at db game (:unit/q unit) (:unit/r unit))]
-    (or (can-move? db game unit)
-        (and (can-attack? db game unit)
-             (> (count (enemies-in-range db game unit)) 0))
-        (can-repair? db game unit)
-        (can-capture? db game unit terrain))))
-
-(defn move-actions [db game unit]
-  (map (fn [m]
-         (conj m [:action/type :action.type/move-unit]))
-       (valid-moves db game unit)))
-
-(defn attack-actions [db game unit]
-  (if (can-attack? db game unit)
-    (map (fn [defender]
-           {:action/type :action.type/attack-unit
-            :action/attacker-q (:unit/q unit)
-            :action/attacker-r (:unit/r unit)
-            :action/defender-q (:unit/q defender)
-            :action/defender-r (:unit/r defender)})
-         (enemies-in-range db game unit))
-    []))
-
-(defn repair-actions [db game unit]
-  (if (can-repair? db game unit)
-    [{:action/type :action.type/repair-unit
-      :action/q (:unit/q unit)
-      :action/r (:unit/r unit)}]
-    []))
-
-(defn capture-actions [db game unit]
-  (let [{:keys [q r]} unit
-        terrain (terrain-at db game q r)]
-    (if (can-capture? db game unit terrain)
-      [{:action/type :action.type/capture-base
-        :action/q q
-        :action/r r}]
-      [])))
-
-(defn unit-actions [db game unit]
-  (concat (move-actions db game unit)
-          (attack-actions db game unit)
-          (repair-actions db game unit)
-          (capture-actions db game unit)))
-
-(defn actionable-units [db game]
-  (let [units (get-in game [:game/current-faction :faction/units])]
-    (map #(unit-can-act? db game %) units)))
-
-(defn buildable-unit-types [db game]
-  (qess '[:find ?ut
-          :in $ ?g
-          :where
-          [?g  :game/current-faction ?f]
-          [?f  :faction/credits ?credits]
-          [?ut :unit-type/cost ?cost]
-          [(>= ?credits ?cost)]]
-        db (e game)))
-
-(defn base-can-act? [db game base]
-  (let [{:keys [terrain/q terrain/r]} base]
-    (and (> 0 (count (buildable-unit-types db game)))
-         (unoccupied? db game q r))))
-
-(defn base-actions [db game base]
-  (let [{:keys [terrain/q terrain/r]} base]
-    (map (fn [ut]
-           {:action/type :action.type/build-unit
-            :action/q q
-            :action/r r
-            :action/unit-type-id (:unit-type/id ut)})
-         (buildable-unit-types db game))))
-
-(defn actionable-bases [db game]
-  (let [faction (:game/current-faction game)
-        bases (faction-bases db faction)]
-    (map #(base-can-act? db game %) bases)))
-
 (defn action-tx [db game action]
   (case (:action/type action)
     :action.type/build-unit
@@ -850,6 +759,111 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; AI Helpers
+
+(defn buildable-unit-types [db game]
+  (qess '[:find ?ut
+          :in $ ?g
+          :where
+          [?g  :game/current-faction ?f]
+          [?f  :faction/credits ?credits]
+          [?ut :unit-type/cost ?cost]
+          [(>= ?credits ?cost)]]
+        db (e game)))
+
+(defn base-can-act? [db game base]
+  (let [{:keys [terrain/q terrain/r]} base]
+    (and (> (count (buildable-unit-types db game)) 0)
+         (unoccupied? db game q r))))
+
+(defn base-actions [db game base]
+  (let [{:keys [terrain/q terrain/r]} base]
+    (map (fn [ut]
+           {:action/type :action.type/build-unit
+            :action/q q
+            :action/r r
+            :action/unit-type-id (:unit-type/id ut)})
+         (buildable-unit-types db game))))
+
+(defn actionable-bases [db game]
+  (let [faction (:game/current-faction game)
+        bases (faction-bases db faction)]
+    (filter #(base-can-act? db game %) bases)))
+
+(defn enemies-in-range [db game unit]
+  (let [u-faction (unit-faction db unit)]
+    (into []
+          (filter #(in-range? db unit %))
+          (qess '[:find ?u
+                  :in $ ?g ?f-arg
+                  :where
+                  [?g :game/factions ?f]
+                  [?f :faction/units ?u]
+                  [(not= ?f ?f-arg)]]
+                db (e game) (e u-faction)))))
+
+(defn unit-can-act? [db game unit]
+  (let [terrain (terrain-at db game (:unit/q unit) (:unit/r unit))]
+    (or (can-move? db game unit)
+        (and (can-attack? db game unit)
+             (> (count (enemies-in-range db game unit)) 0))
+        (can-repair? db game unit)
+        (can-capture? db game unit terrain))))
+
+(defn move-actions [db game unit]
+  (if (can-move? db game unit)
+    (map (fn [move]
+           (let [[to-q to-r] (:to move)
+                 [from-q from-r] (:from move)]
+             (-> move
+                 (dissoc :to :from)
+                 (assoc :action/type :action.type/move-unit
+                        :action/to-q to-q
+                        :action/to-r to-r
+                        :action/from-q from-q
+                        :action/from-r from-r))))
+         (valid-moves db game unit))
+    []))
+
+(defn attack-actions [db game unit]
+  (if (can-attack? db game unit)
+    (map (fn [defender]
+           {:action/type :action.type/attack-unit
+            :action/attacker-q (:unit/q unit)
+            :action/attacker-r (:unit/r unit)
+            :action/defender-q (:unit/q defender)
+            :action/defender-r (:unit/r defender)})
+         (enemies-in-range db game unit))
+    []))
+
+(defn repair-actions [db game unit]
+  (if (can-repair? db game unit)
+    [{:action/type :action.type/repair-unit
+      :action/q (:unit/q unit)
+      :action/r (:unit/r unit)}]
+    []))
+
+(defn capture-actions [db game unit]
+  (let [{:keys [unit/q unit/r]} unit
+        terrain (terrain-at db game q r)]
+    (if (can-capture? db game unit terrain)
+      [{:action/type :action.type/capture-base
+        :action/q q
+        :action/r r}]
+      [])))
+
+(defn unit-actions [db game unit]
+  (concat (move-actions db game unit)
+          (attack-actions db game unit)
+          (repair-actions db game unit)
+          (capture-actions db game unit)))
+
+(defn actionable-units [db game]
+  (let [units (get-in game [:game/current-faction :faction/units])]
+    (filter #(unit-can-act? db game %) units)))
+
+(defn actionable-actors [db game]
+  (concat (actionable-units db game)
+          (actionable-bases db game)))
 
 (defn capturable-bases [db game unit]
   (when (get-in unit [:unit/type :unit-type/can-capture])

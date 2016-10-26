@@ -243,19 +243,19 @@
         {:keys [faction/ai faction/color]} faction
         other-factions (remove #(= (e faction) (e %)) factions)
         tx [[:db/add (e faction) :faction/ai (not ai)]]
-        cur-player (@players color)
+        cur-player (color @players)
         new-player (if ai
                      (players/new-player handler-ctx ::players/human color)
                      (players/new-player handler-ctx ::players/embedded-ai color))]
     (players/stop cur-player)
     (players/start new-player)
-    (swap! players color new-player)
+    (swap! players assoc color new-player)
     (if (and (not ai)
              (= (count other-factions)
                 (count (filter :faction/ai other-factions))))
       {:tx (conj tx [:db/add (e app) :app/ai-turn-stepping (not ai-turn-stepping)])
        :dispatch [[::alert "AI enabled for all factions, enabling AI turn stepping."]]}
-      {:tx tx})))
+      {:tx (conj tx [:db/add (e app) :app/ai-turn-stepping false])})))
 
 (defmethod router/handle-event ::hide-win-dialog
   [{:as handler-ctx :keys [ev-chan db]} _]

@@ -7,6 +7,7 @@
    [zetawar.data :as data]
    [zetawar.db :as db :refer [e qe qes qess]]
    [zetawar.game :as game]
+   [zetawar.hex :as hex]
    [zetawar.players :as players]
    [zetawar.router :as router])
   (:require-macros
@@ -57,95 +58,57 @@
              (not= (:action/type action) :action.type/end-turn))
     {:dispatch [[:zetawar.events.player/send-game-state faction-color]]}))
 
-(defn build-at-score-fn [db game]
-  (fn [base]
-    (rand)))
+(defn actor-score-fn [db game]
+  (fn [actor]
+    (cond
+      (game/unit? actor) (rand-int 100)
+      (game/base? actor) (+ (rand-int 100) 100))))
 
-(defn to-build-score-fn [db game]
-  (fn [unit-type]
-    (rand)))
+(defn choose-actor [db game]
+  (let [actor-score (memoize (actor-score-fn db game))]
+    (->> (game/actionable-actors db game)
+         (apply max-key actor-score))))
 
-(defn choose-build-action [player db game]
-  (let [build-at-score (build-at-score-fn db game)
-        to-build-score (to-build-score-fn db game)
-        cur-faction (:game/current-faction game)
-        base (->> (game/faction-bases db cur-faction)
-                  (remove #(game/unit-at db game (:terrain/q %) (:terrain/r %)))
-                  (sort-by (memoize #(build-at-score %)))
-                  first)
-        [base-q base-r] (game/terrain-hex base)
-        unit-type (->> (game/buildable-unit-types db game)
-                       (sort-by (memoize #(to-build-score %)))
-                       first)]
-    (when (and base unit-type (not (game/unit-at db game base-q base-r)))
-      {:action/type :action.type/build-unit
-       :action/faction-color (:faction-color player)
-       :action/q base-q
-       :action/r base-r
-       :action/unit-type-id (:unit-type/id unit-type)})))
+(defn base-action-score-fn [db game base]
+  (fn [action]
+    (rand-int 200)))
 
-(defn act-score-fn [db game]
-  (fn [unit]
-    (rand)))
+(defn choose-base-action [db game base]
+  (let [base-action-score (memoize (base-action-score-fn db game base))]
+    (->> (game/base-actions db game base)
+         (apply max-key base-action-score))))
 
-(defn choose-unit [db game]
-  (let [act-score (act-score-fn db game)]
-    (->> game
-         :game/current-faction
-         :faction/units
-         (filter #(game/unit-can-act? db game %))
-         (sort-by (memoize #(act-score %)))
-         first)))
-
-;; TODO: generalize action code; return list of all actions and compute score for each
-
-(defn chose-move [db game unit]
+(defn unit-action-score-fn [db game unit]
   (let [closest-base (game/closest-capturable-base db game unit)]
-    (game/closest-move-to-hex db game unit (:terrain/q closest-base) (:terrain/r closest-base))))
+    (fn [action]
+      (case (:action/type action)
+        :action.type/capture-base
+        200
 
-(defn target-score-fn [db game unit]
-  (fn [target]
-    (rand)))
+        :action.type/attack-unit
+        100
 
-(defn choose-target [db game unit]
-  (let [target-score (target-score-fn db game unit)]
-    (->> (game/enemies-in-range db game unit)
-         (sort-by (memoize #(target-score %)))
-         first)))
+        :action.type/move-unit
+        (let [[base-q base-r] (game/terrain-hex closest-base)
+              {:keys [action/to-q action/to-r]} action
+              base-distance (hex/distance base-q base-r to-q to-r)]
+          (- 100 base-distance))
 
-(defn choose-unit-action [player db game unit]
-  (let [terrain (game/unit-terrain db game unit)]
-    (if (and (game/on-capturable-base? db game unit)
-             (game/can-capture? db game unit terrain))
-      {:action/type :action.type/capture-base
-       :action/faction-color (:faction-color player)
-       :action/q (:unit/q unit)
-       :action/r (:unit/r unit)}
-      (if-let [move (when (game/can-move? db game unit)
-                      (not-empty (chose-move db game unit)))]
-        (let [[from-q from-r] (:from move)
-              [to-q to-r] (:to move)]
-          {:action/type :action.type/move-unit
-           :action/faction-color (:faction-color player)
-           :action/from-q from-q
-           :action/from-r from-r
-           :action/to-q to-q
-           :action/to-r to-r})
-        (when-let [target (when (game/can-attack? db game unit)
-                            (choose-target db game unit))]
-          {:action/type :action.type/attack-unit
-           :action/faction-color (:faction-color player)
-           :action/attacker-q (:unit/q unit)
-           :action/attacker-r (:unit/r unit)
-           :action/defender-q (:unit/q target)
-           :action/defender-r (:unit/r target)})))))
+        0))))
+
+(defn choose-unit-action [db game unit]
+  (let [unit-action-score (memoize (unit-action-score-fn db game unit))]
+    (->> (game/unit-actions db game unit)
+         (apply max-key unit-action-score))))
 
 (defn choose-action [player db game]
-  (if-let [build-action (choose-build-action player db game)]
-    build-action
-    (let [unit (choose-unit db game)]
-      (when-let [unit-action (and unit (choose-unit-action player db game unit))]
-        unit-action))))
+  (when-let [actor (choose-actor db game)]
+    (cond
+      (game/base? actor)
+      (choose-base-action db game actor)
+
+      (game/unit? actor)
+      (choose-unit-action db game actor))))
 
 (defmethod handle-event ::players/update-game-state
   [{:as player :keys [conn faction-color]} [_ _ game-state]]
