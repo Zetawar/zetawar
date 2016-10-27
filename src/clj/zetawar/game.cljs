@@ -232,6 +232,9 @@
     (ex-info message {:q q
                       :r r})))
 
+;; TODO: implement next-state
+;; TODO: implement checked-next-state
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Movement
 
