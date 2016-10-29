@@ -247,7 +247,7 @@
         cur-player (color @players)
         new-player (if ai
                      (players/new-player handler-ctx ::players/human color)
-                     (players/new-player handler-ctx ::players/embedded-ai color))]
+                     (players/new-player handler-ctx ::players/reference-ai color))]
     (players/stop cur-player)
     (players/start new-player)
     (swap! players assoc color new-player)

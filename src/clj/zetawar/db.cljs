@@ -33,11 +33,20 @@
    :unit/game-pos-idx            {:db/unique      :db.unique/identity}
    :unit/attacked-units          {:db/valueType   :db.type/ref
                                   :db/cardinality :db.cardinality/many}
+   ;; unit/state
 
    ;; Unit type
    :unit-type/id                 {:db/unique      :db.unique/identity}
    :unit-type/name               {:db/unique      :db.unique/identity}
+   ;; unit-type/initial-state
 
+   ;; Unit State
+   ;; - unit-state
+   ;;   - unit-state/index - integer representing index in unit type spec state vector
+   ;;   - unit-state/transititons
+   ;; - unit-state-transition
+   ;;   - unit-state-transition/action-type (-id?)
+   ;;   - unit-state-transition/new-state
 
    ;; Map
    :map/starting-faction         {:db/valueType   :db.type/ref}

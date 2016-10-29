@@ -4,10 +4,8 @@
    [datascript.core :as d]
    [taoensso.timbre :as log]
    [zetawar.app :as app]
-   [zetawar.data :as data]
-   [zetawar.db :as db :refer [e qe qes qess]]
+   [zetawar.db :as db]
    [zetawar.game :as game]
-   [zetawar.hex :as hex]
    [zetawar.players :as players]
    [zetawar.router :as router])
   (:require-macros
@@ -25,7 +23,7 @@
     (doseq [new-msg (:dispatch ret)]
       (router/dispatch ev-chan new-msg))))
 
-(defrecord SimpleAIPlayer [faction-color ev-chan notify-pub player-chan conn]
+(defrecord SimpleEmbeddedAIPlayer [faction-color ev-chan notify-pub player-chan conn fns]
   players/Player
   (start [player]
     (let [{:keys [notify-pub]} player]
@@ -42,11 +40,10 @@
   (stop [player]
     (async/close! player-chan)))
 
-(defmethod players/new-player ::players/embedded-ai
-  [{:as app-ctx :keys [ev-chan notify-pub]} player-type faction-color]
+(defn new-simple-embedded-ai-player [faction-color ev-chan notify-pub fns]
   (let [player-chan (async/chan (async/dropping-buffer 10))
         conn (d/create-conn db/schema)]
-    (SimpleAIPlayer. faction-color ev-chan notify-pub player-chan conn)))
+    (SimpleEmbeddedAIPlayer. faction-color ev-chan notify-pub player-chan conn fns)))
 
 (defmethod handle-event ::players/start-turn
   [{:as player :keys [faction-color]} _]
@@ -58,68 +55,53 @@
              (not= (:action/type action) :action.type/end-turn))
     {:dispatch [[:zetawar.events.player/send-game-state faction-color]]}))
 
-(defn actor-score-fn [db game]
-  (fn [actor]
-    (cond
-      (game/unit? actor) (rand-int 100)
-      (game/base? actor) (+ (rand-int 100) 100))))
+(declare ^:dynamic *action-ctx*)
 
-(defn choose-actor [db game]
-  (let [actor-score (memoize (actor-score-fn db game))]
+(declare ^:dynamic *actor-score-fn*)
+
+(defn choose-actor [db game ctx]
+  (let [actor-score (memoize (*actor-score-fn* db game ctx))]
     (->> (game/actionable-actors db game)
          (apply max-key actor-score))))
 
-(defn base-action-score-fn [db game base]
-  (fn [action]
-    (rand-int 200)))
+(declare ^:dynamic *base-action-score-fn*)
 
-(defn choose-base-action [db game base]
-  (let [base-action-score (memoize (base-action-score-fn db game base))]
+(defn choose-base-action [db game ctx base]
+  (let [base-action-score (memoize (*base-action-score-fn* db game ctx base))]
     (->> (game/base-actions db game base)
          (apply max-key base-action-score))))
 
-(defn unit-action-score-fn [db game unit]
-  (let [closest-base (game/closest-capturable-base db game unit)]
-    (fn [action]
-      (case (:action/type action)
-        :action.type/capture-base
-        200
+(declare ^:dynamic *unit-action-score-fn*)
 
-        :action.type/attack-unit
-        100
-
-        :action.type/move-unit
-        (let [[base-q base-r] (game/terrain-hex closest-base)
-              {:keys [action/to-q action/to-r]} action
-              base-distance (hex/distance base-q base-r to-q to-r)]
-          (- 100 base-distance))
-
-        0))))
-
-(defn choose-unit-action [db game unit]
-  (let [unit-action-score (memoize (unit-action-score-fn db game unit))]
+(defn choose-unit-action [db game ctx unit]
+  (let [unit-action-score (memoize (*unit-action-score-fn* db game ctx unit))]
     (->> (game/unit-actions db game unit)
          (apply max-key unit-action-score))))
 
 (defn choose-action [player db game]
-  (when-let [actor (choose-actor db game)]
-    (cond
-      (game/base? actor)
-      (choose-base-action db game actor)
+  (let [ctx (*action-ctx* db game)
+        actor (choose-actor db game ctx)]
+    (when actor
+      (cond
+        (game/base? actor)
+        (choose-base-action db game ctx actor)
 
-      (game/unit? actor)
-      (choose-unit-action db game actor))))
-
-;; TODO: consider adding choice context function (called before chosing actor + action)
+        (game/unit? actor)
+        (choose-unit-action db game ctx actor)))))
 
 (defmethod handle-event ::players/update-game-state
-  [{:as player :keys [conn faction-color]} [_ _ game-state]]
+  [{:as player :keys [conn faction-color fns]} [_ _ game-state]]
   (let [new-conn (d/create-conn db/schema)
         game-id (players/load-player-game-state! new-conn game-state)]
     (reset! conn @new-conn)
     (let [db @conn
           game (game/game-by-id db game-id)
-          action (or (choose-action player db game)
+          {:keys [action-ctx actor-score-fn base-action-score-fn unit-action-score-fn]} fns
+          action (or (binding [*action-ctx* action-ctx
+                               *actor-score-fn* actor-score-fn
+                               *base-action-score-fn* base-action-score-fn
+                               *unit-action-score-fn* unit-action-score-fn]
+                       (choose-action player db game))
                      {:action/type :action.type/end-turn
                       :action/faction-color faction-color})]
       {:dispatch [[:zetawar.events.player/execute-action action]]})))
