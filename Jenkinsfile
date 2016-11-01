@@ -52,8 +52,9 @@ def notifyBuild(String buildStatus = 'STARTED') {
 
   // Send notifications
   emailext (
-      subject: subject,
-      body: details,
-      to: recipients
-    )
+    to: recipients,
+    replyTo: env.ZETAWAR_REPLY_TO,
+    subject: subject,
+    body: details,
+  )
 }
