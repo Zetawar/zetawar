@@ -1,4 +1,4 @@
-# -*- mode: groovy; -*-
+// -*- mode: groovy; -*-
 
 node {
   currentBuild.result = "SUCCESS"
