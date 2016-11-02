@@ -51,6 +51,7 @@ Check console output at ${env.BUILD_URL} to view the results.
     color = 'RED'
     colorCode = '#FF0000'
   }
+  // Send notifications
 
   // Override values for public builds
   if (PUBLIC_BUILD) {
@@ -65,15 +66,24 @@ build notifications when you filled out the Zetawar Kickstarter survey. If you
 no longer want to receive build notifications or would like to receive them less
 frequently (daily or weekly are the available options) email builds@zetawar.com.
 """
-  }
 
-  // Send notifications
-  //if (!PUBLIC_BUILD || buildStatus == 'SUCCESSFUL') {
+    if (buildStatus == 'SUCCESSFUL') {
+      emailext (
+        to: recipients,
+        replyTo: REPLY_TO,
+        subject: subject,
+        body: details,
+      )
+    }
+  } else {
     emailext (
       to: recipients,
       replyTo: REPLY_TO,
       subject: subject,
       body: details,
     )
+  }
+
+  //if (!PUBLIC_BUILD || buildStatus == 'SUCCESSFUL') {
   //}
 }
