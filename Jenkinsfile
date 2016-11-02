@@ -1,7 +1,7 @@
 // -*- mode: groovy; -*-
 
 node {
-  currentBuild.result = "SUCCESS"
+  currentBuild.result = 'SUCCESSFUL'
 
   try {
     stage 'Checkout'
@@ -57,25 +57,17 @@ Check console output at ${env.BUILD_URL} to view the results.
   if (PUBLIC_BUILD) {
     subject = "A new Zetawar build is available!"
     summary = "${subject} (http://dev.zetawar.com/)"
-    details = """${subject}
-
-You can find it at http://dev.zetawar.com/.
+    details = """${subject} You can find it at http://dev.zetawar.com/. Login as
+${DEV_SITE_USER}:${DEV_SITE_PASSWORD}.
 
 You're receiving this email because you indicated you would like to receive
 build notifications when you filled out the Zetawar Kickstarter survey. If you
 no longer want to receive build notifications or would like to receive them less
 frequently (daily or weekly are the available options) email builds@zetawar.com.
 """
+  }
 
-    if (buildStatus == 'SUCCESSFUL') {
-      emailext (
-        to: recipients,
-        replyTo: REPLY_TO,
-        subject: subject,
-        body: details,
-      )
-    }
-  } else {
+  if (!PUBLIC_BUILD || buildStatus == 'SUCCESSFUL') {
     emailext (
       to: recipients,
       replyTo: REPLY_TO,
@@ -83,7 +75,4 @@ frequently (daily or weekly are the available options) email builds@zetawar.com.
       body: details,
     )
   }
-
-  //if (!PUBLIC_BUILD || buildStatus == 'SUCCESSFUL') {
-  //}
 }
