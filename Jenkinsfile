@@ -1,7 +1,7 @@
 // -*- mode: groovy; -*-
 
 node {
-  currentBuild.result = 'SUCCESSFUL'
+  currentBuild.result = 'SUCCESS'
 
   try {
     stage 'Checkout'
@@ -17,7 +17,7 @@ node {
       sh "./bin/deploy -b dev.zetawar.com"
 
   } catch (err) {
-    currentBuild.result = "FAILURE"
+    currentBuild.result = 'FAILURE'
     throw err
   } finally {
     notifyBuild(currentBuild.result)
@@ -26,7 +26,7 @@ node {
 
 def notifyBuild(String buildStatus = 'STARTED') {
   // build status of null means successful
-  buildStatus =  buildStatus ?: 'SUCCESSFUL'
+  buildStatus =  buildStatus ?: 'SUCCESS'
 
   // Default values
   def colorName = 'RED'
@@ -43,10 +43,10 @@ Check console output at ${env.BUILD_URL} to view the results.
   if (buildStatus == 'STARTED') {
     color = 'YELLOW'
     colorCode = '#FFFF00'
-  } else if (buildStatus == 'SUCCESSFUL') {
+  } else if (buildStatus == 'SUCCESS') {
     color = 'GREEN'
     colorCode = '#00FF00'
-    recipients = SUCCESSFUL_RECIPIENTS
+    recipients = SUCCESS_RECIPIENTS
   } else {
     color = 'RED'
     colorCode = '#FF0000'
@@ -67,7 +67,7 @@ frequently (daily or weekly are the available options) email builds@zetawar.com.
 """
   }
 
-  if (!PUBLIC_BUILD || buildStatus == 'SUCCESSFUL') {
+  if (!PUBLIC_BUILD || buildStatus == 'SUCCESS') {
     emailext (
       to: recipients,
       replyTo: REPLY_TO,
