@@ -68,12 +68,12 @@ frequently (daily or weekly are the available options) email builds@zetawar.com.
   }
 
   // Send notifications
-  if (!PUBLIC_BUILD || buildStatus == 'SUCCESSFUL') {
+  //if (!PUBLIC_BUILD || buildStatus == 'SUCCESSFUL') {
     emailext (
       to: recipients,
       replyTo: REPLY_TO,
       subject: subject,
       body: details,
     )
-  }
+  //}
 }
