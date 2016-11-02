@@ -31,13 +31,13 @@ def notifyBuild(String buildStatus = 'STARTED') {
   // Default values
   def colorName = 'RED'
   def colorCode = '#FF0000'
-  def recipients = env.ZETAWAR_UNSUCCESSFUL_RECIPIENTS
-  def subject = "${env.PROJECT_NAME} - Build # ${env.BUILD_NUMBER} - ${env.BUILD_STATUS}!"
+  def recipients = UNSUCCESSFUL_RECIPIENTS
+  def subject = "${env.JOB_NAME} - Build # ${env.BUILD_NUMBER} - ${buildStatus}!"
   def summary = "${subject} (${env.BUILD_URL})"
-  def details = """${env.PROJECT_NAME} - Build # ${env.BUILD_NUMBER} - ${env.BUILD_STATUS}
+  def details = """${env.JOB_NAME} - Build # ${env.BUILD_NUMBER} - ${buildStatus}
 
-  Check console output at ${env.BUILD_URL} to view the results.
-  """
+Check console output at ${env.BUILD_URL} to view the results.
+"""
 
   // Override default values based on build status
   if (buildStatus == 'STARTED') {
