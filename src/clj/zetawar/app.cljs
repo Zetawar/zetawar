@@ -9,7 +9,10 @@
    [zetawar.db :refer [e find-by qe qes qess]]
    [zetawar.game :as game]
    [zetawar.players :as players]
-   [zetawar.util :refer [breakpoint inspect]]))
+   [zetawar.util :as util :refer [breakpoint inspect]]))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; DB Accessors
 
 (defn root [db]
   (qe '[:find ?a
@@ -23,31 +26,21 @@
         [_ :app/game ?g]]
       db))
 
-(defn create-players! [{:as app-ctx :keys [conn players]}]
-  (let [factions (qess '[:find ?f
-                         :where
-                         [_  :app/game ?g]
-                         [?g :game/factions ?f]]
-                       @conn)]
-    (doseq [{:keys [faction/ai faction/color]} factions]
-      (let [player-type (if ai ::players/reference-ai ::players/human)
-            player (players/new-player app-ctx player-type color)]
-        (players/start player)
-        (swap! players assoc color player)))))
+(defn current-game-id [db]
+  (:game/id (current-game db)))
 
-(defn start-new-game! [{:as app-ctx :keys [conn players]} scenario-id]
-  (let [game (current-game @conn)]
-    (when-not game
-      (game/load-specs! conn))
-    (let [scenario-def (data/scenario-definitions scenario-id)
-          game-id (game/load-scenario! conn data/map-definitions scenario-def)
-          app-eid (or (some-> (root @conn) e) -101)]
-      (d/transact! conn (cond-> [{:db/id app-eid
-                                  :app/game [:game/id game-id]}]
-                          game (conj [:db.fn/retractEntity (e game)])))
-      (if players
-        (create-players! app-ctx)
-        (log/warnf "Skipping player creation for tests")))))
+(defn selected-hex [db]
+  (let [{:keys [app/selected-q app/selected-r]} (root db)]
+    [selected-q selected-r]))
+
+(defn targeted-hex [db]
+  (let [{:keys [app/targeted-q app/targeted-r]} (root db)]
+    [targeted-q targeted-r]))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Game State Encoding
+
+;; TODO: move to encoding or serialization ns?
 
 (defn encode-game-state [game-state]
   (let [writer (transit/writer :json)]
@@ -66,19 +59,59 @@
                                js/lzwDecode)]
     (transit/read reader transit-game-state)))
 
-(defn load-encoded-game-state! [{:as app-ctx :keys [conn players]} encoded-game-state]
-  (game/load-specs! conn)
-  (let [game-state (decode-game-state encoded-game-state)
-        game-id (game/load-game-state! conn
-                                       data/map-definitions
-                                       data/scenario-definitions
-                                       game-state)]
-    (d/transact! conn [{:db/id -1
-                        :app/game [:game/id game-id]}])
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Player Setup
 
-    (if players
-      (create-players! app-ctx)
-      (log/warnf "Skipping player creation for tests"))))
+(defn create-players! [{:as app-ctx :keys [conn players]}]
+  (let [factions (qess '[:find ?f
+                         :where
+                         [_  :app/game ?g]
+                         [?g :game/factions ?f]]
+                       @conn)]
+    (doseq [{:keys [faction/ai faction/color]} factions]
+      (let [player-type (if ai ::players/reference-ai ::players/human)
+            player (players/new-player app-ctx player-type color)]
+        (players/start player)
+        (swap! players assoc color player)))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Game Setup
+
+(defn start-new-game!
+  ([{:as app-ctx :keys [conn players]} scenario-id]
+   (start-new-game! app-ctx data/map-definitions data/scenario-definitions scenario-id))
+  ([{:as app-ctx :keys [conn players]} map-definitions scenario-definitions scenario-id]
+   (let [game (current-game @conn)]
+     (when-not game
+       (game/load-specs! conn))
+     (let [scenario-def (scenario-definitions scenario-id)
+           game-id (game/load-scenario! conn map-definitions scenario-def)
+           app-eid (or (some-> (root @conn) e) -101)]
+       (d/transact! conn (cond-> [{:db/id app-eid
+                                   :app/game [:game/id game-id]}]
+                           game (conj [:db.fn/retractEntity (e game)])))
+       ;; TODO: remove test specific code
+       (if players
+         (create-players! app-ctx)
+         (log/warnf "Skipping player creation for tests"))))))
+
+(defn load-encoded-game-state!
+  ([{:as app-ctx :keys [conn players]} encoded-game-state]
+   (load-encoded-game-state! app-ctx data/map-definitions data/scenario-definitions encoded-game-state))
+  ([{:as app-ctx :keys [conn players]} map-definitions scenario-definitions encoded-game-state]
+   (game/load-specs! conn)
+   (let [game-state (decode-game-state encoded-game-state)
+         game-id (game/load-game-state! conn
+                                        map-definitions
+                                        scenario-definitions
+                                        game-state)]
+     (d/transact! conn [{:db/id -1
+                         :app/game [:game/id game-id]}])
+
+     ;; TODO: remove test specific code
+     (if players
+       (create-players! app-ctx)
+       (log/warnf "Skipping player creation for tests")))))
 
 ;; TODO: put URL in paste buffer
 (defn set-url-game-state! [db]
@@ -86,20 +119,3 @@
                                 (game/get-game-state db)
                                 encode-game-state)]
     (set! js/window.location.hash encoded-game-state)))
-
-(defn current-game-id [db]
-  (:game/id (current-game db)))
-
-(defn selected-hex [db]
-  (first (d/q '[:find ?q ?r
-                :where
-                [?a :app/selected-q ?q]
-                [?a :app/selected-r ?r]]
-              db)))
-
-(defn targeted-hex [db]
-  (first (d/q '[:find ?q ?r
-                :where
-                [?a :app/targeted-q ?q]
-                [?a :app/targeted-r ?r]]
-              db)))
