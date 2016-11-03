@@ -17,10 +17,9 @@
    [devcards.core :refer [defcard defcard-rg]]))
 
 (defcard-rg unit-selected
-  (let [system (component/start (new-system))
-        {:keys [app]} system
-        conn (get-in system [:datascript :conn])]
-    (app/start-new-game! conn :sterlings-aruba-multiplayer)
+  (let [{:keys [app]} (component/start (new-system))
+        {:keys [conn]} app]
+    (app/start-new-game! app :sterlings-aruba-multiplayer)
     (d/transact! conn [{:db/id (-> @conn app/root e)
                         :app/selected-q 2
                         :app/selected-r 2}])
@@ -33,10 +32,9 @@
       [views/board app]]]))
 
 (defcard-rg moved-unit-selected
-  (let [system (component/start (new-system))
-        {:keys [app]} system
-        conn (get-in system [:datascript :conn])]
-    (app/start-new-game! conn :sterlings-aruba-multiplayer)
+  (let [{:keys [app]} (component/start (new-system))
+        {:keys [conn]} app]
+    (app/start-new-game! app :sterlings-aruba-multiplayer)
     (let [game (app/current-game @conn)
           unit (game/unit-at @conn game 2 2)]
       (d/transact! conn [{:db/id (-> @conn app/root e)
@@ -52,17 +50,16 @@
       [views/board app]]]))
 
 (defcard-rg moved-unit-with-attacks
-  (let [system (component/start (new-system))
-        {:keys [app]} system
-        conn (get-in system [:datascript :conn])]
-    (app/start-new-game! conn :sterlings-aruba-multiplayer)
+  (let [{:keys [app]} (component/start (new-system))
+        {:keys [conn]} app]
+    (app/start-new-game! app :sterlings-aruba-multiplayer)
     (let [game (app/current-game @conn)
           unit (game/unit-at @conn game 2 2)]
-      (d/transact! conn (concat (game/teleport-tx @conn game 2 2 6 8)
-                                [{:db/id (-> @conn app/root e)
-                                  :app/selected-q 6
-                                  :app/selected-r 8}
-                                 [:db/add (e unit) :unit/move-count 1]])))
+      (d/transact! conn (into (game/teleport-tx @conn game 2 2 6 8)
+                              [{:db/id (-> @conn app/root e)
+                                :app/selected-q 6
+                                :app/selected-r 8}
+                               [:db/add (e unit) :unit/move-count 1]])))
     [:div.row
      [:div.col-md-2
       [views/faction-list app]
@@ -72,19 +69,18 @@
       [views/board app]]]))
 
 (defcard-rg targeted-enemy
-  (let [system (component/start (new-system))
-        {:keys [app]} system
-        conn (get-in system [:datascript :conn])]
-    (app/start-new-game! conn :sterlings-aruba-multiplayer)
+  (let [{:keys [app]} (component/start (new-system))
+        {:keys [conn]} app]
+    (app/start-new-game! app :sterlings-aruba-multiplayer)
     (let [game (app/current-game @conn)
           unit (game/unit-at @conn game 2 2)]
-      (d/transact! conn (concat (game/teleport-tx @conn game 2 2 6 8)
-                                [{:db/id (-> @conn app/root e)
-                                  :app/selected-q 6
-                                  :app/selected-r 8
-                                  :app/targeted-q 7
-                                  :app/targeted-r 8}
-                                 [:db/add (e unit) :unit/move-count 1]])))
+      (d/transact! conn (into (game/teleport-tx @conn game 2 2 6 8)
+                              [{:db/id (-> @conn app/root e)
+                                :app/selected-q 6
+                                :app/selected-r 8
+                                :app/targeted-q 7
+                                :app/targeted-r 8}
+                               [:db/add (e unit) :unit/move-count 1]])))
     [:div.row
      [:div.col-md-2
       [views/faction-list app]
@@ -94,10 +90,9 @@
       [views/board app]]]))
 
 (defcard-rg base-selected
-  (let [system (component/start (new-system))
-        {:keys [app]} system
-        conn (get-in system [:datascript :conn])]
-    (app/start-new-game! conn :sterlings-aruba-multiplayer)
+  (let [{:keys [app]} (component/start (new-system))
+        {:keys [conn]} app]
+    (app/start-new-game! app :sterlings-aruba-multiplayer)
     (d/transact! conn [{:db/id (-> @conn app/root e)
                         :app/selected-q 1
                         :app/selected-r 2}])
