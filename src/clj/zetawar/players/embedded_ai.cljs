@@ -97,7 +97,7 @@
     (let [db @conn
           game (game/game-by-id db game-id)
           {:keys [action-ctx actor-score-fn base-action-score-fn unit-action-score-fn]} fns
-          action (or (binding [*action-ctx* action-ctx
+          action (or (binding [*action-ctx* (or action-ctx (constantly nil))
                                *actor-score-fn* actor-score-fn
                                *base-action-score-fn* base-action-score-fn
                                *unit-action-score-fn* unit-action-score-fn]
