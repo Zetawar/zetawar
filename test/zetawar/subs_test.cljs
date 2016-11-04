@@ -47,7 +47,9 @@
                 :game/id
                 :game/scenario-id
                 :game/map
+                :game/credits-per-base
                 :game/max-unit-count
+                :game/starting-faction
                 :game/current-faction
                 :game/factions
                 :game/round}
@@ -70,9 +72,7 @@
   (let [conn (helper/create-aruba-conn)]
     (testing "game map returned by subscription has expected attributes"
       (is (= #{:db/id
-               :map/credits-per-base
-               :map/name
-               :map/starting-faction}
+               :map/name}
              (into #{} (keys @(subs/game-map conn))))))))
 
 (deftest test-terrains

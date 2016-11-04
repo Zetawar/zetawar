@@ -46,9 +46,7 @@
 
 (defn game-map [conn]
   (posh/pull conn
-             '[:map/credits-per-base
-               :map/name
-               :map/starting-faction]
+             '[:map/name]
              @(game-map-eid conn)))
 
 (deftrack terrain-eid-at [conn q r]
@@ -163,8 +161,8 @@
   (get @(faction-eid->unit-count conn) @(current-faction-eid conn)))
 
 (deftrack current-income [conn]
-  (let [{:keys [map/credits-per-base]} @(game-map conn)]
-    (* (:map/credits-per-base @(game-map conn))
+  (let [{:keys [game/credits-per-base]} @(game conn)]
+    (* credits-per-base
        @(current-base-count conn @(current-faction-eid conn)))))
 
 (deftrack enemy-unit-count [conn]

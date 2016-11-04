@@ -19,6 +19,7 @@
    :game/factions                {:db/valueType   :db.type/ref
                                   :db/cardinality :db.cardinality/many
                                   :db/isComponent true}
+   :game/starting-faction        {:db/valueType   :db.type/ref}
    :game/current-faction         {:db/valueType   :db.type/ref}
 
    ;; Faction
@@ -49,7 +50,6 @@
    ;;   - unit-state-transition/new-state
 
    ;; Map
-   :map/starting-faction         {:db/valueType   :db.type/ref}
    :map/terrains                 {:db/valueType   :db.type/ref
                                   :db/cardinality :db.cardinality/many
                                   :db/isComponent true}

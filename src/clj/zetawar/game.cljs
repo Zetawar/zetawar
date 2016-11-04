@@ -95,7 +95,7 @@
 
 (defn income [db game faction]
   (let [base-count (faction-base-count db faction)
-        credits-per-base (get-in game [:game/map :map/credits-per-base])]
+        {:keys [game/credits-per-base]} game]
     (* base-count credits-per-base)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -698,12 +698,7 @@
   "Return a transaction that completes captures, clears per round unit flags,
   updates the current faction, adds faction credits, and updates the round."
   [db game]
-  (let [starting-faction (qe '[:find ?f
-                               :in $ ?g
-                               :where
-                               [?g :game/map ?m]
-                               [?m :map/starting-faction ?f]]
-                             db (e game))
+  (let [starting-faction (:game/starting-faction game)
         cur-faction (:game/current-faction game)
         next-faction (:faction/next-faction cur-faction)
         credits (+ (:faction/credits next-faction) (income db game next-faction))
@@ -942,12 +937,13 @@
    (create-game! conn scenario-def {}))
   ([conn scenario-def game-state]
    (let [game-id (random-uuid)
-         {:keys [id max-unit-count]} scenario-def]
+         {:keys [id credits-per-base max-unit-count]} scenario-def]
      (d/transact! conn [{:db/id -101
                          :game/id game-id
                          :game/scenario-id id
                          :game/round (get game-state :round 1)
-                         :game/max-unit-count max-unit-count}])
+                         :game/max-unit-count max-unit-count
+                         :game/credits-per-base credits-per-base}])
      game-id)))
 
 (defn bases-tx [game scenario-def]
@@ -1011,28 +1007,23 @@
                 units)))
           (zipmap (range) factions)))
 
-;; TODO: move starting-faction from map to game
 ;; TODO: setup players
 (defn load-scenario! [conn map-defs scenario-def]
   (let [game-id (create-game! conn scenario-def)
         conn-game #(game-by-id @conn game-id)
         {:keys [map-id credits-per-base factions]} scenario-def
-        starting-faction (get-in factions [0 :color])]
+        starting-faction-color (get-in factions [0 :color])]
     (d/transact! conn (game-map-tx (conn-game) (map-defs map-id)))
-    ;; TODO: move credits-per-base from map to game
-    (d/transact! conn [[:db/add (-> (conn-game) :game/map e)
-                        :map/credits-per-base credits-per-base]])
     (d/transact! conn (bases-tx (conn-game) scenario-def))
     (d/transact! conn (factions-tx (conn-game) factions))
     (d/transact! conn (factions-bases-tx @conn (conn-game) factions))
     (d/transact! conn (factions-units-tx @conn (conn-game) factions))
     (let [game (conn-game)
-          starting-faction-eid (->> starting-faction
+          starting-faction-eid (->> starting-faction-color
                                     (faction-by-color @conn game)
                                     e)]
-      (d/transact! conn [{:db/id (-> (conn-game) :game/map e)
-                          :map/starting-faction starting-faction-eid}
-                         {:db/id (e game)
+      (d/transact! conn [{:db/id (e game)
+                          :game/starting-faction starting-faction-eid
                           :game/current-faction starting-faction-eid}]))
     game-id))
 
@@ -1058,9 +1049,6 @@
         conn-game #(game-by-id @conn game-id)
         {:keys [map-id credits-per-base]} scenario-def]
     (d/transact! conn (game-map-tx (conn-game) (map-defs map-id)))
-    ;; TODO: move credits-per-base from map to game
-    (d/transact! conn [[:db/add (-> (conn-game) :game/map e)
-                        :map/credits-per-base credits-per-base]])
     (d/transact! conn (bases-tx (conn-game) scenario-def))
     (d/transact! conn (factions-tx (conn-game) factions))
     (d/transact! conn (factions-bases-tx @conn (conn-game) factions))
