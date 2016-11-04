@@ -2,9 +2,9 @@
   (:require
    [cljs.test :refer-macros [testing is async use-fixtures]]
    [datascript.core :as d]
-   [devcards.core :as dc :refer-macros [deftest]]
+   [devcards.core :as dc :refer-macros [defcard deftest]]
    [zetawar.app :as app]
-   [zetawar.db :refer [e qe]]
+   [zetawar.db :as db :refer [e qe]]
    [zetawar.data :as data]
    [zetawar.game :as game]
    [zetawar.test-helper :as helper]
@@ -461,6 +461,18 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Setup
+
+(defcard terrains-spec-tx
+  (let [terrains-spec (select-keys data/terrains [:plains])]
+    {:terrains-spec terrains-spec
+     :terrains-spec-tx (game/terrains-spec-tx terrains-spec)}))
+
+(defcard units-spec-tx
+  (let [conn (d/create-conn db/schema)
+        units-spec (select-keys data/units [:infantry])]
+    (d/transact! conn (game/terrains-spec-tx data/terrains))
+    {:units-spec units-spec
+     :units-spec-tx (game/units-spec-tx @conn units-spec)}))
 
 (comment
 

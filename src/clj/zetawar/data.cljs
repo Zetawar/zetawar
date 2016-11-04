@@ -12,9 +12,19 @@
    :shallow-water {:name "Shallow Water"
                    :image "tilesets/elite-command/terrains/shallow-water.png"}})
 
+(def unit-state-maps
+  {:basic
+   {:start      {:move    :moved-once
+                 :attack  :done
+                 :repair  :done
+                 :capture :done}
+    :moved-once {:attack  :done
+                 :capture :done}
+    :done       {}}})
+
 (def units
   {:infantry {:name "Infantry"
-              :credits 75
+              :cost 75
               :movement 9
               :can-capture true
               :min-range 1

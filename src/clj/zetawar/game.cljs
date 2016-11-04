@@ -101,6 +101,11 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Terrain
 
+(defn terrain-type-by-short-id [db short-id]
+  (find-by db
+           :terrain-type/id
+           (keyword 'terrain-type.id (name short-id))))
+
 (defn terrain? [x]
   (contains? x :terrain/type))
 
@@ -910,6 +915,68 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Setup
 
+(defn terrains-spec-tx [terrains-spec]
+  (into []
+        (map-indexed (fn [i [id terrain-type-spec]]
+                       (let [{:keys [image]} terrain-type-spec]
+                         {:db/id (- -100 i)
+                          :terrain-type/id (keyword 'terrain-type.id (name id))
+                          :terrain-type/name (:name terrain-type-spec)
+                          :terrain-type/image image})))
+        terrains-spec))
+
+(defn attack-strengths-tx [db unit-type-eid attack-strengths-spec]
+  (into []
+        (map-indexed (fn [i [id attack-strength]]
+                       {:db/id (- -201 i)
+                        :unit-strength/unit-type unit-type-eid
+                        :unit-strength/armor-type (keyword 'unit-type.armor-type (name id))
+                        :unit-strength/attack attack-strength}))
+        attack-strengths-spec))
+
+(defn terrain-effects-tx [db unit-type-eid terrain-effects-spec]
+  (into []
+        (map-indexed (fn [i [id terrain-effects-spec]]
+                       (let [{:keys [attack-bonus
+                                     armor-bonus
+                                     movement-cost]} terrain-effects-spec
+                             terrain-type (find-by db
+                                                   :terrain-type/id
+                                                   (keyword 'terrain-type.id (name id)))]
+                         {:db/id (- -301 i)
+                          :terrain-effect/terrain-type (e terrain-type)
+                          :terrain-effect/unit-type unit-type-eid
+                          :terrain-effect/movement-cost movement-cost
+                          :terrain-effect/attack-bonus attack-bonus
+                          :terrain-effect/armor-bonus armor-bonus})))
+        terrain-effects-spec))
+
+(defn units-spec-tx [db units-spec]
+  (into []
+        (comp
+         (map-indexed (fn [i [id unit-type-spec]]
+                        (let [{:keys [cost movement can-capture min-range
+                                      max-range armor capturing-armor repair
+                                      image terrain-effects attack-strengths]} unit-type-spec
+                              armor-type (keyword 'unit-type.armor-type
+                                                  (-> unit-type-spec :armor-type name))
+                              unit-type-eid  (- -101 i)]
+                          (-> [{:db/id unit-type-eid
+                                :unit-type/id (keyword 'unit-type (name id))
+                                :unit-type/name (:name unit-type-spec)
+                                :unit-type/cost cost
+                                :unit-type/can-capture can-capture
+                                :unit-type/movement movement
+                                :unit-type/min-range min-range
+                                :unit-type/max-range max-range
+                                :unit-type/armor-type armor-type
+                                :unit-type/armor armor
+                                :unit-type/capturing-armor armor}]
+                              (into (attack-strengths-tx db unit-type-eid attack-strengths))
+                              (into (terrain-effects-tx db unit-type-eid terrain-effects))))))
+         cat)
+        units-spec))
+
 (defn load-specs! [conn]
   (d/transact! conn data/specs-tx))
 
@@ -920,17 +987,17 @@
             :map/name (:name map-def)
             :game/_map (e game)}]
           (map-indexed
-            (fn [i t]
-              (let [{:keys [q r]} t]
-                {:db/id (- -201 i)
-                 :terrain/game-pos-idx (game-pos-idx game q r)
-                 :terrain/q q
-                 :terrain/r r
-                 :terrain/type [:terrain-type/id (->> (:terrain-type t)
-                                                      name
-                                                      (keyword 'terrain-type.id))]
-                 :map/_terrains map-eid}))
-            (:terrains map-def)))))
+           (fn [i t]
+             (let [{:keys [q r]} t]
+               {:db/id (- -201 i)
+                :terrain/game-pos-idx (game-pos-idx game q r)
+                :terrain/q q
+                :terrain/r r
+                :terrain/type [:terrain-type/id (->> (:terrain-type t)
+                                                     name
+                                                     (keyword 'terrain-type.id))]
+                :map/_terrains map-eid}))
+           (:terrains map-def)))))
 
 (defn create-game!
   ([conn scenario-def]

@@ -6,7 +6,6 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Schema
 
-;; TODO: add unit/terrain
 (def schema
   {:db/ident                     {:db/unique      :db.unique/identity}
 
@@ -34,16 +33,22 @@
    :unit/game-pos-idx            {:db/unique      :db.unique/identity}
    :unit/attacked-units          {:db/valueType   :db.type/ref
                                   :db/cardinality :db.cardinality/many}
+   ;; TODO: add unit/terrain
    ;; unit/state
 
    ;; Unit type
    :unit-type/id                 {:db/unique      :db.unique/identity}
    :unit-type/name               {:db/unique      :db.unique/identity}
-   ;; unit-type/initial-state
+   ;; unit-type/state-map
 
    ;; Unit State
+   ;; - unit-state-map
+   ;;   - unit-state-map/id
+   ;;   - unit-state-map/states
+   ;;   - unit-state-map/just-built-state
+   ;;   - unit-state-map/start-turn-state
    ;; - unit-state
-   ;;   - unit-state/index - integer representing index in unit type spec state vector
+   ;;   - unit-state/name
    ;;   - unit-state/transititons
    ;; - unit-state-transition
    ;;   - unit-state-transition/action-type (-id?)
@@ -81,6 +86,7 @@
   (when-let [result (-> (apply d/q query db args) ssolo)]
     (d/entity db result)))
 
+;; TODO: add single arity version for singleton entities
 (defn find-by
   "Returns the unique entity identified by attr and val."
   [db attr val]
