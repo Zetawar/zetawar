@@ -180,6 +180,10 @@
         (build-html :metadata-file (str "perun.base." environment ".edn"))
         (build-css)
         (gzip :regex #{#"\.html$" #"\.css$" #"\.js$"})
+        (sift :move {#"^(.*)\.html$" "$1.html.orig"
+                     #"^(.*)\.css$" "$1.css.orig"
+                     #"^(.*)\.js$" "$1.js.orig"})
+        (sift :to-source #{#"\.orig$"})
         (sift :move {#"^(.*)\.html\.gz$" "$1.html"
                      #"^(.*)\.css\.gz$" "$1.css"
                      #"^(.*)\.js\.gz$" "$1.js"})
