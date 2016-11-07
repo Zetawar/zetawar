@@ -1,6 +1,7 @@
 *.class
 *.jar
 .m2
+/.cljs_rhino_repl
 /.nrepl-*
 /TAGS
 /out

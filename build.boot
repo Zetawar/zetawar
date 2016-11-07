@@ -128,8 +128,10 @@
 
 (deftask dev
   "Run full dev environment."
-  [_ reload-host HOST str "Reload WebSocket host"
-   _ reload-port PORT int "Reload WebSocket port"]
+  [_ reload-host    HOST str "Reload WebSocket host"
+   _ reload-port    PORT int "Reload WebSocket port"
+   _ cljs-repl-host HOST str "ClojureScript REPL host"
+   _ cljs-repl-port PORT int "ClojureScript REPL port"]
   (comp (serve)
         (repl)
         (watch)
@@ -138,9 +140,16 @@
         (build-css)
         (reload :on-jsload 'zetawar.core/run
                 :cljs-asset-path ""
-                :ws-host reload-host
-                :ws-port reload-port)
-        (cljs-repl-env)
+                :ws-host (or reload-host
+                             (System/getenv "ZETAWAR_RELOAD_HOST")
+                             (System/getenv "ZETAWAR_DEV_HOST"))
+                :ws-port (or reload-host
+                             (System/getenv "ZETAWAR_RELOAD_PORT")))
+        (cljs-repl-env :ws-host (or reload-host
+                                    (System/getenv "ZETAWAR_CLJS_REPL_HOST")
+                                    (System/getenv "ZETAWAR_DEV_HOST"))
+                       :port (or reload-host
+                                 (System/getenv "ZETAWAR_CLJS_REPL_PORT")))
         (cljs :ids ["js/main"]
               :optimizations :none
               :compiler-options {:devcards true
@@ -181,7 +190,6 @@
   "Build Zetawar."
   [e environment ENV str]
   (comp (build-cljs)
-        (codox :name "Zetawar" :language :clojurescript)
         (build-html :metadata-file (str "perun.base." environment ".edn"))
         (build-css)
         (gzip :regex #{#"\.html$" #"\.css$" #"\.js$"})
@@ -192,4 +200,5 @@
         (sift :move {#"^(.*)\.html\.gz$" "$1.html"
                      #"^(.*)\.css\.gz$" "$1.css"
                      #"^(.*)\.js\.gz$" "$1.js"})
+        (codox :name "Zetawar" :language :clojurescript)
         (target)))
