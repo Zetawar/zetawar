@@ -1,18 +1,18 @@
 (set-env!
- :source-paths #{"src/clj" "src/js" "src/less" "test" "site"}
+ :source-paths #{"src/clj" "src/js" "src/scss" "test" "site"}
  :resource-paths #{"assets"}
  :dependencies
- '[[adzerk/boot-cljs "1.7.228-1" :scope "test"]
+ '[[adzerk/boot-cljs "1.7.228-2" :scope "test"]
    [adzerk/boot-cljs-repl "0.3.3" :scope "test"]
    [adzerk/boot-reload "0.4.12" :scope "test"]
    [adzerk/boot-test "1.1.2" :scope "test"]
    [binaryage/devtools "0.8.2" :scope "test"]
+   [boot-codox "0.10.0" :scope "test"]
    [cljsjs/clipboard "1.5.9-0"]
    [cljsjs/react "15.3.1-0"]
    [cljsjs/react-bootstrap "0.29.2-0"]
    [cljsjs/react-dom "15.3.1-0"]
    [cljsjs/react-dom-server "15.3.1-0"]
-   [boot-codox "0.10.0" :scope "test"]
    [com.cemerick/piggieback "0.2.1" :scope "test"]
    [com.cognitect/transit-cljs "0.8.239"]
    [com.rpl/specter "0.12.0"]
@@ -20,9 +20,8 @@
    [com.taoensso/timbre "4.7.4"]
    [crisptrutski/boot-cljs-test "0.2.2-SNAPSHOT" :scope "test"]
    [datascript "0.15.4"]
-   [deraen/boot-less "0.5.0" :scope "test"]
+   [deraen/boot-sass "0.3.0" :scope "test"]
    [devcards "0.2.1-7" :scope "test"]
-   [fipp "0.6.6" :scope "test"]
    [hashobject/boot-s3 "0.1.2-SNAPSHOT" :scope "test"]
    [hiccup "1.0.5"]
    [org.clojure/clojure "1.9.0-alpha13"]
@@ -31,8 +30,8 @@
    [org.clojure/test.check "0.9.0"]
    [org.clojure/tools.nrepl "0.2.12" :scope "test"]
    [org.martinklepsch/boot-gzip "0.1.2" :scope "test"]
-   [org.webjars.npm/bootswatch "3.3.6"]
-   [org.webjars/bootstrap "3.3.6"]
+   [org.slf4j/slf4j-nop "1.7.13" :scope "test"]
+   [org.webjars/bootstrap-sass "3.3.7"]
    [org.webjars/font-awesome "4.6.3"]
    [pandeiro/boot-http "0.7.3" :scope "test"]
    [perun "0.3.0" :scope "test"]
@@ -49,7 +48,7 @@
  '[clojure.string :as string]
  '[codox.boot :refer [codox]]
  '[crisptrutski.boot-cljs-test :refer [test-cljs]]
- '[deraen.boot-less :refer :all]
+ '[deraen.boot-sass :refer :all]
  '[hashobject.boot-s3 :refer :all]
  '[io.perun :refer :all]
  '[org.martinklepsch.boot-gzip :refer [gzip]]
@@ -61,14 +60,15 @@
 (deftask build-css
   []
   (comp
-   (sift :add-jar {'org.webjars/bootstrap #"META-INF/resources/webjars/bootstrap/3\.3\.6/less/.*\.less$"
-                   'org.webjars/font-awesome #"META-INF/resources/webjars/font-awesome/4\.6\.3/(fonts|less/.*\.less)"})
-   (sift :move {#"META-INF/resources/webjars/bootstrap/3\.3\.6/less" "bootstrap"
+   (sift :add-jar {'org.webjars/bootstrap-sass #"META-INF/resources/webjars/bootstrap-sass/3\.3\.7/stylesheets/.*\.scss$"
+                   'org.webjars/font-awesome #"META-INF/resources/webjars/font-awesome/4\.6\.3/(fonts|scss/.*\.scss)"})
+   (sift :move {#"META-INF/resources/webjars/bootstrap-sass/3\.3\.7/stylesheets" "bootstrap"
                 #"META-INF/resources/webjars/font-awesome/4\.6\.3/fonts" "fonts"
-                #"META-INF/resources/webjars/font-awesome/4\.6\.3/less" "font-awesome"})
-   (sift :to-source #{#"bootstrap" #"font-awesome"})
-   (sift :to-resource #{#"fonts"})
-   (less)
+                #"META-INF/resources/webjars/font-awesome/4\.6\.3/scss/(_.*\.scss)" "font-awesome/$1"
+                #"META-INF/resources/webjars/font-awesome/4\.6\.3/scss/font-awesome.scss" "font-awesome/_font-awesome.scss"})
+   (sift :to-source #{#"bootstrap" #"font-awesome"}
+         :to-resource #{#"fonts"})
+   (sass :options {:precision 8})
    (sift :move {#"^main.css$" "css/main.css"})))
 
 (defn slug-fn [filename]
@@ -128,7 +128,7 @@
   (comp (serve)
         (repl)
         (watch)
-        ;(test)
+        ;;(test)
         (build-html :metadata-file "perun.base.dev.edn")
         (build-css)
         (reload :on-jsload 'zetawar.core/run
@@ -176,15 +176,11 @@
   "Build Zetawar."
   [e environment ENV str]
   (comp (build-cljs)
+        (codox :name "Zetawar" :language :clojurescript)
         (build-html :metadata-file (str "perun.base." environment ".edn"))
         (build-css)
         (gzip :regex #{#"\.html$" #"\.css$" #"\.js$"})
-        (sift :move {#"^(.*)\.html$" "$1.html.orig"
-                     #"^(.*)\.css$" "$1.css.orig"
-                     #"^(.*)\.js$" "$1.js.orig"})
-        (sift :to-source #{#"\.orig$"})
         (sift :move {#"^(.*)\.html\.gz$" "$1.html"
                      #"^(.*)\.css\.gz$" "$1.css"
                      #"^(.*)\.js\.gz$" "$1.js"})
-        (codox :name "Zetawar" :language :clojurescript)
         (target)))
