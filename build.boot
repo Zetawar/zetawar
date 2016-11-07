@@ -19,6 +19,7 @@
    [com.stuartsierra/component "0.3.1"]
    [com.taoensso/timbre "4.7.4"]
    [crisptrutski/boot-cljs-test "0.2.2-SNAPSHOT" :scope "test"]
+   [danielsz/boot-autoprefixer "0.0.8"]
    [datascript "0.15.4"]
    [deraen/boot-sass "0.3.0" :scope "test"]
    [devcards "0.2.1-7" :scope "test"]
@@ -48,6 +49,7 @@
  '[clojure.string :as string]
  '[codox.boot :refer [codox]]
  '[crisptrutski.boot-cljs-test :refer [test-cljs]]
+ '[danielsz.autoprefixer :refer [autoprefixer]]
  '[deraen.boot-sass :refer :all]
  '[hashobject.boot-s3 :refer :all]
  '[io.perun :refer :all]
@@ -55,7 +57,9 @@
  '[pandeiro.boot-http :refer :all])
 
 (task-options!
- test-cljs {:js-env :phantom})
+ test-cljs    {:js-env :phantom}
+ autoprefixer {:files ["main.css"]
+               :browsers "> 5%"})
 
 (deftask build-css
   []
@@ -69,6 +73,7 @@
    (sift :to-source #{#"bootstrap" #"font-awesome"}
          :to-resource #{#"fonts"})
    (sass :options {:precision 8})
+   (autoprefixer)
    (sift :move {#"^main.css$" "css/main.css"})))
 
 (defn slug-fn [filename]
