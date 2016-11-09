@@ -14,13 +14,16 @@
 
 (def unit-state-maps
   {:basic
-   {:start      {:move    :moved-once
-                 :attack  :done
-                 :repair  :done
-                 :capture :done}
-    :moved-once {:attack  :done
-                 :capture :done}
-    :done       {}}})
+   {:start-turn-state :start
+    :newly-built-state :done
+    :states
+    {:start      {:move    :moved-once
+                  :attack  :done
+                  :repair  :done
+                  :capture :done}
+     :moved-once {:attack  :done
+                  :capture :done}
+     :done       {}}}})
 
 (def units
   {:infantry {:name "Infantry"
