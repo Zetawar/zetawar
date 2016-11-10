@@ -68,6 +68,12 @@
                          [_  :app/game ?g]
                          [?g :game/factions ?f]]
                        @conn)]
+    ;; TODO: cleanup (relocate?) player stopping
+    ;; Stop existing players (when starting new games)
+    (when players
+      (doseq [[_ player] @players]
+        (when player
+          (players/stop player))))
     (doseq [{:keys [faction/ai faction/color]} factions]
       (let [player-type (if ai ::players/reference-ai ::players/human)
             player (players/new-player app-ctx player-type color)]
