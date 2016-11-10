@@ -13,20 +13,29 @@ backers who chose to have their names listed and backed the project at or above 
 - -Toni-
 - Alex Eberts
 - Austin Haas
+- Ben and Anna Donovan
 - Benni Stauss
 - Benno Kittelmann
 - Bill Kratzer
 - Boris Kourtoukov
+- Brandon Mathis
 - Brent Hagany
+- Cameron Callahan
 - Carl T Kleihege
 - Chris Wasser
+- Coop
 - Dan Boykis
+- Dmitri Lobach
+- Dmitri Sotnikov
 - Greg Polander
 - Herb
+- Herb Bruss
 - Igor "McBell" Makaruks
 - J Johansen
+- JD Bell
 - James Reeves
 - Jarrod Doherty
+- Jeroen Lamain
 - Joel Martin
 - Jon M Dugan
 - Jonas Winje
@@ -35,12 +44,15 @@ backers who chose to have their names listed and backed the project at or above 
 - Joshua Miller
 - Juraj Martinka
 - Kephren
+- Kephren Newton
+- Kevin D. Saunders
 - Kevin Hutson (@mrjabba)
 - Koji Yusa
 - Lambda Island
 - Lloyd Goss
 - Loosetoes
 - Luke Ehresman
+- Markku Rontu
 - Martin Clausen
 - Max Juchheim
 - Mewmoomoo
@@ -52,8 +64,10 @@ backers who chose to have their names listed and backed the project at or above 
 - Nathan Powell
 - Nikita Prokopov
 - Nor Azman
+- Pasi Heikkinen
 - Pete
 - Phillip DiPuccio
+- Rob Balder
 - Ross Williams
 - RubyGeek LLC
 - Stonecrusher
@@ -63,6 +77,7 @@ backers who chose to have their names listed and backed the project at or above 
 - Toby Nance
 - Tomi Kasurinen
 - Troy Bonneau
+- Ty Goss
 - Vovusique
 - Walton Hoops
 - Wasserlasser
