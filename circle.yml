@@ -4,6 +4,8 @@ general:
 machine:
   java:
     version: oraclejdk8
+  node:
+    version: 6.9.1
   environment:
     _JAVA_OPTIONS: "-Xms512m -Xmx1024m"
 dependencies:
