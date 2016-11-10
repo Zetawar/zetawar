@@ -237,6 +237,7 @@
 
 ;; TODO: notify new AIs to start turn if they're plays as the current faction
 ;; TODO: find a way to make player swapping nicer (maybe put in router?)
+;; TODO: cleanup return value construction
 (defmethod router/handle-event ::toggle-faction-ai
   [{:as handler-ctx :keys [ev-chan conn db players]} [_ faction]]
   (let [{:as app :keys [ai-turn-stepping]} (app/root db)
@@ -247,7 +248,9 @@
         cur-player (color @players)
         new-player (if ai
                      (players/new-player handler-ctx ::players/human color)
-                     (players/new-player handler-ctx ::players/reference-ai color))]
+                     (players/new-player handler-ctx ::players/reference-ai color))
+        notify (when-not ai
+                 [[:zetawar.players/start-turn color]])]
     (players/stop cur-player)
     (players/start new-player)
     (swap! players assoc color new-player)
@@ -255,8 +258,10 @@
              (= (count other-factions)
                 (count (filter :faction/ai other-factions))))
       {:tx (conj tx [:db/add (e app) :app/ai-turn-stepping (not ai-turn-stepping)])
-       :dispatch [[::alert "AI enabled for all factions, enabling AI turn stepping."]]}
-      {:tx (conj tx [:db/add (e app) :app/ai-turn-stepping false])})))
+       :dispatch [[::alert "AI enabled for all factions, enabling AI turn stepping."]]
+       :notify notify}
+      {:tx (conj tx [:db/add (e app) :app/ai-turn-stepping false])
+       :notify notify})))
 
 (defmethod router/handle-event ::hide-win-dialog
   [{:as handler-ctx :keys [ev-chan db]} _]
