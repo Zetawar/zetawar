@@ -13,6 +13,7 @@ dependencies:
   pre:
     - curl -L https://github.com/boot-clj/boot-bin/releases/download/latest/boot.sh -o ~/bin/boot
     - chmod +x ~/bin/boot
+    - npm install --global postcss-cli autoprefixer
   override:
     - boot show -d
 test:
