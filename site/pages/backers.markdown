@@ -32,7 +32,6 @@ backers who chose to have their names listed and backed the project at or above 
 - Dan Boykis
 - Dmitri Lobach
 - Dmitri Sotnikov
-- Herb
 - Herb Bruss
 - Igor "McBell" Makaruks
 - JD Bell

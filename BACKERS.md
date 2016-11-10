@@ -28,7 +28,6 @@ backers who chose to have their names listed and backed the project at or above 
 - Dmitri Lobach
 - Dmitri Sotnikov
 - Greg Polander
-- Herb
 - Herb Bruss
 - Igor "McBell" Makaruks
 - J Johansen
