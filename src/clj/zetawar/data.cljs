@@ -10,7 +10,9 @@
    :base          {:name "Base"
                    :image "tilesets/elite-command/terrains/base-COLOR.png"}
    :shallow-water {:name "Shallow Water"
-                   :image "tilesets/elite-command/terrains/shallow-water.png"}})
+                   :image "tilesets/elite-command/terrains/shallow-water.png"}
+   :deep-water    {:name "Deep Water"
+                   :image "tilesets/elite-command/terrains/deep-water.png"}})
 
 (def unit-state-maps
   {:basic
@@ -34,7 +36,9 @@
               :max-range 1
               :armor-type :personnel
               :armor 6
-              :image "elite-command/units/infantry-COLOR.png"
+              :capturing-armor 2
+              :repair 1
+              :image "tilesets/elite-command/units/infantry-COLOR.png"
               :terrain-effects
               {:plains    {:movement-cost 3 :attack-bonus 0 :armor-bonus 0}
                :mountains {:movement-cost 6 :attack-bonus 2 :armor-bonus 5}

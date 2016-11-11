@@ -957,12 +957,13 @@
          (map-indexed (fn [i [id unit-type-spec]]
                         (let [{:keys [cost movement can-capture min-range
                                       max-range armor capturing-armor repair
-                                      image terrain-effects attack-strengths]} unit-type-spec
+                                      capturing-armor repair image
+                                      terrain-effects attack-strengths]} unit-type-spec
                               armor-type (keyword 'unit-type.armor-type
                                                   (-> unit-type-spec :armor-type name))
                               unit-type-eid  (- -101 i)]
                           (-> [{:db/id unit-type-eid
-                                :unit-type/id (keyword 'unit-type (name id))
+                                :unit-type/id (keyword 'unit-type.id (name id))
                                 :unit-type/name (:name unit-type-spec)
                                 :unit-type/cost cost
                                 :unit-type/can-capture can-capture
@@ -971,14 +972,17 @@
                                 :unit-type/max-range max-range
                                 :unit-type/armor-type armor-type
                                 :unit-type/armor armor
-                                :unit-type/capturing-armor armor}]
+                                :unit-type/capturing-armor armor
+                                :unit-type/repair repair
+                                :unit-type/image image}]
                               (into (attack-strengths-tx db unit-type-eid attack-strengths))
                               (into (terrain-effects-tx db unit-type-eid terrain-effects))))))
          cat)
         units-spec))
 
 (defn load-specs! [conn]
-  (d/transact! conn data/specs-tx))
+  (d/transact! conn (terrains-spec-tx data/terrains))
+  (d/transact! conn (units-spec-tx @conn data/units)))
 
 (defn game-map-tx [game map-def]
   (let [map-eid -101]
