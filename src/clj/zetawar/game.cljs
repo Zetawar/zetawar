@@ -980,8 +980,63 @@
          cat)
         units-spec))
 
+(defn unit-state-map-id [state-map-name]
+  (keyword 'unit-state-map.id (name state-map-name)))
+
+(defn unit-state-id [state-map-name state-name]
+  (keyword 'unit-state.id (str (name state-map-name) "--" (name state-name))))
+
+(defn action-type [action-type-name]
+  (keyword 'action.type (name action-type-name)))
+
+(defn unit-state-transitions-tx [state-map-name parent-state-name transitions]
+  (into []
+        (map-indexed
+         (fn [i [action new-state]]
+           (let [parent-state-id (unit-state-id state-map-name parent-state-name)
+                 new-state-id (unit-state-id state-map-name new-state)]
+             {:db/id (- -301 i)
+              :unit-state-transition/action-type (action-type action)
+              :unit-state-transition/new-state [:unit-state/id new-state-id]
+              :unit-state/_transitions [:unit-state/id parent-state-id]})))
+        transitions))
+
+(defn unit-states-tx [state-map-name states]
+  (into []
+        (comp
+         (map-indexed
+          (fn [i [state-name transitions]]
+            (let [parent-map-id (unit-state-map-id state-map-name)
+                  state-id (unit-state-id state-map-name state-name)]
+              (into [{:db/id (- -201 i)
+                      :unit-state/id state-id
+                      :unit-state-map/_states [:unit-state-map/id parent-map-id]}]
+                    (unit-state-transitions-tx state-map-name state-name
+                                               transitions)))))
+         cat)
+        states))
+
+(defn unit-state-map-tx [state-maps]
+  (into []
+        (comp
+         (map-indexed
+          (fn [i [state-map-name state-map]]
+            (let [{:keys [states start-turn-state newly-built-state]} state-map
+                  map-id (unit-state-map-id state-map-name)
+                  start-id (unit-state-id state-map-name start-turn-state)
+                  built-id (unit-state-id state-map-name newly-built-state)]
+              (-> [{:db/id (- -101 i)
+                    :unit-state-map/id map-id}]
+                  (into (unit-states-tx state-map-name states))
+                  (into [{:db/id (- -101 i)
+                          :unit-state-map/start-turn-state [:unit-state/id start-id]
+                          :unit-state-map/newly-built-state [:unit-state/id built-id]}])))))
+         cat)
+        state-maps))
+
 (defn load-specs! [conn]
   (d/transact! conn (terrains-spec-tx data/terrains))
+  (d/transact! conn (unit-state-map-tx data/unit-state-maps))
   (d/transact! conn (units-spec-tx @conn data/units)))
 
 (defn game-map-tx [game map-def]
@@ -1182,61 +1237,3 @@
                          )))
                }))
       })))
-
-(comment
-
-  (require 'zetawar.data)
-
-  (defn unit-state-map-id [state-map-name]
-    (keyword 'unit-state-map.id (name state-map-name)))
-
-  (defn unit-state-id [state-map-name state-name]
-    (keyword 'unit-state.id (str (name state-map-name) "--" (name state-name))))
-
-  (defn action-type [action-type-name]
-    (keyword 'action.type (name action-type-name)))
-
-  (defn unit-state-transitions-tx [state-map-name parent-state-name transitions]
-    (into []
-          (map-indexed (fn [i [action new-state]]
-                         (let [parent-state-id (unit-state-id state-map-name parent-state-name)
-                               new-state-id (unit-state-id state-map-name new-state)]
-                           {:db/id (- -301 i)
-                            :unit-state-transition/action-type (action-type action)
-                            :unit-state-transition/new-state [:unit-state/id new-state-id]
-                            :unit-state/_transitions parent-state-id})))
-          transitions))
-
-  (defn unit-states-tx [state-map-name states]
-    (into []
-          (comp
-           (map-indexed (fn [i [state-name transitions]]
-                          (let [parent-map-id (state-map-id state-map-name)
-                                state-id (unit-state-id state-map-name state-name)]
-                            (into [{:db/id (- -201 i)
-                                    :unit-state/id state-id
-                                    :unit-state-map/_states [:unit-state/id parent-map-id]}]
-                                  (unit-state-transitions-tx state-map-name state-name
-                                                               transitions)))))
-           cat)
-          states))
-
-  (defn unit-state-map-tx [state-maps]
-    (into []
-          (comp
-           (map-indexed (fn [i [state-map-name state-map]]
-                          (let [{:keys [states start-turn-state newly-built-state]} state-map
-                                map-id (unit-state-map-id state-map-name)
-                                start-id (unit-state-id state-map-name start-turn-state)
-                                built-id (unit-state-id state-map-name newly-built-state)]
-                            (into [{:db/id (- -101 i)
-                                    :unit-state-map/id map-id
-                                    :unit-state-map/start-turn-state [:unit-state/id start-id]
-                                    :unit-state-map/newly-built-state [:unit-state/id built-id]}]
-                                  (unit-states-tx state-map-name states)))))
-           cat)
-          state-maps))
-
-  (state-map-tx zetawar.data/unit-state-maps)
-
-  )
