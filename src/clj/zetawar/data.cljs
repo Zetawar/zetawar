@@ -38,6 +38,7 @@
               :armor 6
               :capturing-armor 2
               :repair 1
+              :state-map :basic
               :image "tilesets/elite-command/units/infantry-COLOR.png"
               :terrain-effects
               {:plains    {:movement-cost 3 :attack-bonus 0 :armor-bonus 0}

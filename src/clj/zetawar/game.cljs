@@ -237,8 +237,24 @@
     (ex-info message {:q q
                       :r r})))
 
-;; TODO: implement next-state
-;; TODO: implement checked-next-state
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Unit States
+
+(defn next-state [unit action]
+  (let [transition-map (->> unit
+                            :unit/current-state
+                            :unit/transitions
+                            (map (juxt :unit-state-transition/action-type
+                                       :unit-state-transition/new-state))
+                            action)]
+    (transition-map action)))
+
+(defn checked-next-state [unit action]
+  (let [new-state (next-state unit action)]
+    (when-not new-state
+      (throw (ex-info "No state transition from current state found for action"
+                      {:current-state (get-in unit [:unit/current-state :unit-state/id])
+                       :action action})))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Movement
@@ -640,6 +656,7 @@
     (catch :default ex
       false)))
 
+;; TODO: set unit/state
 (defn build-tx
   "Returns a transaction that creates a new unit and updates faction credits."
   ([db game q r unit-type-id]
@@ -936,47 +953,51 @@
 
 (defn terrain-effects-tx [db unit-type-eid terrain-effects-spec]
   (into []
-        (map-indexed (fn [i [id terrain-effects-spec]]
-                       (let [{:keys [attack-bonus
-                                     armor-bonus
-                                     movement-cost]} terrain-effects-spec
-                             terrain-type (find-by db
-                                                   :terrain-type/id
-                                                   (keyword 'terrain-type.id (name id)))]
-                         {:db/id (- -301 i)
-                          :terrain-effect/terrain-type (e terrain-type)
-                          :terrain-effect/unit-type unit-type-eid
-                          :terrain-effect/movement-cost movement-cost
-                          :terrain-effect/attack-bonus attack-bonus
-                          :terrain-effect/armor-bonus armor-bonus})))
+        (map-indexed
+         (fn [i [id terrain-effects-spec]]
+           (let [{:keys [attack-bonus
+                         armor-bonus
+                         movement-cost]} terrain-effects-spec
+                 terrain-type (find-by db
+                                       :terrain-type/id
+                                       (keyword 'terrain-type.id (name id)))]
+             {:db/id (- -301 i)
+              :terrain-effect/terrain-type (e terrain-type)
+              :terrain-effect/unit-type unit-type-eid
+              :terrain-effect/movement-cost movement-cost
+              :terrain-effect/attack-bonus attack-bonus
+              :terrain-effect/armor-bonus armor-bonus})))
         terrain-effects-spec))
 
 (defn units-spec-tx [db units-spec]
   (into []
         (comp
-         (map-indexed (fn [i [id unit-type-spec]]
-                        (let [{:keys [cost movement can-capture min-range
-                                      max-range armor capturing-armor repair
-                                      capturing-armor repair image
-                                      terrain-effects attack-strengths]} unit-type-spec
-                              armor-type (keyword 'unit-type.armor-type
-                                                  (-> unit-type-spec :armor-type name))
-                              unit-type-eid  (- -101 i)]
-                          (-> [{:db/id unit-type-eid
-                                :unit-type/id (keyword 'unit-type.id (name id))
-                                :unit-type/name (:name unit-type-spec)
-                                :unit-type/cost cost
-                                :unit-type/can-capture can-capture
-                                :unit-type/movement movement
-                                :unit-type/min-range min-range
-                                :unit-type/max-range max-range
-                                :unit-type/armor-type armor-type
-                                :unit-type/armor armor
-                                :unit-type/capturing-armor armor
-                                :unit-type/repair repair
-                                :unit-type/image image}]
-                              (into (attack-strengths-tx db unit-type-eid attack-strengths))
-                              (into (terrain-effects-tx db unit-type-eid terrain-effects))))))
+         (map-indexed
+          (fn [i [id unit-type-spec]]
+            (let [{:keys [cost movement can-capture min-range
+                          max-range armor capturing-armor repair
+                          capturing-armor repair state-map image
+                          terrain-effects attack-strengths]} unit-type-spec
+                  armor-type (keyword 'unit-type.armor-type
+                                      (-> unit-type-spec :armor-type name))
+                  unit-state-map-id (keyword 'unit-state-map.id (name state-map))
+                  unit-type-eid (- -101 i)]
+              (-> [{:db/id unit-type-eid
+                    :unit-type/id (keyword 'unit-type.id (name id))
+                    :unit-type/name (:name unit-type-spec)
+                    :unit-type/cost cost
+                    :unit-type/can-capture can-capture
+                    :unit-type/movement movement
+                    :unit-type/min-range min-range
+                    :unit-type/max-range max-range
+                    :unit-type/armor-type armor-type
+                    :unit-type/armor armor
+                    :unit-type/capturing-armor armor
+                    :unit-type/repair repair
+                    :unit-type/state-map [:unit-state-map/id unit-state-map-id]
+                    :unit-type/image image}]
+                  (into (attack-strengths-tx db unit-type-eid attack-strengths))
+                  (into (terrain-effects-tx db unit-type-eid terrain-effects))))))
          cat)
         units-spec))
 
@@ -1133,7 +1154,7 @@
                 units)))
           (zipmap (range) factions)))
 
-;; TODO: setup players
+;; TODO: set unit/state
 (defn load-scenario! [conn map-defs scenario-def]
   (let [game-id (create-game! conn scenario-def)
         conn-game #(game-by-id @conn game-id)

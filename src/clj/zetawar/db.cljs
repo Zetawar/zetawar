@@ -33,13 +33,13 @@
    :unit/game-pos-idx                {:db/unique      :db.unique/identity}
    :unit/attacked-units              {:db/valueType   :db.type/ref
                                       :db/cardinality :db.cardinality/many}
+   :unit/state                       {:db/valueType   :db.type/ref}
    ;; TODO: add unit/terrain
-   ;; unit/state
 
    ;; Unit type
    :unit-type/id                     {:db/unique      :db.unique/identity}
    :unit-type/name                   {:db/unique      :db.unique/identity}
-   ;; unit-type/state-map
+   :unit-type/state-map              {:db/valueType   :db.type/ref}
 
    ;; Unit State Maps
    :unit-state-map/id                {:db/unique      :db.unique/identity}
