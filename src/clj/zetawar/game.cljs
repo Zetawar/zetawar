@@ -172,8 +172,8 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Units
 
-(defn to-unit-type-id [unit-type]
-  (->> unit-type
+(defn to-unit-type-id [unit-type-name]
+  (->> unit-type-name
        name
        (keyword 'unit-type.id)))
 
@@ -240,21 +240,38 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Unit States
 
-(defn next-state [unit action]
-  (let [transition-map (->> unit
-                            :unit/current-state
-                            :unit/transitions
+;; TODO: add "to-" prefix to conversion functions?
+
+(defn to-unit-state-map-id [state-map-name]
+  (keyword 'unit-state-map.id (name state-map-name)))
+
+(defn to-unit-state-id
+  ([unit-state-id-name]
+   (keyword 'unit-state.id (name unit-state-id-name)))
+  ([state-map-name state-name]
+   (keyword 'unit-state.id (str (name state-map-name) "--" (name state-name)))))
+
+(defn to-action-type [action-type-name]
+  (keyword 'action.type (name action-type-name)))
+
+;; TODO: remove entity hack for subs (?)
+(defn next-state [db unit action]
+  (let [transition-map (->> (e unit)
+                            (d/entity db)
+                            :unit/state
+                            :unit-state/transitions
                             (map (juxt :unit-state-transition/action-type
                                        :unit-state-transition/new-state))
-                            action)]
+                            (into {}))]
     (transition-map action)))
 
-(defn checked-next-state [unit action]
-  (let [new-state (next-state unit action)]
+(defn checked-next-state [db unit action]
+  (let [new-state (next-state db unit action)]
     (when-not new-state
       (throw (ex-info "No state transition from current state found for action"
-                      {:current-state (get-in unit [:unit/current-state :unit-state/id])
-                       :action action})))))
+                      {:current-state (get-in unit [:unit/state :unit-state/id])
+                       :action action})))
+    new-state))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Movement
@@ -335,6 +352,7 @@
                (remove #(apply unit-at %)) ; remove occupied locations
                (map (fn [dest] {:from start :to dest}))
                (into #{}))
+
           (recur new-frontier new-moves))))))
 
 ;; TODO: implement valid-move?
@@ -354,16 +372,18 @@
 
 (defn check-can-move [db game unit]
   (check-unit-current db game unit)
-  (when (= (:unit/round-built unit) (:game/round game))
-    (throw (unit-ex "Unit cannot move on the turn it was built" unit)))
-  (when (> (:unit/move-count unit) 0)
-    (throw (unit-ex "Unit can only move once per turn" unit)))
-  (when (> (:unit/attack-count unit) 0)
-    (throw (unit-ex "Unit cannot move after attacking" unit)))
   (when (:unit/capturing unit)
     (throw (unit-ex "Unit cannot move while capturing" unit)))
-  (when (:unit/repaired unit)
-    (throw (unit-ex "Unit cannot move after repair" unit))))
+  (checked-next-state db unit :action.type/move-unit)
+  ;;(when (= (:unit/round-built unit) (:game/round game))
+  ;;  (throw (unit-ex "Unit cannot move on the turn it was built" unit)))
+  ;;(when (> (:unit/move-count unit) 0)
+  ;;  (throw (unit-ex "Unit can only move once per turn" unit)))
+  ;;(when (> (:unit/attack-count unit) 0)
+  ;;  (throw (unit-ex "Unit cannot move after attacking" unit)))
+  ;;(when (:unit/repaired unit)
+  ;;  (throw (unit-ex "Unit cannot move after repair" unit)))
+  )
 
 (defn can-move? [db game unit]
   (try
@@ -390,13 +410,14 @@
   "Returns a transaction that updates the unit's location and move count."
   ([db game unit to-terrain]
    (let [new-move-count (inc (get unit :unit/move-count 0))
-         [to-q to-r] (terrain-hex to-terrain)]
-     (check-can-move db game unit)
+         [to-q to-r] (terrain-hex to-terrain)
+         new-state (check-can-move db game unit)]
      [{:db/id (e unit)
        :unit/game-pos-idx (game-pos-idx game to-q to-r)
        :unit/q to-q
        :unit/r to-r
-       :unit/move-count new-move-count}]))
+       :unit/move-count new-move-count
+       :unit/state (e new-state)}]))
   ([db game from-q from-r to-q to-r]
    (let [unit (checked-unit-at db game from-q from-r)
          terrain (checked-terrain-at db game to-q to-r)]
@@ -412,14 +433,16 @@
 
 (defn check-can-attack [db game unit]
   (check-unit-current db game unit)
-  (when (= (:unit/round-built unit) (:game/round game))
-    (throw (unit-ex "Unit cannot attack on the turn it was built" unit)))
-  (when (> (:unit/attack-count unit) 0)
-    (throw (unit-ex "Unit can only attack once per turn" unit)))
   (when (:unit/capturing unit)
     (throw (unit-ex "Unit cannot attack while capturing" unit)))
-  (when (:unit/repaired unit)
-    (throw (unit-ex "Unit cannot attack after repair" unit))))
+  (checked-next-state db unit :action.type/attack-unit)
+  ;;(when (= (:unit/round-built unit) (:game/round game))
+  ;;  (throw (unit-ex "Unit cannot attack on the turn it was built" unit)))
+  ;;(when (> (:unit/attack-count unit) 0)
+  ;;  (throw (unit-ex "Unit can only attack once per turn" unit)))
+  ;;(when (:unit/repaired unit)
+  ;;  (throw (unit-ex "Unit cannot attack after repair" unit)))
+  )
 
 (defn can-attack? [db game unit]
   (try
@@ -502,29 +525,30 @@
 ;; TODO: add attacked unit to unit/attacked-units
 (defn battle-tx
   ([db game attacker defender attacker-damage defender-damage]
-   (check-can-attack db game attacker)
-   (check-in-range db attacker defender)
-   (let [attacker-terrain (terrain-at db game (:unit/q attacker) (:unit/r attacker))
-         defender-terrain (terrain-at db game (:unit/q defender) (:unit/r defender))
-         attack-count (get attacker :unit/attack-count 0)
-         attacker-count (:unit/count attacker)
-         defender-count (:unit/count defender)]
-     (cond-> []
-       (> defender-count defender-damage)
-       (conj {:db/id (e defender)
-              :unit/count (- defender-count defender-damage)
-              :unit/attacked-count (inc (:unit/attacked-count defender))})
+   (let [new-state (check-can-attack db game attacker)]
+     (check-in-range db attacker defender)
+     (let [attacker-terrain (terrain-at db game (:unit/q attacker) (:unit/r attacker))
+           defender-terrain (terrain-at db game (:unit/q defender) (:unit/r defender))
+           attack-count (get attacker :unit/attack-count 0)
+           attacker-count (:unit/count attacker)
+           defender-count (:unit/count defender)]
+       (cond-> []
+         (> defender-count defender-damage)
+         (conj {:db/id (e defender)
+                :unit/count (- defender-count defender-damage)
+                :unit/attacked-count (inc (:unit/attacked-count defender))})
 
-       (= defender-count defender-damage)
-       (conj [:db.fn/retractEntity (e defender)])
+         (= defender-count defender-damage)
+         (conj [:db.fn/retractEntity (e defender)])
 
-       (> attacker-count attacker-damage)
-       (conj {:db/id (e attacker)
-              :unit/count (- attacker-count attacker-damage)
-              :unit/attack-count (inc attack-count)})
+         (> attacker-count attacker-damage)
+         (conj {:db/id (e attacker)
+                :unit/count (- attacker-count attacker-damage)
+                :unit/attack-count (inc attack-count)
+                :unit/state (e new-state)})
 
-       (= attacker-count attacker-damage)
-       (conj [:db.fn/retractEntity (e attacker)]))))
+         (= attacker-count attacker-damage)
+         (conj [:db.fn/retractEntity (e attacker)])))))
   ([db game attacker-q attacker-r defender-q defender-r attacker-damage defender-damage]
    (let [attacker (checked-unit-at db game attacker-q attacker-r)
          defender (checked-unit-at db game defender-q defender-r)]
@@ -552,16 +576,18 @@
 
 (defn check-can-repair [db game unit]
   (check-unit-current db game unit)
+  (when (:unit/capturing unit)
+    (throw (unit-ex "Unit cannot be repaired while capturing" unit)))
   (when (>= (:unit/count unit) (:game/max-unit-count game))
     (throw (unit-ex "Unit is already fully repaired" unit)))
-  (when (:unit/repaired unit)
-    (throw (unit-ex "Unit can only be repaired once per turn" unit)))
-  (when (> (:unit/attack-count unit) 0)
-    (throw (unit-ex "Unit cannot be repaired after attacking" unit)))
-  (when (> (:unit/move-count unit) 0)
-    (throw (unit-ex "Unit cannot be repaired after moving" unit)))
-  (when (:unit/capturing unit)
-    (throw (unit-ex "Unit cannot be repaired while capturing" unit))))
+  (checked-next-state db unit :action.type/repair-unit)
+  ;;(when (:unit/repaired unit)
+  ;;  (throw (unit-ex "Unit can only be repaired once per turn" unit)))
+  ;;(when (> (:unit/attack-count unit) 0)
+  ;;  (throw (unit-ex "Unit cannot be repaired after attacking" unit)))
+  ;;(when (> (:unit/move-count unit) 0)
+  ;;  (throw (unit-ex "Unit cannot be repaired after moving" unit)))
+  )
 
 (defn can-repair? [db game unit]
   (try
@@ -574,12 +600,13 @@
   "Returns a transaction that increments unit count and sets the unit repaired
   flag to true."
   ([db game unit]
-   (check-can-repair db game unit)
-   [{:db/id (e unit)
-     :unit/count (min (:game/max-unit-count game)
-                      (+ (:unit/count unit)
-                         (get-in unit [:unit/type :unit-type/repair])))
-     :unit/repaired true}])
+   (let [new-state (check-can-repair db game unit)]
+     [{:db/id (e unit)
+       :unit/count (min (:game/max-unit-count game)
+                        (+ (:unit/count unit)
+                           (get-in unit [:unit/type :unit-type/repair])))
+       :unit/repaired true
+       :unit/state (e new-state)}]))
   ([db game q r]
    (let [unit (checked-unit-at db game q r)]
      (repair-tx db game unit))))
@@ -593,23 +620,25 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Capture
 
+;; TODO: rename to check-can-capture
 (defn check-capturable [db game unit terrain]
   (check-unit-current db game unit)
   (when-not (-> unit :unit/type :unit-type/can-capture)
     (throw (unit-ex "Unit does not have the ability to capture" unit)))
   (when-not (and terrain (base? terrain))
     (throw (unit-ex "Unit unit is not on a base" unit)))
-  (when (> (:unit/attack-count unit) 0)
-    (throw (unit-ex "Unit cannot capture after attacking" unit)))
-  (when (:unit/repaired unit)
-    (throw (unit-ex "Unit cannot capture after being repaired" unit)))
+  ;;(when (> (:unit/attack-count unit) 0)
+  ;;  (throw (unit-ex "Unit cannot capture after attacking" unit)))
+  ;;(when (:unit/repaired unit)
+  ;;  (throw (unit-ex "Unit cannot capture after being repaired" unit)))
   (when (:unit/capturing unit)
     (throw (unit-ex "Unit is already caturing" unit)))
   (when (= (e (unit-faction db unit)) (some-> terrain :terrain/owner e))
     ;; TODO: add more exception info
     (throw (ex-info "Base is already owned by current faction"
                     {:x (:terrain/x terrain)
-                     :y (:terrain/y terrain)}))))
+                     :y (:terrain/y terrain)})))
+  (checked-next-state db unit :action.type/capture-base))
 
 (defn can-capture? [db game unit terrain]
   (try
@@ -618,16 +647,16 @@
     (catch :default ex
       false)))
 
-
 (defn capture-tx
   "Returns a transaction that sets the unit capturing flag and capture round."
   ([db game unit]
    (let [base (base-at db game (:unit/q unit) (:unit/r unit))
-         round (:game/round game)]
-     (check-capturable db game unit base)
+         round (:game/round game)
+         new-state (check-capturable db game unit base)]
      [{:db/id (e unit)
        :unit/capturing true
-       :unit/capture-round (inc round)}]))
+       :unit/capture-round (inc round)
+       :unit/state (e new-state)}]))
   ([db game q r]
    (let [unit (checked-unit-at db game q r)]
      (capture-tx db game unit))))
@@ -686,7 +715,11 @@
        :unit/attack-count 0
        :unit/attacked-count 0
        :unit/repaired false
-       :unit/capturing false}
+       :unit/capturing false
+       :unit/state (-> unit-type
+                       :unit-type/state-map
+                       :unit-state-map/newly-built-state
+                       e)}
       {:db/id (e cur-faction)
        :faction/credits (- credits cost)
        :faction/units -1}])))
@@ -709,10 +742,16 @@
 
 (defn unit-end-turn-tx [db game unit]
   (let [{:keys [unit/capturing unit/capture-round]} unit]
-    (cond-> [[:db/add (e unit) :unit/repaired false]
-             [:db/add (e unit) :unit/move-count 0]
-             [:db/add (e unit) :unit/attack-count 0]
-             [:db/add (e unit) :unit/attacked-count 0]]
+    (cond-> [{:db/id (e unit)
+              :unit/repaired false
+              :unit/move-count 0
+              :unit/attack-count 0
+              :unit/attacked-count 0
+              :unit/state (-> unit
+                              :unit/type
+                              :unit-type/state-map
+                              :unit-state-map/start-turn-state
+                              e)}]
       (and capturing (= capture-round (:game/round game)))
       (into (end-turn-capture-tx db game unit)))))
 
@@ -934,21 +973,23 @@
 
 (defn terrains-spec-tx [terrains-spec]
   (into []
-        (map-indexed (fn [i [id terrain-type-spec]]
-                       (let [{:keys [image]} terrain-type-spec]
-                         {:db/id (- -100 i)
-                          :terrain-type/id (keyword 'terrain-type.id (name id))
-                          :terrain-type/name (:name terrain-type-spec)
-                          :terrain-type/image image})))
+        (map-indexed
+         (fn [i [id terrain-type-spec]]
+           (let [{:keys [image]} terrain-type-spec]
+             {:db/id (- -100 i)
+              :terrain-type/id (keyword 'terrain-type.id (name id))
+              :terrain-type/name (:name terrain-type-spec)
+              :terrain-type/image image})))
         terrains-spec))
 
 (defn attack-strengths-tx [db unit-type-eid attack-strengths-spec]
   (into []
-        (map-indexed (fn [i [id attack-strength]]
-                       {:db/id (- -201 i)
-                        :unit-strength/unit-type unit-type-eid
-                        :unit-strength/armor-type (keyword 'unit-type.armor-type (name id))
-                        :unit-strength/attack attack-strength}))
+        (map-indexed
+         (fn [i [id attack-strength]]
+           {:db/id (- -201 i)
+            :unit-strength/unit-type unit-type-eid
+            :unit-strength/armor-type (keyword 'unit-type.armor-type (name id))
+            :unit-strength/attack attack-strength}))
         attack-strengths-spec))
 
 (defn terrain-effects-tx [db unit-type-eid terrain-effects-spec]
@@ -1001,39 +1042,37 @@
          cat)
         units-spec))
 
-(defn unit-state-map-id [state-map-name]
-  (keyword 'unit-state-map.id (name state-map-name)))
+;; TODO: cleanup state loading
 
-(defn unit-state-id [state-map-name state-name]
-  (keyword 'unit-state.id (str (name state-map-name) "--" (name state-name))))
-
-(defn action-type [action-type-name]
-  (keyword 'action.type (name action-type-name)))
-
-(defn unit-state-transitions-tx [state-map-name parent-state-name transitions]
+(defn unit-states-tx [state-map-name states]
   (into []
         (map-indexed
-         (fn [i [action new-state]]
-           (let [parent-state-id (unit-state-id state-map-name parent-state-name)
-                 new-state-id (unit-state-id state-map-name new-state)]
-             {:db/id (- -301 i)
-              :unit-state-transition/action-type (action-type action)
+         (fn [i [state-name transitions]]
+           (let [parent-map-id (to-unit-state-map-id state-map-name)
+                 state-id (to-unit-state-id state-map-name state-name)]
+             {:db/id (- -201 i)
+              :unit-state/id state-id
+              :unit-state-map/_states [:unit-state-map/id parent-map-id]})))
+        states))
+
+(defn unit-state-transitions-tx [state-map-name parent-state-name i transitions]
+  (into []
+        (map-indexed
+         (fn [j [action new-state]]
+           (let [parent-state-id (to-unit-state-id state-map-name parent-state-name)
+                 new-state-id (to-unit-state-id state-map-name new-state)]
+             {:db/id (- -301 (* i 100) j)
+              :unit-state-transition/action-type (to-action-type action)
               :unit-state-transition/new-state [:unit-state/id new-state-id]
               :unit-state/_transitions [:unit-state/id parent-state-id]})))
         transitions))
 
-(defn unit-states-tx [state-map-name states]
+(defn unit-states-transitions-tx [state-map-name states]
   (into []
         (comp
          (map-indexed
           (fn [i [state-name transitions]]
-            (let [parent-map-id (unit-state-map-id state-map-name)
-                  state-id (unit-state-id state-map-name state-name)]
-              (into [{:db/id (- -201 i)
-                      :unit-state/id state-id
-                      :unit-state-map/_states [:unit-state-map/id parent-map-id]}]
-                    (unit-state-transitions-tx state-map-name state-name
-                                               transitions)))))
+            (unit-state-transitions-tx state-map-name state-name i transitions)))
          cat)
         states))
 
@@ -1043,12 +1082,13 @@
          (map-indexed
           (fn [i [state-map-name state-map]]
             (let [{:keys [states start-turn-state newly-built-state]} state-map
-                  map-id (unit-state-map-id state-map-name)
-                  start-id (unit-state-id state-map-name start-turn-state)
-                  built-id (unit-state-id state-map-name newly-built-state)]
+                  map-id (to-unit-state-map-id state-map-name)
+                  start-id (to-unit-state-id state-map-name start-turn-state)
+                  built-id (to-unit-state-id state-map-name newly-built-state)]
               (-> [{:db/id (- -101 i)
                     :unit-state-map/id map-id}]
                   (into (unit-states-tx state-map-name states))
+                  (into (unit-states-transitions-tx state-map-name states))
                   (into [{:db/id (- -101 i)
                           :unit-state-map/start-turn-state [:unit-state/id start-id]
                           :unit-state-map/newly-built-state [:unit-state/id built-id]}])))))
@@ -1132,26 +1172,34 @@
                   {:keys [units color]} faction
                   faction-eid (e (faction-by-color db game color))]
               (map-indexed
-                (fn [j {:keys [q r] :as unit}]
-                  (let [idx (game-pos-idx game q r)
-                        unit-type-id (to-unit-type-id (:unit-type unit))
-                        capturing (get unit :capturing false)]
-                    (cond-> {:db/id (- (- (* i 100)) (inc j))
-                             :unit/game-pos-idx idx
-                             :unit/q q
-                             :unit/r r
-                             :unit/count (get unit :count max-unit-count)
-                             :unit/round-built (get unit :round-built 0)
-                             :unit/move-count (get unit :move-count 0)
-                             :unit/attack-count (get unit :attack-count 0)
-                             :unit/attacked-count (get unit :attack-count 0)
-                             :unit/repaired (get unit :repaired false)
-                             :unit/capturing capturing
-                             :unit/type [:unit-type/id unit-type-id]
-                             :faction/_units faction-eid}
-                      capturing
-                      (assoc :unit/capture-round (:capture-round unit)))))
-                units)))
+               (fn [j {:keys [q r] :as unit}]
+                 (let [idx (game-pos-idx game q r)
+                       unit-type-id (to-unit-type-id (:unit-type unit))
+                       unit-state (:state unit)
+                       unit-type (find-by db :unit-type/id unit-type-id)
+                       capturing (get unit :capturing false)]
+                   (cond-> {:db/id (- (* i -100) (inc j))
+                            :unit/game-pos-idx idx
+                            :unit/q q
+                            :unit/r r
+                            :unit/count (get unit :count max-unit-count)
+                            :unit/round-built (get unit :round-built 0)
+                            :unit/move-count (get unit :move-count 0)
+                            :unit/attack-count (get unit :attack-count 0)
+                            :unit/attacked-count (get unit :attack-count 0)
+                            :unit/repaired (get unit :repaired false)
+                            :unit/capturing capturing
+                            :unit/type (e unit-type)
+                            :unit/state (if unit-state
+                                          [:unit-state/id (to-unit-state-id unit-state)]
+                                          (-> unit-type
+                                              :unit-type/state-map
+                                              :unit-state-map/start-turn-state
+                                              e))
+                            :faction/_units faction-eid}
+                     capturing
+                     (assoc :unit/capture-round (:capture-round unit)))))
+               units)))
           (zipmap (range) factions)))
 
 ;; TODO: set unit/state
@@ -1254,7 +1302,12 @@
                          (assoc :attack-count (:unit/attack-count unit)
                                 :move-count (:unit/move-count unit)
                                 :repaired (:unit/repaired unit)
-                                :round-built (:unit/round-built unit))
+                                :round-built (:unit/round-built unit)
+                                :state (-> unit
+                                           :unit/state
+                                           :unit-state/id
+                                           name
+                                           keyword))
                          )))
                }))
       })))

@@ -19,12 +19,12 @@
    {:start-turn-state :start
     :newly-built-state :done
     :states
-    {:start      {:move    :moved-once
-                  :attack  :done
-                  :repair  :done
-                  :capture :done}
-     :moved-once {:attack  :done
-                  :capture :done}
+    {:start      {:move-unit    :moved-once
+                  :attack-unit  :done
+                  :repair-unit  :done
+                  :capture-base :done}
+     :moved-once {:attack-unit  :done
+                  :capture-base :done}
      :done       {}}}})
 
 (def units

@@ -45,10 +45,12 @@
    :unit-state-map/id                {:db/unique      :db.unique/identity}
    :unit-state-map/states            {:db/valueType   :db.type/ref
                                       :db/cardinality :db.cardinality/many}
+   :unit-state-map/newly-built-state {:db/valueType   :db.type/ref}
+   :unit-state-map/start-turn-state  {:db/valueType   :db.type/ref}
    :unit-state/id                    {:db/unique      :db.unique/identity}
    :unit-state/transitions           {:db/valueType   :db.type/ref
                                       :db/cardinality :db.cardinality/many}
-   :unit-state-transitions/new-state {:db/valueType   :db.type/ref}
+   :unit-state-transition/new-state  {:db/valueType   :db.type/ref}
 
    ;; Unit State
    ;; - unit-state-map
