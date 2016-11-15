@@ -15,16 +15,10 @@
 ;;; DB Accessors
 
 (defn root [db]
-  (qe '[:find ?a
-        :where
-        [?a :app/game]]
-      db))
+  (find-by db :app/game))
 
 (defn current-game [db]
-  (qe '[:find ?g
-        :where
-        [_ :app/game ?g]]
-      db))
+  (:app/game (root db)))
 
 (defn current-game-id [db]
   (:game/id (current-game db)))

@@ -101,10 +101,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Terrain
 
-(defn terrain-type-by-short-id [db short-id]
-  (find-by db
-           :terrain-type/id
-           (keyword 'terrain-type.id (name short-id))))
+;; TODO: implement to-terrain-type-id
 
 (defn terrain? [x]
   (contains? x :terrain/type))
@@ -131,6 +128,7 @@
                       {:q q :r r})))
     terrain))
 
+;; TODO: use index lookup instead of query?
 (defn base-at [db game q r]
   (qe '[:find ?t
         :in $ ?idx
@@ -149,11 +147,7 @@
 
 (defn check-base-current [db game base]
   (let [cur-faction (:game/current-faction game)
-        base-faction (qe '[:find ?f
-                           :in $ ?b
-                           :where
-                           [?b :terrain/owner ?f]]
-                         db (e base))]
+        base-faction (:terrain/owner base)]
     (when (not= cur-faction base-faction)
       (throw (ex-info "Base is not owned by the current faction"
                       {:current-faction (:faction/color cur-faction)
@@ -162,11 +156,7 @@
 (defn current-base? [db game x]
   (when (base? x)
     (let [cur-faction (:game/current-faction game)
-          base-faction (qe '[:find ?f
-                             :in $ ?t
-                             :where
-                             [?t :terrain/owner ?f]]
-                           db (e x))]
+          base-faction (:terrain/owner x)]
       (= cur-faction base-faction))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -202,6 +192,7 @@
   (let [{:keys [unit/q unit/r]} unit]
     (terrain-at db game q r)))
 
+;; TODO: is "if" necessary?
 (defn unit-faction [db unit]
   (if (:faction/_units unit)
     (:faction/_units unit)
@@ -240,21 +231,23 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Unit States
 
-;; TODO: add "to-" prefix to conversion functions?
-
 (defn to-unit-state-map-id [state-map-name]
-  (keyword 'unit-state-map.id (name state-map-name)))
+  (->> state-map-name name (keyword 'unit-state-map.id)))
 
 (defn to-unit-state-id
-  ([unit-state-id-name]
-   (keyword 'unit-state.id (name unit-state-id-name)))
+  ([unit-state-name]
+   (->> unit-state-name name (keyword 'unit-state.id)))
   ([state-map-name state-name]
-   (keyword 'unit-state.id (str (name state-map-name) "--" (name state-name)))))
+   (to-unit-state-id (str (name state-map-name)
+                          "_"
+                          (name state-name)))))
 
 (defn to-action-type [action-type-name]
-  (keyword 'action.type (name action-type-name)))
+  (->> action-type-name name (keyword 'action.type)))
 
-;; TODO: remove entity hack for subs (?)
+;; TODO: implement start-turn-state + newly-built-state (takes unit or unit-type)
+
+;; Note: (->> (e unit) (d/entity db) ...) is to support UI subs
 (defn next-state [db unit action]
   (let [transition-map (->> (e unit)
                             (d/entity db)
@@ -1080,16 +1073,17 @@
   (into []
         (comp
          (map-indexed
-          (fn [i [state-map-name state-map]]
+          (fn [i [map-name state-map]]
             (let [{:keys [states start-turn-state newly-built-state]} state-map
-                  map-id (to-unit-state-map-id state-map-name)
-                  start-id (to-unit-state-id state-map-name start-turn-state)
-                  built-id (to-unit-state-id state-map-name newly-built-state)]
-              (-> [{:db/id (- -101 i)
+                  map-id (to-unit-state-map-id map-name)
+                  start-id (to-unit-state-id map-name start-turn-state)
+                  built-id (to-unit-state-id map-name newly-built-state)
+                  temp-eid (- -101 i)]
+              (-> [{:db/id temp-eid
                     :unit-state-map/id map-id}]
-                  (into (unit-states-tx state-map-name states))
-                  (into (unit-states-transitions-tx state-map-name states))
-                  (into [{:db/id (- -101 i)
+                  (into (unit-states-tx map-name states))
+                  (into (unit-states-transitions-tx map-name states))
+                  (into [{:db/id temp-eid
                           :unit-state-map/start-turn-state [:unit-state/id start-id]
                           :unit-state-map/newly-built-state [:unit-state/id built-id]}])))))
          cat)
@@ -1173,13 +1167,12 @@
                   faction-eid (e (faction-by-color db game color))]
               (map-indexed
                (fn [j {:keys [q r] :as unit}]
-                 (let [idx (game-pos-idx game q r)
-                       unit-type-id (to-unit-type-id (:unit-type unit))
+                 (let [unit-type-id (to-unit-type-id (:unit-type unit))
                        unit-state (:state unit)
                        unit-type (find-by db :unit-type/id unit-type-id)
                        capturing (get unit :capturing false)]
                    (cond-> {:db/id (- (* i -100) (inc j))
-                            :unit/game-pos-idx idx
+                            :unit/game-pos-idx (game-pos-idx game q r)
                             :unit/q q
                             :unit/r r
                             :unit/count (get unit :count max-unit-count)

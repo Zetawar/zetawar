@@ -36,7 +36,7 @@
    :unit/state                       {:db/valueType   :db.type/ref}
    ;; TODO: add unit/terrain
 
-   ;; Unit type
+   ;; Unit Type
    :unit-type/id                     {:db/unique      :db.unique/identity}
    :unit-type/name                   {:db/unique      :db.unique/identity}
    :unit-type/state-map              {:db/valueType   :db.type/ref}
@@ -47,9 +47,13 @@
                                       :db/cardinality :db.cardinality/many}
    :unit-state-map/newly-built-state {:db/valueType   :db.type/ref}
    :unit-state-map/start-turn-state  {:db/valueType   :db.type/ref}
+
+   ;; Unit State
    :unit-state/id                    {:db/unique      :db.unique/identity}
    :unit-state/transitions           {:db/valueType   :db.type/ref
                                       :db/cardinality :db.cardinality/many}
+
+   ;; Unit State Transitions
    :unit-state-transition/new-state  {:db/valueType   :db.type/ref}
 
    ;; Unit State
@@ -97,14 +101,19 @@
   (when-let [result (-> (apply d/q query db args) ssolo)]
     (d/entity db result)))
 
-;; TODO: add single arity version for singleton entities
 (defn find-by
-  "Returns the unique entity identified by attr and val."
-  [db attr val]
-  (qe '[:find ?e
-        :in $ ?attr ?val
-        :where  [?e ?attr ?val]]
-      db attr val))
+  "Returns the unique entity identified by either attr (for singleton
+  entities) or attr and val."
+  ([db attr]
+   (qe '[:find ?e
+         :in $ ?attr
+         :where [?e ?attr]]
+       db attr))
+  ([db attr val]
+   (qe '[:find ?e
+         :in $ ?attr ?val
+         :where [?e ?attr ?val]]
+       db attr val)))
 
 (defn qes
   "Returns the entities returned by a query, assuming that
@@ -124,10 +133,10 @@
 (defn find-all-by
   "Returns all entities possessing attr."
   [db attr]
-  (qes '[:find ?e
-         :in $ ?attr
-         :where [?e ?attr]]
-       db attr))
+  (qess '[:find ?e
+          :in $ ?attr
+          :where [?e ?attr]]
+        db attr))
 
 (defprotocol Eid
   "A protocol for retrieving an object's entity id."
