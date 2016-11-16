@@ -15,7 +15,6 @@
    [cljsjs/react-dom-server "15.3.1-0"]
    [com.cemerick/piggieback "0.2.1" :scope "test"]
    [com.cognitect/transit-cljs "0.8.239"]
-   [com.rpl/specter "0.12.0"]
    [com.stuartsierra/component "0.3.1"]
    [com.taoensso/timbre "4.7.4"]
    [crisptrutski/boot-cljs-test "0.2.2-SNAPSHOT" :scope "test"]
