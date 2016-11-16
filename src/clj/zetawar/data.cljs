@@ -16,8 +16,8 @@
 
 (def unit-state-maps
   {:basic
-   {:start-turn-state :start
-    :newly-built-state :done
+   {:start-state :start
+    :built-state :done
     :states
     {:start      {:move-unit    :moved-once
                   :attack-unit  :done

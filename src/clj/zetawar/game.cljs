@@ -131,15 +131,10 @@
                       {:q q :r r})))
     terrain))
 
-;; TODO: use index lookup instead of query?
 (defn base-at [db game q r]
-  (qe '[:find ?t
-        :in $ ?idx
-        :where
-        [?t :terrain/game-pos-idx ?idx]
-        [?t :terrain/type ?tt]
-        [?tt :terrain-type/id :terrain-type.id/base]]
-      db (game-pos-idx game q r)))
+  (let [terrain (terrain-at db game q r)]
+    (when (base? terrain)
+      terrain)))
 
 (defn checked-base-at [db game q r]
   (let [base (base-at db game q r)]
@@ -154,7 +149,7 @@
     (when (not= cur-faction base-faction)
       (throw (ex-info "Base is not owned by the current faction"
                       {:current-faction (:faction/color cur-faction)
-                       :base-faction (:faction/color base-faction)})))))
+                       })))))
 
 (defn current-base? [db game x]
   (when (base? x)
@@ -200,11 +195,8 @@
   (let [{:keys [unit/q unit/r]} unit]
     (terrain-at db game q r)))
 
-;; TODO: is "if" necessary?
 (defn unit-faction [db unit]
-  (if (:faction/_units unit)
-    (:faction/_units unit)
-    (find-by db :faction/units (e unit))))
+  (:faction/_units unit))
 
 (defn check-unit-current [db game unit]
   (let [cur-faction (:game/current-faction game)
@@ -253,7 +245,19 @@
 (defn to-action-type [action-type-name]
   (->> action-type-name name (keyword 'action.type)))
 
-;; TODO: implement start-turn-state + newly-built-state (takes unit or unit-type)
+(defn start-state [unit-or-unit-type]
+  (let [unit-type (if (unit? unit-or-unit-type)
+                    (:unit/type unit-or-unit-type)
+                    unit-or-unit-type)]
+    (get-in unit-type [:unit-type/state-map
+                       :unit-state-map/start-state])))
+
+(defn built-state [unit-or-unit-type]
+  (let [unit-type (if (unit? unit-or-unit-type)
+                    (:unit/type unit-or-unit-type)
+                    unit-or-unit-type)]
+    (get-in unit-type [:unit-type/state-map
+                       :unit-state-map/built-state])))
 
 ;; Note: (->> (e unit) (d/entity db) ...) is to support UI subs
 (defn next-state [db unit action]
@@ -324,6 +328,7 @@
                             (if movement
                               (let [costs (adjacent-costs q r)
                                     ;; TODO: simplify
+
                                     new-moves (into
                                                {}
                                                (comp
@@ -375,16 +380,7 @@
   (check-unit-current db game unit)
   (when (:unit/capturing unit)
     (throw (unit-ex "Unit cannot move while capturing" unit)))
-  (checked-next-state db unit :action.type/move-unit)
-  ;;(when (= (:unit/round-built unit) (:game/round game))
-  ;;  (throw (unit-ex "Unit cannot move on the turn it was built" unit)))
-  ;;(when (> (:unit/move-count unit) 0)
-  ;;  (throw (unit-ex "Unit can only move once per turn" unit)))
-  ;;(when (> (:unit/attack-count unit) 0)
-  ;;  (throw (unit-ex "Unit cannot move after attacking" unit)))
-  ;;(when (:unit/repaired unit)
-  ;;  (throw (unit-ex "Unit cannot move after repair" unit)))
-  )
+  (checked-next-state db unit :action.type/move-unit))
 
 (defn can-move? [db game unit]
   (try
@@ -436,14 +432,7 @@
   (check-unit-current db game unit)
   (when (:unit/capturing unit)
     (throw (unit-ex "Unit cannot attack while capturing" unit)))
-  (checked-next-state db unit :action.type/attack-unit)
-  ;;(when (= (:unit/round-built unit) (:game/round game))
-  ;;  (throw (unit-ex "Unit cannot attack on the turn it was built" unit)))
-  ;;(when (> (:unit/attack-count unit) 0)
-  ;;  (throw (unit-ex "Unit can only attack once per turn" unit)))
-  ;;(when (:unit/repaired unit)
-  ;;  (throw (unit-ex "Unit cannot attack after repair" unit)))
-  )
+  (checked-next-state db unit :action.type/attack-unit))
 
 (defn can-attack? [db game unit]
   (try
@@ -581,14 +570,7 @@
     (throw (unit-ex "Unit cannot be repaired while capturing" unit)))
   (when (>= (:unit/count unit) (:game/max-unit-count game))
     (throw (unit-ex "Unit is already fully repaired" unit)))
-  (checked-next-state db unit :action.type/repair-unit)
-  ;;(when (:unit/repaired unit)
-  ;;  (throw (unit-ex "Unit can only be repaired once per turn" unit)))
-  ;;(when (> (:unit/attack-count unit) 0)
-  ;;  (throw (unit-ex "Unit cannot be repaired after attacking" unit)))
-  ;;(when (> (:unit/move-count unit) 0)
-  ;;  (throw (unit-ex "Unit cannot be repaired after moving" unit)))
-  )
+  (checked-next-state db unit :action.type/repair-unit))
 
 (defn can-repair? [db game unit]
   (try
@@ -628,17 +610,13 @@
     (throw (unit-ex "Unit does not have the ability to capture" unit)))
   (when-not (and terrain (base? terrain))
     (throw (unit-ex "Unit unit is not on a base" unit)))
-  ;;(when (> (:unit/attack-count unit) 0)
-  ;;  (throw (unit-ex "Unit cannot capture after attacking" unit)))
-  ;;(when (:unit/repaired unit)
-  ;;  (throw (unit-ex "Unit cannot capture after being repaired" unit)))
   (when (:unit/capturing unit)
     (throw (unit-ex "Unit is already caturing" unit)))
   (when (= (e (unit-faction db unit)) (some-> terrain :terrain/owner e))
     ;; TODO: add more exception info
     (throw (ex-info "Base is already owned by current faction"
-                    {:x (:terrain/x terrain)
-                     :y (:terrain/y terrain)})))
+                    {:q (:terrain/q terrain)
+                     :r (:terrain/r terrain)})))
   (checked-next-state db unit :action.type/capture-base))
 
 (defn can-capture? [db game unit terrain]
@@ -686,7 +664,6 @@
     (catch :default ex
       false)))
 
-;; TODO: set unit/state
 (defn build-tx
   "Returns a transaction that creates a new unit and updates faction credits."
   ([db game q r unit-type-id]
@@ -717,10 +694,7 @@
        :unit/attacked-count 0
        :unit/repaired false
        :unit/capturing false
-       :unit/state (-> unit-type
-                       :unit-type/state-map
-                       :unit-state-map/newly-built-state
-                       e)}
+       :unit/state (-> unit-type built-state log/spy e)}
       {:db/id (e cur-faction)
        :faction/credits (- credits cost)
        :faction/units -1}])))
@@ -748,11 +722,7 @@
               :unit/move-count 0
               :unit/attack-count 0
               :unit/attacked-count 0
-              :unit/state (-> unit
-                              :unit/type
-                              :unit-type/state-map
-                              :unit-state-map/start-turn-state
-                              e)}]
+              :unit/state (-> unit start-state e)}]
       (and capturing (= capture-round (:game/round game)))
       (into (end-turn-capture-tx db game unit)))))
 
@@ -1037,8 +1007,6 @@
          cat)
         units-def))
 
-;; TODO: cleanup state loading
-
 (defn unit-states-tx [state-map-name states]
   (into []
         (map-indexed
@@ -1050,51 +1018,42 @@
               :unit-state-map/_states [:unit-state-map/id parent-map-id]})))
         states))
 
-(defn unit-state-transitions-tx [state-map-name parent-state-name i transitions]
-  (into []
-        (map-indexed
-         (fn [j [action new-state]]
-           (let [parent-state-id (to-unit-state-id state-map-name parent-state-name)
-                 new-state-id (to-unit-state-id state-map-name new-state)]
-             {:db/id (- -301 (* i 100) j)
-              :unit-state-transition/action-type (to-action-type action)
-              :unit-state-transition/new-state [:unit-state/id new-state-id]
-              :unit-state/_transitions [:unit-state/id parent-state-id]})))
-        transitions))
-
 (defn unit-states-transitions-tx [state-map-name states]
   (into []
-        (comp
-         (map-indexed
-          (fn [i [state-name transitions]]
-            (unit-state-transitions-tx state-map-name state-name i transitions)))
-         cat)
-        states))
+        (mapcat
+         (fn [[i [state-name transitions]]]
+           (map-indexed
+            (fn [j [action new-state]]
+              (let [state-id (to-unit-state-id state-map-name state-name)
+                    new-state-id (to-unit-state-id state-map-name new-state)]
+                {:db/id (- -301 (* i 100) j)
+                 :unit-state-transition/action-type (to-action-type action)
+                 :unit-state-transition/new-state [:unit-state/id new-state-id]
+                 :unit-state/_transitions [:unit-state/id state-id]}))
+            transitions)))
+        (zipmap (range) states)))
 
-;; TODO: rename start-turn-state to start-state
-;; TODO: rename newly-built-state to built-state
 (defn unit-state-map-tx [state-maps-def]
   (into []
         (comp
          (map-indexed
           (fn [i [state-map-name state-map-def]]
-            (let [{:keys [states start-turn-state newly-built-state]} state-map-def
+            (let [{:keys [states start-state built-state]} state-map-def
                   map-id (to-unit-state-map-id state-map-name)
-                  start-id (to-unit-state-id state-map-name start-turn-state)
-                  built-id (to-unit-state-id state-map-name newly-built-state)
+                  start-id (to-unit-state-id state-map-name start-state)
+                  built-id (to-unit-state-id state-map-name built-state)
                   temp-eid (- -101 i)]
               (-> [{:db/id temp-eid
                     :unit-state-map/id map-id}]
                   (into (unit-states-tx state-map-name states))
                   (into (unit-states-transitions-tx state-map-name states))
                   (into [{:db/id temp-eid
-                          :unit-state-map/start-turn-state [:unit-state/id start-id]
-                          :unit-state-map/newly-built-state [:unit-state/id built-id]}])))))
+                          :unit-state-map/start-state [:unit-state/id start-id]
+                          :unit-state-map/built-state [:unit-state/id built-id]}])))))
          cat)
         state-maps-def))
 
-;; TODO: rename (to what?)
-
+;; TODO: rename (?)
 (defn load-specs! [conn]
   (d/transact! conn (terrain-types-tx data/terrains))
   (d/transact! conn (unit-state-map-tx data/unit-state-maps))
@@ -1188,10 +1147,7 @@
                             :unit/type (e unit-type)
                             :unit/state (if unit-state
                                           [:unit-state/id (to-unit-state-id unit-state)]
-                                          (-> unit-type
-                                              :unit-type/state-map
-                                              :unit-state-map/start-turn-state
-                                              e))
+                                          (-> unit-type start-state e))
                             :faction/_units faction-eid}
                      capturing
                      (assoc :unit/capture-round (:capture-round unit)))))

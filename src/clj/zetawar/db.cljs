@@ -7,54 +7,54 @@
 ;;; Schema
 
 (def schema
-  {:db/ident                         {:db/unique      :db.unique/identity}
+  {:db/ident                        {:db/unique      :db.unique/identity}
 
    ;; App
-   :app/game                         {:db/valueType   :db.type/ref}
+   :app/game                        {:db/valueType   :db.type/ref}
 
    ;; Game
-   :game/id                          {:db/unique      :db.unique/identity}
-   :game/map                         {:db/valueType   :db.type/ref}
-   :game/factions                    {:db/valueType   :db.type/ref
-                                      :db/cardinality :db.cardinality/many
-                                      :db/isComponent true}
-   :game/starting-faction            {:db/valueType   :db.type/ref}
-   :game/current-faction             {:db/valueType   :db.type/ref}
+   :game/id                         {:db/unique      :db.unique/identity}
+   :game/map                        {:db/valueType   :db.type/ref}
+   :game/factions                   {:db/valueType   :db.type/ref
+                                     :db/cardinality :db.cardinality/many
+                                     :db/isComponent true}
+   :game/starting-faction           {:db/valueType   :db.type/ref}
+   :game/current-faction            {:db/valueType   :db.type/ref}
 
    ;; Faction
-   :faction/next-faction             {:db/valueType   :db.type/ref}
-   :faction/units                    {:db/valueType   :db.type/ref
-                                      :db/cardinality :db.cardinality/many
-                                      :db/isComponent true
-                                      :db/index       true}
+   :faction/next-faction            {:db/valueType   :db.type/ref}
+   :faction/units                   {:db/valueType   :db.type/ref
+                                     :db/cardinality :db.cardinality/many
+                                     :db/isComponent true
+                                     :db/index       true}
 
    ;; Unit
-   :unit/type                        {:db/valueType   :db.type/ref}
-   :unit/game-pos-idx                {:db/unique      :db.unique/identity}
-   :unit/attacked-units              {:db/valueType   :db.type/ref
-                                      :db/cardinality :db.cardinality/many}
-   :unit/state                       {:db/valueType   :db.type/ref}
+   :unit/type                       {:db/valueType   :db.type/ref}
+   :unit/game-pos-idx               {:db/unique      :db.unique/identity}
+   :unit/attacked-units             {:db/valueType   :db.type/ref
+                                     :db/cardinality :db.cardinality/many}
+   :unit/state                      {:db/valueType   :db.type/ref}
    ;; TODO: add unit/terrain
 
    ;; Unit Type
-   :unit-type/id                     {:db/unique      :db.unique/identity}
-   :unit-type/name                   {:db/unique      :db.unique/identity}
-   :unit-type/state-map              {:db/valueType   :db.type/ref}
+   :unit-type/id                    {:db/unique      :db.unique/identity}
+   :unit-type/name                  {:db/unique      :db.unique/identity}
+   :unit-type/state-map             {:db/valueType   :db.type/ref}
 
    ;; Unit State Maps
-   :unit-state-map/id                {:db/unique      :db.unique/identity}
-   :unit-state-map/states            {:db/valueType   :db.type/ref
-                                      :db/cardinality :db.cardinality/many}
-   :unit-state-map/newly-built-state {:db/valueType   :db.type/ref}
-   :unit-state-map/start-turn-state  {:db/valueType   :db.type/ref}
+   :unit-state-map/id               {:db/unique      :db.unique/identity}
+   :unit-state-map/states           {:db/valueType   :db.type/ref
+                                     :db/cardinality :db.cardinality/many}
+   :unit-state-map/built-state      {:db/valueType   :db.type/ref}
+   :unit-state-map/start-state      {:db/valueType   :db.type/ref}
 
    ;; Unit State
-   :unit-state/id                    {:db/unique      :db.unique/identity}
-   :unit-state/transitions           {:db/valueType   :db.type/ref
-                                      :db/cardinality :db.cardinality/many}
+   :unit-state/id                   {:db/unique      :db.unique/identity}
+   :unit-state/transitions          {:db/valueType   :db.type/ref
+                                     :db/cardinality :db.cardinality/many}
 
    ;; Unit State Transitions
-   :unit-state-transition/new-state  {:db/valueType   :db.type/ref}
+   :unit-state-transition/new-state {:db/valueType   :db.type/ref}
 
    ;; Unit State
    ;; - unit-state-map
@@ -70,27 +70,27 @@
    ;;   - unit-state-transition/new-state
 
    ;; Map
-   :map/terrains                 {:db/valueType   :db.type/ref
-                                  :db/cardinality :db.cardinality/many
-                                  :db/isComponent true}
+   :map/terrains                    {:db/valueType   :db.type/ref
+                                     :db/cardinality :db.cardinality/many
+                                     :db/isComponent true}
 
    ;; Terrain
-   :terrain/owner                {:db/valueType   :db.type/ref}
-   :terrain/type                 {:db/valueType   :db.type/ref}
-   :terrain/game-pos-idx         {:db/unique      :db.unique/identity}
+   :terrain/owner                   {:db/valueType   :db.type/ref}
+   :terrain/type                    {:db/valueType   :db.type/ref}
+   :terrain/game-pos-idx            {:db/unique      :db.unique/identity}
 
    ;; Terrain type
-   :terrain-type/id              {:db/unique      :db.unique/identity}
-   :terrain-type/name            {:db/unique      :db.unique/identity}
+   :terrain-type/id                 {:db/unique      :db.unique/identity}
+   :terrain-type/name               {:db/unique      :db.unique/identity}
 
    ;; Unit strength
-   :unit-strength/unit-type      {:db/valueType   :db.type/ref}
+   :unit-strength/unit-type         {:db/valueType   :db.type/ref}
 
    ;; Terrain effects
-   :terrain-effect/unit-type     {:db/valueType   :db.type/ref
-                                  :db/index       true}
-   :terrain-effect/terrain-type  {:db/valueType   :db.type/ref
-                                  :db/index       true}})
+   :terrain-effect/unit-type        {:db/valueType   :db.type/ref
+                                     :db/index       true}
+   :terrain-effect/terrain-type     {:db/valueType   :db.type/ref
+                                     :db/index       true}})
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Utils
