@@ -386,12 +386,6 @@
     (catch :default ex
       false)))
 
-;; Get moves
-;; - get adjacent coordinates
-;; - get move costs
-;; - add legal moves to frontier
-;; - repeat with updated movement points + frontier
-
 (defn teleport-tx [db game from-q from-r to-q to-r]
   (let [unit (checked-unit-at db game from-q from-r)]
     [{:db/id (e unit)
