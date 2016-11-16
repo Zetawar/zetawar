@@ -48,84 +48,6 @@
               :attack-strengths
               {:personnel 6}}})
 
-(def specs-tx
-  [;; terrain types
-   {:db/id -101
-    :terrain-type/id :terrain-type.id/base
-    :terrain-type/name "base"
-    :terrain-type/image "tilesets/elite-command/terrains/base-COLOR.png"}
-   {:db/id -102
-    :terrain-type/id :terrain-type.id/woods
-    :terrain-type/name "woods"
-    :terrain-type/image "tilesets/elite-command/terrains/woods.png"}
-   {:db/id -103
-    :terrain-type/id :terrain-type.id/mountains
-    :terrain-type/name "mountains"
-    :terrain-type/image "tilesets/elite-command/terrains/mountains.png"}
-   {:db/id -104
-    :terrain-type/id :terrain-type.id/plains
-    :terrain-type/name "plains"
-    :terrain-type/image "tilesets/elite-command/terrains/plains.png"}
-   {:db/id -105
-    :terrain-type/id :terrain-type.id/deep-water
-    :terrain-type/name "deep water"
-    :terrain-type/image "tilesets/elite-command/terrains/deep-water.png"}
-
-   ;; Unit Types
-   {:db/id -201
-    :unit-type/id :unit-type.id/infantry
-    :unit-type/armor-type :unit-type.armor-type/personnel
-    :unit-type/name "Infantry"
-    :unit-type/cost 75
-    :unit-type/can-capture true
-    :unit-type/movement 9
-    :unit-type/min-range 1
-    :unit-type/max-range 1
-    :unit-type/armor 6
-    :unit-type/capturing-armor 2
-    :unit-type/repair 1
-    :unit-type/image "tilesets/elite-command/units/infantry-COLOR.png"}
-
-   ;; Attack
-   {:db/id -301
-    :unit-strength/unit-type -201 ;; Infantry
-    :unit-strength/armor-type :unit-type.armor-type/personnel
-    :unit-strength/attack 6}
-
-   ;; Base effects
-   {:db/id -401
-    :terrain-effect/terrain-type -101 ;; TODO: can eids be replaced by id lookups here?
-    :terrain-effect/unit-type -201
-    :terrain-effect/attack-bonus 2
-    :terrain-effect/armor-bonus 2
-    :terrain-effect/movement-cost 3}
-
-   ;; Woods effects
-   {:db/id -402
-    :terrain-effect/terrain-type -102
-    :terrain-effect/unit-type -201
-    :terrain-effect/attack-bonus 2
-    :terrain-effect/armor-bonus 3
-    :terrain-effect/movement-cost 4}
-
-   ;; Mountain effects
-   {:db/id -403
-    :terrain-effect/terrain-type -103
-    :terrain-effect/unit-type -201
-    :terrain-effect/attack-bonus 2
-    :terrain-effect/armor-bonus 4
-    :terrain-effect/movement-cost 6}
-
-   ;; Plain effects
-   {:db/id -404
-    :terrain-effect/terrain-type -104
-    :terrain-effect/unit-type -201
-    :terrain-effect/attack-bonus 0
-    :terrain-effect/armor-bonus 0
-    :terrain-effect/movement-cost 3}
-   ])
-
-
 (def map-definitions
   {:sterlings-aruba
    {:id :sterlings-aruba
@@ -366,9 +288,9 @@
      {:q 7
       :r 8
       :terrain-type :plains}
-    ]
-   }
-  })
+     ]
+    }
+   })
 
 (def scenario-definitions
   {:sterlings-aruba-multiplayer
