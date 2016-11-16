@@ -7,6 +7,8 @@
    [zetawar.hex :as hex]
    [zetawar.util :refer [breakpoint inspect oonly]]))
 
+;; TODO: improve exception data
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Util
 
