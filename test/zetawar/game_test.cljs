@@ -462,17 +462,17 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Setup
 
-(defcard terrains-spec-tx
+(defcard terrain-types-tx
   (let [terrains-spec (select-keys data/terrains [:plains])]
     {:terrains-spec terrains-spec
-     :terrains-spec-tx (game/terrains-spec-tx terrains-spec)}))
+     :terrain-types-tx (game/terrain-types-tx terrains-spec)}))
 
 (defcard units-spec-tx
   (let [conn (d/create-conn db/schema)
         units-spec (select-keys data/units [:infantry])]
-    (d/transact! conn (game/terrains-spec-tx data/terrains))
+    (d/transact! conn (game/terrain-types-tx data/terrains))
     {:units-spec units-spec
-     :units-spec-tx (game/units-spec-tx @conn units-spec)}))
+     :unit-types-tx (game/unit-types-tx @conn units-spec)}))
 
 (comment
 
