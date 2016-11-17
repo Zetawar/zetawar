@@ -22,7 +22,6 @@
    [datascript "0.15.4"]
    [deraen/boot-sass "0.3.0" :scope "test"]
    [devcards "0.2.2" :scope "test"]
-   [hashobject/boot-s3 "0.1.2-SNAPSHOT" :scope "test"]
    [hiccup "1.0.5"]
    [org.clojure/clojure "1.9.0-alpha14"]
    [org.clojure/clojurescript "1.9.293"]
@@ -50,7 +49,6 @@
  '[crisptrutski.boot-cljs-test :refer [test-cljs]]
  '[danielsz.autoprefixer :refer [autoprefixer]]
  '[deraen.boot-sass :refer :all]
- '[hashobject.boot-s3 :refer :all]
  '[io.perun :refer :all]
  '[org.martinklepsch.boot-gzip :refer [gzip]]
  '[pandeiro.boot-http :refer :all])
@@ -64,11 +62,11 @@
   []
   (comp
    (sift :add-jar {'org.webjars/bootstrap-sass #"META-INF/resources/webjars/bootstrap-sass/3\.3\.7/stylesheets/.*\.scss$"
-                   'org.webjars/font-awesome #"META-INF/resources/webjars/font-awesome/4\.6\.3/(fonts|scss/.*\.scss)"})
+                   'org.webjars/font-awesome #"META-INF/resources/webjars/font-awesome/4\.7\.0/(fonts|scss/.*\.scss)"})
    (sift :move {#"META-INF/resources/webjars/bootstrap-sass/3\.3\.7/stylesheets" "bootstrap"
-                #"META-INF/resources/webjars/font-awesome/4\.6\.3/fonts" "fonts"
-                #"META-INF/resources/webjars/font-awesome/4\.6\.3/scss/(_.*\.scss)" "font-awesome/$1"
-                #"META-INF/resources/webjars/font-awesome/4\.6\.3/scss/font-awesome.scss" "font-awesome/_font-awesome.scss"})
+                #"META-INF/resources/webjars/font-awesome/4\.7\.0/fonts" "fonts"
+                #"META-INF/resources/webjars/font-awesome/4\.7\.0/scss/(_.*\.scss)" "font-awesome/$1"
+                #"META-INF/resources/webjars/font-awesome/4\.7\.0/scss/font-awesome.scss" "font-awesome/_font-awesome.scss"})
    (sift :to-source #{#"bootstrap" #"font-awesome"}
          :to-resource #{#"fonts"})
    (sass :options {:precision 8})
