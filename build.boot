@@ -10,7 +10,7 @@
    [boot-codox "0.10.1" :scope "test"]
    [cljsjs/clipboard "1.5.9-0"]
    [cljsjs/react "15.3.1-0"]
-   [cljsjs/react-bootstrap "0.29.2-0"]
+   [cljsjs/react-bootstrap "0.30.6-0"]
    [cljsjs/react-dom "15.3.1-0"]
    [cljsjs/react-dom-server "15.3.1-0"]
    [com.cemerick/piggieback "0.2.1" :scope "test"]
