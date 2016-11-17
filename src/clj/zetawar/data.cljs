@@ -46,7 +46,26 @@
                :woods     {:movement-cost 4 :attack-bonus 2 :armor-bonus 3}
                :base      {:movement-cost 2 :attack-bonus 2 :armor-bonus 3}}
               :attack-strengths
-              {:personnel 6}}})
+              {:personnel 6}}
+   :grenadier {:name "Grenadier"
+               :cost 150
+               :movement 9
+               :can-capture true
+               :min-range 1
+               :max-range 2
+               :armor-type :personnel
+               :armor 8
+               :capturing-armor 2
+               :repair 1
+               :state-map :basic
+               :image "tilesets/elite-command/units/grenadier-COLOR.png"
+               :terrain-effects
+               {:plains    {:movement-cost 4 :attack-bonus 0  :armor-bonus 0}
+                :mountains {:movement-cost 9 :attack-bonus 2  :armor-bonus 5}
+                :woods     {:movement-cost 4 :attack-bonus -1 :armor-bonus 3}
+                :base      {:movement-cost 3 :attack-bonus -1 :armor-bonus 3}}
+               :attack-strengths
+               {:personnel 8}}})
 
 (def map-definitions
   {:sterlings-aruba

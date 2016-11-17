@@ -945,24 +945,26 @@
             :terrain-type/image (:image terrain-def)}))
         terrains-def))
 
-(defn attack-strengths-tx [db unit-type-eid attack-strengths-def]
+;; TODO: cleanup index passing (how?)
+
+(defn attack-strengths-tx [db unit-type-eid i attack-strengths-def]
   (into []
         (map-indexed
-         (fn [i [armor-type-name attack-strength]]
-           {:db/id (- -201 i)
+         (fn [j [armor-type-name attack-strength]]
+           {:db/id (- -1001 j (* i 100))
             :unit-strength/unit-type unit-type-eid
             :unit-strength/armor-type (to-armor-type armor-type-name)
             :unit-strength/attack attack-strength}))
         attack-strengths-def))
 
-(defn terrain-effects-tx [db unit-type-eid terrain-effects-def]
+(defn terrain-effects-tx [db unit-type-eid i terrain-effects-def]
   (into []
         (map-indexed
-         (fn [i [terrain-type-name terrain-effect-def]]
+         (fn [j [terrain-type-name terrain-effect-def]]
            (let [{:keys [attack-bonus armor-bonus movement-cost]} terrain-effect-def
                  terrain-type-id (to-terrain-type-id terrain-type-name)
                  terrain-type (find-by db :terrain-type/id terrain-type-id)]
-             {:db/id (- -301 i)
+             {:db/id (- -2001 j (* i 100))
               :terrain-effect/terrain-type (e terrain-type)
               :terrain-effect/unit-type unit-type-eid
               :terrain-effect/movement-cost movement-cost
@@ -995,8 +997,8 @@
                     :unit-type/repair repair
                     :unit-type/state-map [:unit-state-map/id unit-state-map-id]
                     :unit-type/image image}]
-                  (into (attack-strengths-tx db unit-type-eid attack-strengths))
-                  (into (terrain-effects-tx db unit-type-eid terrain-effects))))))
+                  (into (attack-strengths-tx db unit-type-eid i attack-strengths))
+                  (into (terrain-effects-tx db unit-type-eid i terrain-effects))))))
          cat)
         units-def))
 
