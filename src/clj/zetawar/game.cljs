@@ -190,10 +190,6 @@
                       {:q q :r r})))
     unit))
 
-(defn unit-terrain [db game unit]
-  (let [{:keys [unit/q unit/r]} unit]
-    (terrain-at db game q r)))
-
 (defn unit-faction [db unit]
   (:faction/_units unit))
 
@@ -389,11 +385,13 @@
       false)))
 
 (defn teleport-tx [db game from-q from-r to-q to-r]
-  (let [unit (checked-unit-at db game from-q from-r)]
+  (let [unit (checked-unit-at db game from-q from-r)
+        terrain (checked-terrain-at db game to-q to-r)]
     [{:db/id (e unit)
       :unit/game-pos-idx (game-pos-idx game to-q to-r)
       :unit/q to-q
-      :unit/r to-r}]))
+      :unit/r to-r
+      :unit/terrain (e terrain)}]))
 
 ;; TODO: check move is valid
 (defn move-tx
@@ -406,6 +404,7 @@
        :unit/game-pos-idx (game-pos-idx game to-q to-r)
        :unit/q to-q
        :unit/r to-r
+       :unit/terrain (e to-terrain)
        :unit/move-count new-move-count
        :unit/state (e new-state)}]))
   ([db game from-q from-r to-q to-r]
@@ -491,8 +490,8 @@
 
 (defn battle-damage
   ([db game attacker defender]
-   (let [attacker-terrain (terrain-at db game (:unit/q attacker) (:unit/r attacker))
-         defender-terrain (terrain-at db game (:unit/q defender) (:unit/r defender))
+   (let [attacker-terrain (:unit/terrain attacker)
+         defender-terrain (:unit/terrain defender)
          attack-count (:unit/attack-count attacker 0)
          defender-damage (attack-damage db attacker defender attacker-terrain defender-terrain)
          attacker-damage (if (in-range? db defender attacker)
@@ -505,13 +504,12 @@
          defender (checked-unit-at db game defender-q defender-r)]
      (battle-damage db game attacker defender))))
 
-;; TODO: add attacked unit to unit/attacked-units
 (defn battle-tx
   ([db game attacker defender attacker-damage defender-damage]
    (let [new-state (check-can-attack db game attacker)]
      (check-in-range db attacker defender)
-     (let [attacker-terrain (terrain-at db game (:unit/q attacker) (:unit/r attacker))
-           defender-terrain (terrain-at db game (:unit/q defender) (:unit/r defender))
+     (let [attacker-terrain (:unit/terrain attacker)
+           defender-terrain (:unit/terrain defender)
            attack-count (:unit/attack-count attacker 0)
            attacker-count (:unit/count attacker)
            defender-count (:unit/count defender)]
@@ -519,7 +517,12 @@
          (> defender-count defender-damage)
          (conj {:db/id (e defender)
                 :unit/count (- defender-count defender-damage)
-                :unit/attacked-count (inc (:unit/attacked-count defender))})
+                :unit/attacked-count (inc (:unit/attacked-count defender))}
+               {:db/id -101
+                :game/_attacked-froms (e game)
+                :unit/_attacked-froms (e defender)
+                :attacked-from/q (:unit/q attacker)
+                :attacked-from/r (:unit/r attacker)})
 
          (= defender-count defender-damage)
          (conj [:db.fn/retractEntity (e defender)])
@@ -679,6 +682,7 @@
        :unit/game-pos-idx (game-pos-idx game base-q base-r)
        :unit/q base-q
        :unit/r base-r
+       :unit/terrain (e base)
        :unit/round-built (:game/round game)
        :unit/type (e unit-type)
        :unit/count (:game/max-unit-count game)
@@ -719,6 +723,9 @@
       (and capturing (= capture-round (:game/round game)))
       (into (end-turn-capture-tx db game unit)))))
 
+(defn remove-attacked-from-tx [attacked-from]
+  [[:db.fn/retractEntity (e attacked-from)]])
+
 (defn end-turn-tx
   "Return a transaction that completes captures, clears per round unit flags,
   updates the current faction, adds faction credits, and updates the round."
@@ -731,13 +738,15 @@
         new-round (if (= starting-faction next-faction)
                     (inc cur-round)
                     cur-round)
-        units (:faction/units cur-faction)]
-    (into [{:db/id (e next-faction)
-            :faction/credits credits}
-           {:db/id (e game)
-            :game/round new-round
-            :game/current-faction (e next-faction)}]
-          (mapcat #(unit-end-turn-tx db game %) units))))
+        units (:faction/units cur-faction)
+        attacked-froms (:game/attacked-froms game)]
+    (-> [{:db/id (e next-faction)
+          :faction/credits credits}
+         {:db/id (e game)
+          :game/round new-round
+          :game/current-faction (e next-faction)}]
+        (into (mapcat #(unit-end-turn-tx db game %) units))
+        (into (mapcat remove-attacked-from-tx attacked-froms)))))
 
 (defn end-turn! [conn game-id]
   (let [db @conn
@@ -825,7 +834,7 @@
                 db (e game) (e u-faction)))))
 
 (defn unit-can-act? [db game unit]
-  (let [terrain (terrain-at db game (:unit/q unit) (:unit/r unit))]
+  (let [terrain (:unit/terrain unit)]
     (or (can-move? db game unit)
         (and (can-attack? db game unit)
              (> (count (enemies-in-range db game unit)) 0))
@@ -866,8 +875,7 @@
     []))
 
 (defn capture-actions [db game unit]
-  (let [{:keys [unit/q unit/r]} unit
-        terrain (terrain-at db game q r)]
+  (let [{:keys [unit/q unit/r unit/terrain]} unit]
     (if (can-capture? db game unit terrain)
       [{:action/type :action.type/capture-base
         :action/q q
@@ -1127,11 +1135,13 @@
                  (let [unit-type-id (to-unit-type-id (:unit-type unit))
                        unit-state (:state unit)
                        unit-type (find-by db :unit-type/id unit-type-id)
-                       capturing (:capturing unit false)]
+                       capturing (:capturing unit false)
+                       terrain (terrain-at db game q r)]
                    (cond-> {:db/id (- (* i -100) (inc j))
                             :unit/game-pos-idx (game-pos-idx game q r)
                             :unit/q q
                             :unit/r r
+                            :unit/terrain (e terrain)
                             :unit/count (:count unit max-unit-count)
                             :unit/round-built (:round-built unit 0)
                             :unit/move-count (:move-count unit 0)

@@ -7,9 +7,7 @@
 ;;; Schema
 
 (def schema
-  {:db/ident                        {:db/unique      :db.unique/identity}
-
-   ;; App
+  {;; App
    :app/game                        {:db/valueType   :db.type/ref}
 
    ;; Game
@@ -20,6 +18,8 @@
                                      :db/isComponent true}
    :game/starting-faction           {:db/valueType   :db.type/ref}
    :game/current-faction            {:db/valueType   :db.type/ref}
+   :game/attacked-froms             {:db/valueType   :db.type/ref
+                                     :db/cardinality :db.cardinality/many}
 
    ;; Faction
    :faction/next-faction            {:db/valueType   :db.type/ref}
@@ -31,10 +31,10 @@
    ;; Unit
    :unit/type                       {:db/valueType   :db.type/ref}
    :unit/game-pos-idx               {:db/unique      :db.unique/identity}
-   :unit/attacked-units             {:db/valueType   :db.type/ref
+   :unit/attacked-froms             {:db/valueType   :db.type/ref
                                      :db/cardinality :db.cardinality/many}
    :unit/state                      {:db/valueType   :db.type/ref}
-   ;; TODO: add unit/terrain
+   :unit/terrain                    {:db/valueType   :db.type/ref}
 
    ;; Unit Type
    :unit-type/id                    {:db/unique      :db.unique/identity}
