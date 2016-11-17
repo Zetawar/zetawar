@@ -4,10 +4,10 @@
  :dependencies
  '[[adzerk/boot-cljs "1.7.228-2" :scope "test"]
    [adzerk/boot-cljs-repl "0.3.3" :scope "test"]
-   [adzerk/boot-reload "0.4.12" :scope "test"]
+   [adzerk/boot-reload "0.4.13" :scope "test"]
    [adzerk/boot-test "1.1.2" :scope "test"]
-   [binaryage/devtools "0.8.2" :scope "test"]
-   [boot-codox "0.10.0" :scope "test"]
+   [binaryage/devtools "0.8.3" :scope "test"]
+   [boot-codox "0.10.1" :scope "test"]
    [cljsjs/clipboard "1.5.9-0"]
    [cljsjs/react "15.3.1-0"]
    [cljsjs/react-bootstrap "0.29.2-0"]
@@ -17,23 +17,23 @@
    [com.cognitect/transit-cljs "0.8.239"]
    [com.stuartsierra/component "0.3.1"]
    [com.taoensso/timbre "4.7.4"]
-   [crisptrutski/boot-cljs-test "0.2.2-SNAPSHOT" :scope "test"]
+   [crisptrutski/boot-cljs-test "0.2.2" :scope "test"]
    [danielsz/boot-autoprefixer "0.0.8"]
    [datascript "0.15.4"]
    [deraen/boot-sass "0.3.0" :scope "test"]
-   [devcards "0.2.1-7" :scope "test"]
+   [devcards "0.2.2" :scope "test"]
    [hashobject/boot-s3 "0.1.2-SNAPSHOT" :scope "test"]
    [hiccup "1.0.5"]
-   [org.clojure/clojure "1.9.0-alpha13"]
-   [org.clojure/clojurescript "1.9.225"]
-   [org.clojure/core.async "0.2.391"]
+   [org.clojure/clojure "1.9.0-alpha14"]
+   [org.clojure/clojurescript "1.9.293"]
+   [org.clojure/core.async "0.2.395"]
    [org.clojure/test.check "0.9.0"]
    [org.clojure/tools.nrepl "0.2.12" :scope "test"]
    [org.martinklepsch/boot-gzip "0.1.2" :scope "test"]
-   [org.slf4j/slf4j-nop "1.7.13" :scope "test"]
+   [org.slf4j/slf4j-nop "1.7.21" :scope "test"]
    [org.webjars/bootstrap-sass "3.3.7"]
-   [org.webjars/font-awesome "4.6.3"]
-   [pandeiro/boot-http "0.7.3" :scope "test"]
+   [org.webjars/font-awesome "4.7.0"]
+   [pandeiro/boot-http "0.7.6" :scope "test"]
    [perun "0.3.0" :scope "test"]
    [posh "0.3.5"]
    [reagent "0.6.0"]
@@ -192,6 +192,7 @@
         (build-html :metadata-file (str "perun.base." environment ".edn"))
         (build-css)
         (gzip :regex #{#"\.html$" #"\.css$" #"\.js$"})
+        ;; Fileset gets confused without move to *.orig
         (sift :move {#"^(.*)\.html$" "$1.html.orig"
                      #"^(.*)\.css$" "$1.css.orig"
                      #"^(.*)\.js$" "$1.js.orig"})
