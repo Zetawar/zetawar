@@ -4,7 +4,7 @@
    [cljsjs.react-bootstrap]
    [clojure.string :as string]
    [datascript.core :as d]
-   [posh.core :as posh]
+   [posh.reagent :as posh]
    [reagent.core :as r]
    [zetawar.db :refer [e qe]]
    [zetawar.events.ui :as events.ui]
@@ -220,11 +220,12 @@
 
 (defn faction-actions [{:keys [conn ev-chan] :as app}]
   ;; TODO: replace query with something from subs ns
-  (let [[round current-color] (-> @(posh/q conn '[:find ?round ?current-color
-                                                  :where
-                                                  [?g :game/round ?round]
-                                                  [?g :game/current-faction ?f]
-                                                  [?f :faction/color ?current-color]])
+  (let [[round current-color] (-> @(posh/q '[:find ?round ?current-color
+                                             :where
+                                             [?g :game/round ?round]
+                                             [?g :game/current-faction ?f]
+                                             [?f :faction/color ?current-color]]
+                                           conn)
                                   first)
         {:keys [faction/credits]} @(subs/current-faction conn)]
     [:div#faction-actions

@@ -1,7 +1,7 @@
 (ns zetawar.test-helper
   (:require
    [datascript.core :as d]
-   [posh.core :as posh]
+   [posh.reagent :as posh]
    [reagent.core :as r]
    [zetawar.app :as app]
    [zetawar.db :as db]

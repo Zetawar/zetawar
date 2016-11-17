@@ -1,7 +1,7 @@
 (ns zetawar.subs
   (:require
    [datascript.core :as d]
-   [posh.core :as posh]
+   [posh.reagent :as posh]
    [reagent.core :as r]
    [taoensso.timbre :as log]
    [zetawar.db :refer [e qe]]
@@ -17,9 +17,10 @@
 ;;; App
 
 (deftrack app-eid [conn]
-  (ffirst @(posh/q conn '[:find ?a
-                          :where
-                          [?a :app/game]])))
+  (ffirst @(posh/q '[:find ?a
+                     :where
+                     [?a :app/game]]
+                   conn)))
 
 (defn app [conn]
   (posh/pull conn '[*] @(app-eid conn)))
@@ -28,9 +29,10 @@
 ;;; Game
 
 (deftrack game-eid [conn]
-  (ffirst @(posh/q conn '[:find ?g
-                          :where
-                          [_ :app/game ?g]])))
+  (ffirst @(posh/q '[:find ?g
+                     :where
+                     [_ :app/game ?g]]
+                   conn)))
 
 (defn game [conn]
   (posh/pull conn '[*] @(game-eid conn)))
@@ -39,10 +41,11 @@
 ;;; Map
 
 (deftrack game-map-eid [conn]
-  (ffirst @(posh/q conn '[:find ?m
-                          :where
-                          [_  :app/game ?g]
-                          [?g :game/map ?m]])))
+  (ffirst @(posh/q '[:find ?m
+                     :where
+                     [_  :app/game ?g]
+                     [?g :game/map ?m]]
+                   conn)))
 
 (defn game-map [conn]
   (posh/pull conn
@@ -52,11 +55,11 @@
 (deftrack terrain-eid-at [conn q r]
   (let [game-eid' @(game-eid conn)
         idx (game/game-pos-idx game-eid' q r)]
-    (ffirst @(posh/q conn '[:find ?u
-                            :in $ ?idx
-                            :where
-                            [?u :terrain/game-pos-idx ?idx]]
-                     (game/game-pos-idx game-eid' q r)))))
+    (ffirst @(posh/q '[:find ?u
+                       :in $ ?idx
+                       :where
+                       [?u :terrain/game-pos-idx ?idx]]
+                     conn (game/game-pos-idx game-eid' q r)))))
 
 (def terrain-pull [:terrain/q
                    :terrain/r
@@ -75,15 +78,16 @@
                  map-eid'))))
 
 (defn current-base-locations [conn]
-  (posh/q conn '[:find ?q ?r
-                 :where
-                 [_  :app/game ?g]
-                 [?g :game/map ?m]
-                 [?g :game/current-faction ?f]
-                 [?t :terrain/owner ?f]
-                 [?m :map/terrains ?t]
-                 [?t :terrain/q ?q]
-                 [?t :terrain/r ?r]]))
+  (posh/q '[:find ?q ?r
+            :where
+            [_  :app/game ?g]
+            [?g :game/map ?m]
+            [?g :game/current-faction ?f]
+            [?t :terrain/owner ?f]
+            [?m :map/terrains ?t]
+            [?t :terrain/q ?q]
+            [?t :terrain/r ?r]]
+          conn))
 
 (deftrack current-base? [conn q r]
   (contains? @(current-base-locations conn) [q r]))
@@ -92,11 +96,12 @@
 ;;; Factions
 
 (deftrack faction-eids [conn]
-  (->> @(posh/q conn '[:find ?f ?o
-                       :where
-                       [_  :app/game ?g]
-                       [?g :game/factions ?f]
-                       [?f :faction/order ?o]])
+  (->> @(posh/q '[:find ?f ?o
+                  :where
+                  [_  :app/game ?g]
+                  [?g :game/factions ?f]
+                  [?f :faction/order ?o]]
+                conn)
        (sort-by second)
        (map first)
        (into [])))
@@ -112,19 +117,21 @@
        (into [])))
 
 (deftrack faction-eid->base-count [conn]
-  (->> @(posh/q conn '[:find ?f (count ?t)
-                       :where
-                       [_  :app/game ?g]
-                       [?g :game/factions ?f]
-                       [?t :terrain/owner ?f]])
+  (->> @(posh/q '[:find ?f (count ?t)
+                  :where
+                  [_  :app/game ?g]
+                  [?g :game/factions ?f]
+                  [?t :terrain/owner ?f]]
+                conn)
        (into {})))
 
 (deftrack faction-eid->unit-count [conn]
-  (->> @(posh/q conn '[:find ?f (count ?u)
-                       :where
-                       [_  :app/game ?g]
-                       [?g :game/factions ?f]
-                       [?f :faction/units ?u]])
+  (->> @(posh/q '[:find ?f (count ?u)
+                  :where
+                  [_  :app/game ?g]
+                  [?g :game/factions ?f]
+                  [?f :faction/units ?u]]
+                conn)
        (into {})))
 
 (deftrack winning-faction-eid [conn]
@@ -142,10 +149,11 @@
       (first faction-eids-with-bases))))
 
 (deftrack current-faction-eid [conn]
-  (ffirst @(posh/q conn '[:find ?f
-                          :where
-                          [_  :app/game ?g]
-                          [?g :game/current-faction ?f]])))
+  (ffirst @(posh/q '[:find ?f
+                     :where
+                     [_  :app/game ?g]
+                     [?g :game/current-faction ?f]]
+                   conn)))
 
 (defn current-faction [conn]
   (posh/pull conn faction-pull @(current-faction-eid conn)))
@@ -166,21 +174,21 @@
        @(current-base-count conn @(current-faction-eid conn)))))
 
 (deftrack enemy-unit-count [conn]
-  (or (ffirst @(posh/q conn '[:find (count ?u)
-                              :in $ ?cf
-                              :where
-                              [?f :faction/units ?u]
-                              [(not= ?f ?cf)]]
-                       @(current-faction-eid conn)))
+  (or (ffirst @(posh/q '[:find (count ?u)
+                         :in $ ?cf
+                         :where
+                         [?f :faction/units ?u]
+                         [(not= ?f ?cf)]]
+                       conn @(current-faction-eid conn)))
       0))
 
 (deftrack enemy-base-count [conn]
-  (or (ffirst @(posh/q conn '[:find (count ?b)
-                              :in $ ?cf
-                              :where
-                              [?b :terrain/owner ?f]
-                              [(not= ?f ?cf)]]
-                       @(current-faction-eid conn)))
+  (or (ffirst @(posh/q '[:find (count ?b)
+                         :in $ ?cf
+                         :where
+                         [?b :terrain/owner ?f]
+                         [(not= ?f ?cf)]]
+                       conn @(current-faction-eid conn)))
       0))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -189,21 +197,21 @@
 (deftrack unit-eid-at [conn q r]
   (let [game-eid' @(game-eid conn)
         idx (game/game-pos-idx game-eid' q r)]
-    (ffirst @(posh/q conn '[:find ?u
-                            :in $ ?idx
-                            :where
-                            [?u :unit/game-pos-idx ?idx]]
-                     (game/game-pos-idx game-eid' q r)))))
+    (ffirst @(posh/q '[:find ?u
+                       :in $ ?idx
+                       :where
+                       [?u :unit/game-pos-idx ?idx]]
+                     conn (game/game-pos-idx game-eid' q r)))))
 
 (deftrack current-unit-eid-at [conn q r]
   (let [game-eid' @(game-eid conn)]
-    (ffirst @(posh/q conn '[:find ?u
-                            :in $ ?g ?idx
-                            :where
-                            [?u :unit/game-pos-idx ?idx]
-                            [?f :faction/units ?u]
-                            [?g :game/current-faction ?f]]
-                     game-eid' (game/game-pos-idx game-eid' q r)))))
+    (ffirst @(posh/q '[:find ?u
+                       :in $ ?g ?idx
+                       :where
+                       [?u :unit/game-pos-idx ?idx]
+                       [?f :faction/units ?u]
+                       [?g :game/current-faction ?f]]
+                     conn game-eid' (game/game-pos-idx game-eid' q r)))))
 
 (deftrack unit-at? [conn q r]
   (some? @(unit-eid-at conn q r)))
@@ -237,15 +245,15 @@
   (get-in @(unit-at conn q r) [:unit/type :unit-type/id]))
 
 (deftrack enemy-locations [conn]
-  @(posh/q conn '[:find ?q ?r
-                  :in $ ?g ?cf
-                  :where
-                  [?g :game/factions ?f]
-                  [?f :faction/units ?u]
-                  [?u :unit/q ?q]
-                  [?u :unit/r ?r]
-                  [(not= ?f ?cf)]]
-           @(game-eid conn) @(current-faction-eid conn)))
+  @(posh/q '[:find ?q ?r
+             :in $ ?g ?cf
+             :where
+             [?g :game/factions ?f]
+             [?f :faction/units ?u]
+             [?u :unit/q ?q]
+             [?u :unit/r ?r]
+             [(not= ?f ?cf)]]
+           conn @(game-eid conn) @(current-faction-eid conn)))
 
 (deftrack enemy-at? [conn q r]
   (contains? @(enemy-locations conn) [q r]))
@@ -295,15 +303,15 @@
 ;;; Unit Construction
 
 (deftrack buildable-unit-type-eids [conn]
-  (->> @(posh/q conn '[:find ?ut
-                       :in $ ?g
-                       :where
-                       [?g  :game/current-faction ?f]
-                       [?f  :faction/credits ?credits]
-                       [?ut :unit-type/cost ?cost]
-                       [?ut :unit-type/id ?unit-type-id]
-                       [(>= ?credits ?cost)]]
-                @(game-eid conn))
+  (->> @(posh/q '[:find ?ut
+                  :in $ ?g
+                  :where
+                  [?g  :game/current-faction ?f]
+                  [?f  :faction/credits ?credits]
+                  [?ut :unit-type/cost ?cost]
+                  [?ut :unit-type/id ?unit-type-id]
+                  [(>= ?credits ?cost)]]
+                conn @(game-eid conn))
        (map first)
        (into [])))
 
