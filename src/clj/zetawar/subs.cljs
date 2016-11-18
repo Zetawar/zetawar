@@ -326,24 +326,6 @@
          (sort-by :unit-type/cost)
          (into []))))
 
-(deftrack buildable-unit-type-eids [conn]
-  (->> @(posh/q '[:find ?ut
-                  :in $ ?g
-                  :where
-                  [?g  :game/current-faction ?f]
-                  [?f  :faction/credits ?credits]
-                  [?ut :unit-type/cost ?cost]
-                  [?ut :unit-type/id ?unit-type-id]
-                  [(>= ?credits ?cost)]]
-                conn @(game-eid conn))
-       (map first)
-       (into [])))
-
-(deftrack buildable-unit-types [conn]
-  (->> @(buildable-unit-type-eids conn)
-       (map (fn [ut] @(posh/pull conn '[*] ut)))
-       (into [])))
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Selection and Target
 

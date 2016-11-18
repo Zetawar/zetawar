@@ -1,4 +1,5 @@
 --exclude=*.svg
 --exclude=*.yml
+--exclude=.cljs_rhino_repl
 --exclude=target
 --exclude=vendor
