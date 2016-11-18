@@ -204,7 +204,7 @@
 
 ;; TODO: remove unit type hard coding
 (defmethod router/handle-event ::build-unit
-  [{:as handler-ctx :keys [db]} _]
+  [{:as handler-ctx :keys [db]} [_ unit-type-id]]
   (let [game (app/current-game db)
         cur-faction-color (game/current-faction-color game)
         [q r] (app/selected-hex db)]
@@ -213,7 +213,7 @@
                   :action/faction-color cur-faction-color
                   :action/q q
                   :action/r r
-                  :action/unit-type-id :unit-type.id/infantry}]
+                  :action/unit-type-id unit-type-id}]
                 [::clear-selection]]}))
 
 (defmethod router/handle-event ::end-turn
@@ -263,7 +263,18 @@
       {:tx (conj tx [:db/add (e app) :app/ai-turn-stepping false])
        :notify notify})))
 
+(defmethod router/handle-event ::show-unit-picker
+  [{:as handler-ctx :keys [ev-chan db]} _]
+  (let [app (app/root db)]
+    {:tx [[:db/add (e app) :app/show-unit-picker true]]}))
+
+(defmethod router/handle-event ::hide-unit-picker
+  [{:as handler-ctx :keys [ev-chan db]} _]
+  (let [app (app/root db)]
+    {:tx [[:db/add (e app) :app/show-unit-picker false]]}))
+
 (defmethod router/handle-event ::hide-win-dialog
   [{:as handler-ctx :keys [ev-chan db]} _]
   (let [app (app/root db)]
     {:tx [[:db/add (e app) :app/hide-win-dialog true]]}))
+

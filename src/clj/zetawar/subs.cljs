@@ -103,6 +103,7 @@
                   [?f :faction/order ?o]]
                 conn)
        (sort-by second)
+
        (map first)
        (into [])))
 
@@ -302,6 +303,29 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Unit Construction
 
+(deftrack available-unit-type-eids [conn]
+  (->> @(posh/q '[:find ?ut
+                  :in $ ?g
+                  :where
+                  [?g  :game/current-faction ?f]
+                  [?f  :faction/credits ?credits]
+                  [?ut :unit-type/cost ?cost]
+                  [?ut :unit-type/id ?unit-type-id]]
+                conn @(game-eid conn))
+       (map first)
+       (into [])))
+
+(deftrack available-unit-types [conn]
+  (let [{:keys [faction/credits]} @(current-faction conn)]
+    (->> @(available-unit-type-eids conn)
+         (map (fn [ut-eid]
+                (let [ut @(posh/pull conn '[*] ut-eid)
+                      affordable (<= (:unit-type/cost ut) credits)]
+                  ;; TODO: make affordable a namespaced key (?)
+                  (assoc ut :affordable affordable))))
+         (sort-by :unit-type/cost)
+         (into []))))
+
 (deftrack buildable-unit-type-eids [conn]
   (->> @(posh/q '[:find ?ut
                   :in $ ?g
@@ -396,6 +420,9 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; User Interface
+
+(deftrack show-unit-picker? [conn]
+  (:app/show-unit-picker @(app conn)))
 
 (deftrack show-win-dialog? [conn]
   (and @(current-faction-won? conn)

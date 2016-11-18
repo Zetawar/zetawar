@@ -237,7 +237,7 @@
      (when @(subs/selected-can-build? conn)
        [:p
         [:button.btn.btn-primary.btn-block
-         {:on-click #(router/dispatch ev-chan [::events.ui/build-unit])}
+         {:on-click #(router/dispatch ev-chan [::events.ui/show-unit-picker])}
          "Build"]])
      (when @(subs/selected-can-attack-targeted? conn)
        [:p
@@ -306,10 +306,44 @@
                   :on-click #(router/dispatch ev-chan [::events.ui/toggle-faction-ai faction])
                   :title "Enable AI"}])]]))))
 
+;; TODO: cleanup
+
+(defn unit-picker [{:keys [conn ev-chan] :as app}]
+  (let [unit-types @(subs/available-unit-types conn)
+        cur-faction @(subs/current-faction conn)
+        color (name (:faction/color cur-faction))
+        hide-unit-picker #(router/dispatch ev-chan [::events.ui/hide-unit-picker])]
+    [:> js/ReactBootstrap.Modal {:show @(subs/show-unit-picker? conn)
+                                 :on-hide hide-unit-picker}
+     [:> js/ReactBootstrap.Modal.Header {:close-button true}
+      [:> js/ReactBootstrap.Modal.Title
+       "Select a unit to build"]]
+     [:> js/ReactBootstrap.Modal.Body
+      (into [:div.unit-picker]
+            (for [{:keys [unit-type/id] :as unit-type} unit-types]
+              (let [image (->> (string/replace (:unit-type/image unit-type)
+                                               "COLOR" color)
+                               (str "/images/game/"))
+                    media-class (if (:affordable unit-type)
+                                  "media clickable"
+                                  "media clickable text-muted")
+                    build-unit #(do
+                                  (router/dispatch ev-chan [::events.ui/hide-unit-picker])
+                                  (router/dispatch ev-chan [::events.ui/build-unit id]))]
+                [:div {:class media-class
+                       :on-click build-unit}
+                 [:div.media-left.media-middle
+                  [:img {:src image}]]
+                 [:div.media-body
+                  [:h4.media-heading
+                   (:unit-type/name unit-type)]
+                  (str "Cost: " (:unit-type/cost unit-type))]])))]]))
+
 ;; TODO: turn entire game interface into it's own component
 
 (defn app-root [{:keys [conn ev-chan] :as app}]
   [:div
+   [unit-picker app]
    [:> js/ReactBootstrap.Modal {:show @(subs/show-win-dialog? conn)
                                 :on-hide #(router/dispatch ev-chan [::events.ui/hide-win-dialog])}
     [:> js/ReactBootstrap.Modal.Header
