@@ -9,6 +9,7 @@
 (def schema
   {;; App
    :app/game                        {:db/valueType   :db.type/ref}
+   :app/faction-to-configure        {:db/valueType   :db.type/ref}
 
    ;; Game
    :game/id                         {:db/unique      :db.unique/identity}

@@ -230,10 +230,8 @@
   (app/set-url-game-state! @conn))
 
 (defmethod router/handle-event ::new-game
-  [{:as handler-ctx :keys [ev-chan conn]} _]
-  (when (js/confirm "Are you sure you want to end your current game and start a new one?")
-    (set! js/window.location.hash "")
-    (app/start-new-game! handler-ctx :sterlings-aruba-multiplayer)))
+  [{:as handler-ctx :keys [ev-chan conn]} [_ scenario-id]]
+  (app/start-new-game! handler-ctx :sterlings-aruba-multiplayer))
 
 ;; TODO: notify new AIs to start turn if they're plays as the current faction
 ;; TODO: find a way to make player swapping nicer (maybe put in router?)
@@ -263,6 +261,16 @@
       {:tx (conj tx [:db/add (e app) :app/ai-turn-stepping false])
        :notify notify})))
 
+(defmethod router/handle-event ::show-new-game-settings
+  [{:as handler-ctx :keys [ev-chan db]} _]
+  (let [app (app/root db)]
+    {:tx [[:db/add (e app) :app/show-new-game-settings true]]}))
+
+(defmethod router/handle-event ::hide-new-game-settings
+  [{:as handler-ctx :keys [ev-chan db]} _]
+  (let [app (app/root db)]
+    {:tx [[:db/add (e app) :app/show-new-game-settings false]]}))
+
 (defmethod router/handle-event ::show-unit-picker
   [{:as handler-ctx :keys [ev-chan db]} _]
   (let [app (app/root db)]
@@ -278,3 +286,36 @@
   (let [app (app/root db)]
     {:tx [[:db/add (e app) :app/hide-win-dialog true]]}))
 
+(defmethod router/handle-event ::configure-faction
+  [{:as handler-ctx :keys [ev-chan db]} [_ faction]]
+  (let [app (app/root db)]
+    {:tx [[:db/add (e app) :app/faction-to-configure (e faction)]]}))
+
+(defmethod router/handle-event ::hide-faction-settings
+  [{:as handler-ctx :keys [ev-chan db]} [_ faction]]
+  (let [app (app/root db)]
+    {:tx [[:db/retract (e app) :app/faction-to-configure (e (:app/faction-to-configure app))]]}))
+
+(defmethod router/handle-event ::set-faction-player-type
+  [{:as handler-ctx :keys [ev-chan conn db players]} [_ faction player-type-id]]
+  (let [{:as app :keys [ai-turn-stepping]} (app/root db)
+        {:keys [game/factions]} (app/current-game db)
+        {:keys [faction/color]} faction
+        other-factions (remove #(= (e faction) (e %)) factions)
+        {:keys [ai]} (players/player-types-by-id player-type-id)
+        tx [{:db/id (e faction)
+             :faction/ai ai
+             :faction/player-type player-type-id}]
+        cur-player (color @players)
+        new-player (players/new-player handler-ctx player-type-id color)
+        notify (when ai [[:zetawar.players/start-turn color]])]
+    (players/stop cur-player)
+    (players/start new-player)
+    (swap! players assoc color new-player)
+    (if (and ai (= (count other-factions)
+                   (count (filter :faction/ai other-factions))))
+      {:tx (conj tx [:db/add (e app) :app/ai-turn-stepping (not ai-turn-stepping)])
+       :dispatch [[::alert "AI enabled for all factions, enabling AI turn stepping."]]
+       :notify notify}
+      {:tx (conj tx [:db/add (e app) :app/ai-turn-stepping false])
+       :notify notify})))

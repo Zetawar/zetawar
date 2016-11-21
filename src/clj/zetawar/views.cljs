@@ -5,11 +5,14 @@
    [clojure.string :as string]
    [datascript.core :as d]
    [posh.reagent :as posh]
-   [reagent.core :as r]
+   [reagent.core :as r :refer [with-let]]
+   [taoensso.timbre :as log]
+   [zetawar.data :as data]
    [zetawar.db :refer [e qe]]
    [zetawar.events.ui :as events.ui]
    [zetawar.game :as game]
    [zetawar.hex :as hex]
+   [zetawar.players :as players]
    [zetawar.router :as router]
    [zetawar.subs :as subs]
    [zetawar.util :refer [breakpoint inspect only oonly]]
@@ -213,7 +216,7 @@
       [:a {:href "#"
            :on-click (fn [e]
                        (.preventDefault e)
-                       (router/dispatch ev-chan [::events.ui/new-game]))}
+                       (router/dispatch ev-chan [::events.ui/show-new-game-settings]))}
        "New Game"]
       " · "
       (str "Round " round)]]))
@@ -295,26 +298,26 @@
              (when active
                [:span.fa.fa-angle-double-left
                 {:aria-hidden true}])
+
              [:div.pull-right
               (if (:faction/ai faction)
                 [:span.fa.fa-fw.fa-laptop.clickable
                  {:aria-hidden true
-                  :on-click #(router/dispatch ev-chan [::events.ui/toggle-faction-ai faction])
+                  :on-click #(router/dispatch ev-chan [::events.ui/configure-faction faction])
                   :title "Disable AI"}]
                 [:span.fa.fa-fw.fa-user.clickable
                  {:aria-hidden true
-                  :on-click #(router/dispatch ev-chan [::events.ui/toggle-faction-ai faction])
+                  :on-click #(router/dispatch ev-chan [::events.ui/configure-faction faction])
                   :title "Enable AI"}])]]))))
 
-;; TODO: cleanup
-
+;; TODO: cleanup unit-picker
 (defn unit-picker [{:keys [conn ev-chan] :as app}]
   (let [unit-types @(subs/available-unit-types conn)
         cur-faction @(subs/current-faction conn)
         color (name (:faction/color cur-faction))
-        hide-unit-picker #(router/dispatch ev-chan [::events.ui/hide-unit-picker])]
+        hide #(router/dispatch ev-chan [::events.ui/hide-unit-picker])]
     [:> js/ReactBootstrap.Modal {:show @(subs/show-unit-picker? conn)
-                                 :on-hide hide-unit-picker}
+                                 :on-hide hide}
      [:> js/ReactBootstrap.Modal.Header {:close-button true}
       [:> js/ReactBootstrap.Modal.Title
        "Select a unit to build"]]
@@ -337,13 +340,90 @@
                  [:div.media-body
                   [:h4.media-heading
                    (:unit-type/name unit-type)]
-                  (str "Cost: " (:unit-type/cost unit-type))]])))]]))
+                  (str "Cost: " (:unit-type/cost unit-type))]])))]
+     [:> js/ReactBootstrap.Modal.Footer
+      [:button.btn.btn-default {:on-click hide}
+       "Cancel"]]]))
+
+(defn faction-settings [{:keys [conn ev-chan] :as app}]
+  (with-let [faction (subs/faction-to-configure conn)
+             selected-player-type (r/atom nil)
+             hide #(do
+                     (.preventDefault %)
+                     (router/dispatch ev-chan [::events.ui/hide-faction-settings]))
+             select-player-type #(reset! selected-player-type (.-target.value %))
+             set-player-type #(do
+                                (.preventDefault %)
+                                (when-let [player-type-id (->> (or @selected-player-type :human)
+                                                               (keyword 'zetawar.players))]
+                                  (reset! selected-player-type nil)
+                                  (router/dispatch ev-chan [::events.ui/set-faction-player-type @faction player-type-id]))
+
+                                (router/dispatch ev-chan [::events.ui/hide-faction-settings]))]
+    [:> js/ReactBootstrap.Modal {:show (some? @faction)
+                                 :on-hide hide}
+     [:> js/ReactBootstrap.Modal.Header {:close-button true}
+      [:> js/ReactBootstrap.Modal.Title
+       "Configure faction"]]
+     [:> js/ReactBootstrap.Modal.Body
+      [:form
+       [:div.form-group
+        [:label {:for "player-type"}
+         "Player type"]
+        (into [:select.form-control {:id "player-type"
+                                     :selected (or @selected-player-type
+                                                   (:faction/player-type @faction))
+                                     :on-change select-player-type}]
+              (for [[player-type-id {:keys [description ai]}] players/player-types]
+                [:option {:value (name player-type-id)}
+                 description]))
+        [:> js/ReactBootstrap.Modal.Footer
+         [:button.btn.btn-primary {:on-click set-player-type}
+          "Save"]
+         [:button.btn.btn-default {:on-click hide}
+          "Cancel"]]]]]]))
+
+(defn new-game-settings [{:keys [conn ev-chan] :as app}]
+  (with-let [selected-scenario-id (r/atom :sterlings-aruba-multiplayer)
+             hide #(do
+                     (.preventDefault %)
+                     (router/dispatch ev-chan [::events.ui/hide-new-game-settings]))
+             select-scenario #(reset! selected-scenario-id (keyword (.-target.value %)))
+             start #(do
+                      (.preventDefault %)
+                      (router/dispatch ev-chan [::events.ui/new-game @selected-scenario-id])
+                      (reset! selected-scenario-id nil)
+                      (router/dispatch ev-chan [::events.ui/hide-new-game-settings]))]
+    [:> js/ReactBootstrap.Modal {:show @(subs/show-new-game-settings? conn)
+                                 :on-hide hide}
+     [:> js/ReactBootstrap.Modal.Header {:close-button true}
+      [:> js/ReactBootstrap.Modal.Title
+       "Start a new game"]]
+     [:> js/ReactBootstrap.Modal.Body
+      [:form
+       [:div.form-group
+        [:label {:for "scenario-id"}
+         "Scenario"]
+        (into [:select.form-control {:id "scenario-id"
+                                     :selected (some-> @selected-scenario-id name)}]
+              (for [[scenario-id {:keys [description]}] data/scenario-definitions]
+                [:option {:value (name scenario-id)}
+                 description]))
+        [:> js/ReactBootstrap.Modal.Footer
+         [:button.btn.btn-primary {:on-click start}
+          "Start"]
+         [:button.btn.btn-default {:on-click hide}
+          "Cancel"]]]]]]))
 
 ;; TODO: turn entire game interface into it's own component
 
 (defn app-root [{:keys [conn ev-chan] :as app}]
   [:div
+   [faction-settings app]
    [unit-picker app]
+   [new-game-settings app]
+   ;; TODO: break win dialog out into it's own component
+   ;; TODO: add continue + start new game buttons
    [:> js/ReactBootstrap.Modal {:show @(subs/show-win-dialog? conn)
                                 :on-hide #(router/dispatch ev-chan [::events.ui/hide-win-dialog])}
     [:> js/ReactBootstrap.Modal.Header
@@ -353,7 +433,7 @@
      "Thanks for playing Zetawar! If you're interested in staying up-to-date"
      " with Zetawar as it develops, please follow "
      [:a {:href "https://twitter.com/ZetawarGame"}
-      "@ZetawarGame"]
+      ]
      " on Twitter."]
     [:> js/ReactBootstrap.Modal.Footer
      [:button.btn.btn-default {:on-click #(router/dispatch ev-chan [::events.ui/hide-win-dialog])}

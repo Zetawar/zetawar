@@ -67,6 +67,7 @@
                :attack-strengths
                {:personnel 8}}})
 
+;; TODO: rename to maps
 (def map-definitions
   {:sterlings-aruba
    {:id :sterlings-aruba
@@ -311,9 +312,11 @@
     }
    })
 
+;; TODO: rename to scenarios
 (def scenario-definitions
   {:sterlings-aruba-multiplayer
    {:id :sterlings-aruba-multiplayer
+    :description "Sterling's Aruba Multiplayer"
     :map-id :sterlings-aruba
     :max-unit-count 10
     :credits-per-base 100

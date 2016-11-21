@@ -3,6 +3,7 @@
    [com.stuartsierra.component :as component]
    [posh.core :as posh]))
 
+;; TODO: add dispatch function
 (defrecord App [datascript router timbre conn ev-chan notify-pub players locale]
   component/Lifecycle
   (start [component]

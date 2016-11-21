@@ -96,25 +96,30 @@
 ;;; Factions
 
 (deftrack faction-eids [conn]
-  (->> @(posh/q '[:find ?f ?o
+  (->> @(posh/q '[:find ?f
                   :where
                   [_  :app/game ?g]
-                  [?g :game/factions ?f]
-                  [?f :faction/order ?o]]
+                  [?g :game/factions ?f]]
                 conn)
-       (sort-by second)
-
        (map first)
        (into [])))
 
 (def faction-pull '[:faction/color
                     :faction/credits
+                    :faction/player-type
                     :faction/ai
-                    :faction/next-faction])
+                    :faction/next-faction
+                    :faction/order])
+
+(deftrack factions-by-eid [conn]
+  (->> @(faction-eids conn)
+       (map (fn [eid] [eid @(posh/pull conn faction-pull eid)]))
+       (into {})))
 
 (deftrack factions [conn]
-  (->> @(faction-eids conn)
-       (map (fn [f] @(posh/pull conn faction-pull f)))
+  (->> @(factions-by-eid conn)
+       (map second)
+       (sort-by :faction/order)
        (into [])))
 
 (deftrack faction-eid->base-count [conn]
@@ -403,6 +408,12 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; User Interface
 
+(deftrack faction-to-configure [conn]
+  (some->> @(app conn)
+           :app/faction-to-configure
+           e
+           (get @(factions-by-eid conn))))
+
 (deftrack show-unit-picker? [conn]
   (:app/show-unit-picker @(app conn)))
 
@@ -410,3 +421,6 @@
   (and @(current-faction-won? conn)
        (not (:faction/ai @(current-faction conn)))
        (not (:app/hide-win-dialog @(app conn)))))
+
+(deftrack show-new-game-settings? [conn]
+  (:app/show-new-game-settings @(app conn)))
