@@ -22,8 +22,8 @@
                      [?a :app/game]]
                    conn)))
 
-(deftrack app [conn]
-  @(posh/pull conn '[*] @(app-eid conn)))
+(defn app [conn]
+  (posh/pull conn '[*] @(app-eid conn)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Game
@@ -34,8 +34,8 @@
                      [_ :app/game ?g]]
                    conn)))
 
-(deftrack game [conn]
-  @(posh/pull conn '[*] @(game-eid conn)))
+(defn game [conn]
+  (posh/pull conn '[*] @(game-eid conn)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Map
