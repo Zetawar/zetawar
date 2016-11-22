@@ -4,4 +4,7 @@
 ;; TODO: add support for doc strings
 (defmacro deftrack [name params* & body]
   `(def ~name
-     (partial r/track (fn ~params* ~@body))))
+     (partial r/track (fn ~name ~params*
+                        (do
+                          #_(js/console.debug "Running sub: " '~name (rest ~params*))
+                          ~@body)))))

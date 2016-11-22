@@ -22,8 +22,8 @@
                      [?a :app/game]]
                    conn)))
 
-(defn app [conn]
-  (posh/pull conn '[*] @(app-eid conn)))
+(deftrack app [conn]
+  @(posh/pull conn '[*] @(app-eid conn)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Game
@@ -34,18 +34,14 @@
                      [_ :app/game ?g]]
                    conn)))
 
-(defn game [conn]
-  (posh/pull conn '[*] @(game-eid conn)))
+(deftrack game [conn]
+  @(posh/pull conn '[*] @(game-eid conn)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Map
 
 (deftrack game-map-eid [conn]
-  (ffirst @(posh/q '[:find ?m
-                     :where
-                     [_  :app/game ?g]
-                     [?g :game/map ?m]]
-                   conn)))
+  (-> @(game conn) :game/map e))
 
 (defn game-map [conn]
   (posh/pull conn
@@ -155,11 +151,7 @@
       (first faction-eids-with-bases))))
 
 (deftrack current-faction-eid [conn]
-  (ffirst @(posh/q '[:find ?f
-                     :where
-                     [_  :app/game ?g]
-                     [?g :game/current-faction ?f]]
-                   conn)))
+  (e (:game/current-faction @(game conn))))
 
 (defn current-faction [conn]
   (posh/pull conn faction-pull @(current-faction-eid conn)))
@@ -204,26 +196,13 @@
   (let [game-eid' @(game-eid conn)
         idx (game/game-pos-idx game-eid' q r)]
     (ffirst @(posh/q '[:find ?u
-                       :in $ ?idx
-                       :where
-                       [?u :unit/game-pos-idx ?idx]]
-                     conn (game/game-pos-idx game-eid' q r)))))
-
-(deftrack current-unit-eid-at [conn q r]
-  (let [game-eid' @(game-eid conn)]
-    (ffirst @(posh/q '[:find ?u
-                       :in $ ?g ?idx
-                       :where
-                       [?u :unit/game-pos-idx ?idx]
-                       [?f :faction/units ?u]
-                       [?g :game/current-faction ?f]]
-                     conn game-eid' (game/game-pos-idx game-eid' q r)))))
+                      :in $ ?idx
+                      :where
+                      [?u :unit/game-pos-idx ?idx]]
+                    conn idx))))
 
 (deftrack unit-at? [conn q r]
   (some? @(unit-eid-at conn q r)))
-
-(deftrack current-unit-at? [conn q r]
-  (some? @(current-unit-eid-at conn q r)))
 
 (deftrack unit-at [conn q r]
   (when-let [unit-eid @(unit-eid-at conn q r)]
@@ -244,6 +223,18 @@
                                     :unit-type/image]}]
                 unit-eid)))
 
+(deftrack current-unit-at [conn q r]
+  (when-let [unit @(unit-at conn q r)]
+    (let [cur-faction-eid @(current-faction-eid conn)]
+      (when (= cur-faction-eid (e (:faction/_units unit)))
+        unit))))
+
+(deftrack current-unit-eid-at [conn q r]
+  (e @(current-unit-at conn q r)))
+
+(deftrack current-unit-at? [conn q r]
+  (some? @(current-unit-at conn q r)))
+
 (deftrack unit-color-at [conn q r]
   (get-in @(unit-at conn q r) [:faction/_units :faction/color]))
 
@@ -251,15 +242,15 @@
   (get-in @(unit-at conn q r) [:unit/type :unit-type/id]))
 
 (deftrack enemy-locations [conn]
-  @(posh/q '[:find ?q ?r
-             :in $ ?g ?cf
-             :where
-             [?g :game/factions ?f]
-             [?f :faction/units ?u]
-             [?u :unit/q ?q]
-             [?u :unit/r ?r]
-             [(not= ?f ?cf)]]
-           conn @(game-eid conn) @(current-faction-eid conn)))
+  @(inspect (posh/q '[:find ?q ?r
+                      :in $ ?g ?cf
+                      :where
+                      [?g :game/factions ?f]
+                      [?f :faction/units ?u]
+                      [?u :unit/q ?q]
+                      [?u :unit/r ?r]
+                      [(not= ?f ?cf)]]
+                    conn @(game-eid conn) @(current-faction-eid conn))))
 
 (deftrack enemy-at? [conn q r]
   (contains? @(enemy-locations conn) [q r]))
@@ -357,25 +348,31 @@
       not-empty))
 
 (deftrack selected-unit [conn]
-  @(apply unit-at conn @(selected-hex conn)))
+  (when-let [[q r] @(selected-hex conn)]
+    @(unit-at conn q r)))
 
 (deftrack unit-selected? [conn]
-  @(apply unit-at? conn @(selected-hex conn)))
+  (when-let [[q r] @(selected-hex conn)]
+    @(unit-at? conn q r)))
 
-(defn selected-can-move? [conn]
-  (apply can-move? conn @(selected-hex conn)))
+(deftrack selected-can-move? [conn]
+  (when-let [[q r] @(selected-hex conn)]
+    @(can-move? conn q r)))
 
-(defn selected-can-attack? [conn]
-  (apply can-attack? conn @(selected-hex conn)))
+(deftrack selected-can-attack? [conn]
+  (when-let [[q r] @(selected-hex conn)]
+    @(can-attack? conn q r)))
 
-(defn selected-can-repair? [conn]
-  (apply can-repair? conn @(selected-hex conn)))
+(deftrack selected-can-repair? [conn]
+  (when-let [[q r] @(selected-hex conn)]
+    @(can-repair? conn q r)))
 
-(defn selected-can-capture? [conn]
-  (apply can-capture? conn @(selected-hex conn)))
+(deftrack selected-can-capture? [conn]
+  (when-let [[q r] @(selected-hex conn)]
+    @(can-capture? conn q r)))
 
-(deftrack selected-can-build? [conn q r]
-  (let [[q r] @(selected-hex conn q r)]
+(deftrack selected-can-build? [conn]
+  (when-let [[q r] @(selected-hex conn)]
     (and (not @(unit-selected? conn q r))
          @(current-base? conn q r))))
 
@@ -392,18 +389,18 @@
   (contains? @(valid-destinations-for-selected conn) [q r]))
 
 (deftrack selected-can-move-to-targeted? [conn]
-  (let [[tq tr] @(targeted-hex conn)]
+  (when-let [[q r] @(targeted-hex conn)]
     (and @(selected-can-move? conn)
-         (contains? @(valid-destinations-for-selected conn) [tq tr]))))
+         (contains? @(valid-destinations-for-selected conn) [q r]))))
 
 (deftrack enemy-in-range-of-selected? [conn q r]
-  (let [[selected-q selected-r] @(selected-hex conn)]
+  (when-let [[selected-q selected-r] @(selected-hex conn)]
     @(in-range-of-enemy-at? conn selected-q selected-r q r)))
 
 (deftrack selected-can-attack-targeted? [conn]
-  (let [[tq tr] @(targeted-hex conn)]
+  (when-let [[q r] @(targeted-hex conn)]
     (and @(selected-can-attack? conn)
-         @(enemy-in-range-of-selected? conn tq tr))))
+         @(enemy-in-range-of-selected? conn q r))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; User Interface

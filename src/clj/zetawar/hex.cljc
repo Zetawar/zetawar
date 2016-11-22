@@ -52,10 +52,3 @@
     (max (abs (- x1 x2))
          (abs (- y1 y2))
          (abs (- z1 z2)))))
-
-(def offset->pixel
-  (memoize
-   (fn [q r]
-     (if (= 0 (mod r 2))
-       [(* q 32) (* r 26)]
-       [(+ 16 (* q 32)) (+ 26 (* (- r 1) 26))]))))

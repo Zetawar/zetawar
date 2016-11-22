@@ -1,23 +1,28 @@
 (ns zetawar.components.app
   (:require
    [com.stuartsierra.component :as component]
-   [posh.core :as posh]))
+   [posh.core :as posh]
+   [zetawar.router :as router]))
 
-;; TODO: add dispatch function
 (defrecord App [datascript router timbre conn ev-chan notify-pub players locale]
   component/Lifecycle
   (start [component]
-    (assoc component
-           :conn (:conn datascript)
-           :ev-chan (:ev-chan router)
-           :notify-pub (:notify-pub router)
-           :players (:players router)
-           :locale :en))
+    (let [{:keys [conn]} datascript
+          {:keys [ev-chan notify-pub players]} router
+          dispatch #(router/dispatch ev-chan %)]
+      (assoc component
+             :conn conn
+             :ev-chan ev-chan
+             :notify-pub notify-pub
+             :dispatch dispatch
+             :players players
+             :locale :en)))
   (stop [component]
     (assoc component
            :datascript nil
            :conn nil
            :ev-chan nil
+           :dispatch nil
            :players nil
            :locale nil)))
 
