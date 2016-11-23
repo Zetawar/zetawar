@@ -11,6 +11,7 @@
    [zetawar.events.player]
    [zetawar.events.ui]
    [zetawar.game :as game]
+   [zetawar.players.custom-ai]
    [zetawar.players.human]
    [zetawar.players.reference-ai]
    [zetawar.site :as site]

@@ -1,5 +1,6 @@
 (ns zetawar.events.ui
   (:require
+   [cljsjs.clipboard]
    [datascript.core :as d]
    [taoensso.timbre :as log]
    [zetawar.app :as app]

@@ -10,6 +10,8 @@
 (def player-types [[::human        {:description "Human"
                                     :ai          false}]
                    [::reference-ai {:description "Reference AI"
+                                    :ai          true}]
+                   [::custom-ai    {:description "Custom AI"
                                     :ai          true}]])
 
 (def player-types-by-id

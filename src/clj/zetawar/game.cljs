@@ -176,6 +176,9 @@
   [(:unit/q unit)
    (:unit/r unit)])
 
+(defn unit-color [unit]
+  (get-in unit [:faction/_units :faction/color]))
+
 (defn unit-at [db game q r]
   (->> (game-pos-idx game q r)
        (d/datoms db :avet :unit/game-pos-idx)

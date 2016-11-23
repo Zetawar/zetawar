@@ -29,12 +29,6 @@
 ;; - set map
 ;; - add factions (defined by map)
 
-;; Turn:
-;; - set current faction
-;; - build
-;; - unit actions - move, attack, repair, capture
-;; - set faction done
-
 ;; Faction actions:
 ;; - build (faction-eid, x, y, unit-type-id)
 ;; - end-turn (faction-eid)
@@ -76,9 +70,7 @@
                 :xlink-href "/images/game/borders/selected.png"}])]))
 
 (defn unit-image [unit]
-  (let [color-name (-> unit
-                       (get-in [:faction/_units :faction/color])
-                       name)]
+  (let [color-name (-> unit game/unit-color name)]
     (-> unit
         (get-in [:unit/type :unit-type/image])
         (string/replace "COLOR" color-name))))
@@ -161,11 +153,9 @@
      [:span.text-muted.pull-right (str "+" income)
       [:span.hidden-md "/turn"]]]))
 
-(defn end-turn-link [{:keys [conn dispatch] :as app}]
+(defn copy-url-link [{:keys [conn dispatch] :as app}]
   (let [clipboard (atom nil)
-        text-fn (fn []
-                  (dispatch [::events.ui/end-turn])
-                  js/window.location)]
+        text-fn (fn [] js/window.location)]
     (r/create-class
      {:component-did-mount
       (fn [this]
@@ -177,13 +167,16 @@
       :reagent-render
       (fn [this]
         [:a {:href "#" :on-click #(.preventDefault %)}
-         "End Turn?"])})))
+         "Copy Link"])})))
 
 (defn faction-status [{:keys [conn dispatch] :as app}]
   (let [{:keys [game/round]} @(subs/game conn)
         base-count @(subs/current-base-count conn)]
     [:div#faction-status
-     [end-turn-link app]
+     [:a {:href "#" :on-click #(dispatch [::events.ui/end-turn])}
+      "End Turn?"]
+     " · "
+     [copy-url-link app]
      [:div.pull-right
       [:a {:href "#"
            :on-click (fn [e]

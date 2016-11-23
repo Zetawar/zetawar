@@ -22,8 +22,8 @@
                      [?a :app/game]]
                    conn)))
 
-(defn app [conn]
-  (posh/pull conn '[*] @(app-eid conn)))
+(deftrack app [conn]
+  @(inspect (posh/pull conn '[*] @(app-eid conn))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Game
@@ -34,8 +34,8 @@
                      [_ :app/game ?g]]
                    conn)))
 
-(defn game [conn]
-  (posh/pull conn '[*] @(game-eid conn)))
+(deftrack game [conn]
+  @(posh/pull conn '[*] @(game-eid conn)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Map
@@ -43,8 +43,8 @@
 (deftrack game-map-eid [conn]
   (-> @(game conn) :game/map e))
 
-(defn game-map [conn]
-  (posh/pull conn
+(deftrack game-map [conn]
+  @(posh/pull conn
              '[:map/name]
              @(game-map-eid conn)))
 
@@ -169,7 +169,7 @@
 (deftrack current-income [conn]
   (let [{:keys [game/credits-per-base]} @(game conn)]
     (* credits-per-base
-       @(current-base-count conn @(current-faction-eid conn)))))
+       @(current-base-count conn))))
 
 (deftrack enemy-unit-count [conn]
   (or (ffirst @(posh/q '[:find (count ?u)
@@ -230,7 +230,7 @@
         unit))))
 
 (deftrack current-unit-eid-at [conn q r]
-  (e @(current-unit-at conn q r)))
+  (some-> @(current-unit-at conn q r) e))
 
 (deftrack current-unit-at? [conn q r]
   (some? @(current-unit-at conn q r)))
@@ -273,7 +273,6 @@
 (deftrack can-move? [conn q r]
   (when-let [unit @(unit-at conn q r)]
     (game/can-move? @conn @(game conn) unit)))
-
 (deftrack can-attack? [conn q r]
   (when-let [unit @(unit-at conn q r)]
     (and (game/can-attack? @conn @(game conn) unit)
@@ -373,7 +372,7 @@
 
 (deftrack selected-can-build? [conn]
   (when-let [[q r] @(selected-hex conn)]
-    (and (not @(unit-selected? conn q r))
+    (and (not @(unit-selected? conn))
          @(current-base? conn q r))))
 
 (deftrack valid-destinations-for-selected [conn]

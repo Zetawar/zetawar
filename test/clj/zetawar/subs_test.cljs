@@ -119,7 +119,8 @@
                :faction/color
                :faction/credits
                :faction/next-faction
-               :faction/ai}
+               :faction/ai
+               :faction/order}
              (into #{} (keys @(subs/current-faction conn))))))))
 
 (deftest test-current-unit-count
