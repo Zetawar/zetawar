@@ -694,7 +694,7 @@
        :unit/attacked-count 0
        :unit/repaired false
        :unit/capturing false
-       :unit/state (-> unit-type built-state log/spy e)}
+       :unit/state (-> unit-type built-state e)}
       {:db/id (e cur-faction)
        :faction/credits (- credits cost)
        :faction/units -1}])))
