@@ -13,9 +13,14 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Global
 
+;; TODO: replace alert with flash
+
 (defmethod router/handle-event ::alert
   [{:as handler-ctx :keys [ev-chan conn db]} [_ text]]
   (js/alert text))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Selection
 
 ;; New click logic:
 ;; - no selection?
@@ -31,9 +36,6 @@
 ;;       - set target to enemy
 ;;     - tile is a valid move destination?
 ;;       - set target to terrain
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; Selection
 
 (defmethod router/handle-event ::select-hex
   [{:as handler-ctx :keys [db]} [_ ev-q ev-r]]

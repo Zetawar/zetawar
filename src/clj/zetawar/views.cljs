@@ -16,14 +16,6 @@
    [zetawar.util :refer [breakpoint inspect only oonly]]
    [zetawar.views.common :refer [footer kickstarter-alert navbar]]))
 
-;; TODO: decide whether faction/terrains or terrain/owner is better
-;; TODO: make faction/color a string instead of a symbol
-
-;; new-game-tx function
-;; - set round
-;; - set map
-;; - add factions (defined by map)
-
 (def offset->pixel
   (memoize
    (fn [q r]
