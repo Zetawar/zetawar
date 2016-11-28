@@ -21,7 +21,7 @@
   (start [player])
   (stop [player]))
 
-(defmulti new-player (fn [player-ctx player-type faction-color]))
+(defmulti new-player (fn [player-ctx player-type faction-color] player-type))
 
 (defn notify [notify-chan msg]
   (log/debugf "Notifying player: %s" (pr-str msg))
