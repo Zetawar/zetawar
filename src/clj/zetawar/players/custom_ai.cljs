@@ -43,10 +43,10 @@
 
 (defmethod players/new-player ::players/custom-ai
   [{:as app-ctx :keys [ev-chan notify-pub]} player-type faction-color]
-  (let [fns {:action-ctx action-ctx
-             :actor-score-fn actor-score-fn
-             :base-action-score-fn base-action-score-fn
-             :unit-action-score-fn unit-action-score-fn}]
+  (let [fns {:action-ctx #'action-ctx
+             :actor-score-fn #'actor-score-fn
+             :base-action-score-fn #'base-action-score-fn
+             :unit-action-score-fn #'unit-action-score-fn}]
     (new-simple-embedded-ai-player faction-color
                                    ev-chan
                                    notify-pub
