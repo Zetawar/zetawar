@@ -520,12 +520,8 @@
          (> defender-count defender-damage)
          (conj {:db/id (e defender)
                 :unit/count (- defender-count defender-damage)
-                :unit/attacked-count (inc (:unit/attacked-count defender))}
-               {:db/id -101
-                :game/_attacked-froms (e game)
-                :unit/_attacked-froms (e defender)
-                :attacked-from/q (:unit/q attacker)
-                :attacked-from/r (:unit/r attacker)})
+                :unit/attacked-count (inc (:unit/attacked-count defender))
+                :unit/attacked-from (e attacker-terrain)})
 
          (= defender-count defender-damage)
          (conj [:db.fn/retractEntity (e defender)])
@@ -708,26 +704,21 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; End Turn
 
-(defn end-turn-capture-tx [db game unit]
-  (let [{:keys [unit/capture-round unit/q unit/r]} unit
-        faction (unit-faction db unit)
-        terrain (checked-base-at db game q r)]
-    [[:db/add (e terrain) :terrain/owner (e faction)]
-     [:db.fn/retractEntity (e unit)]]))
-
 (defn unit-end-turn-tx [db game unit]
-  (let [{:keys [unit/capturing unit/capture-round]} unit]
-    (cond-> [{:db/id (e unit)
+  (let [{:keys [unit/q unit/r unit/capturing unit/capture-round]} unit]
+    (if (and capturing (= capture-round (:game/round game)))
+      (let [faction (unit-faction db unit)
+            terrain (checked-base-at db game q r)]
+        [[:db/add (e terrain) :terrain/owner (e faction)]
+         [:db.fn/retractEntity (e unit)]])
+      (into [{:db/id (e unit)
               :unit/repaired false
               :unit/move-count 0
               :unit/attack-count 0
               :unit/attacked-count 0
               :unit/state (-> unit start-state e)}]
-      (and capturing (= capture-round (:game/round game)))
-      (into (end-turn-capture-tx db game unit)))))
-
-(defn remove-attacked-from-tx [attacked-from]
-  [[:db.fn/retractEntity (e attacked-from)]])
+            (map (fn [u] [:db/retract (e unit) :unit/attacked-from (e u)]))
+            (:unit/attacked-from unit)))))
 
 (defn end-turn-tx
   "Return a transaction that completes captures, clears per round unit flags,
@@ -743,13 +734,12 @@
                     cur-round)
         units (:faction/units cur-faction)
         attacked-froms (:game/attacked-froms game)]
-    (-> [{:db/id (e next-faction)
-          :faction/credits credits}
-         {:db/id (e game)
-          :game/round new-round
-          :game/current-faction (e next-faction)}]
-        (into (mapcat #(unit-end-turn-tx db game %) units))
-        (into (mapcat remove-attacked-from-tx attacked-froms)))))
+    (into [{:db/id (e next-faction)
+            :faction/credits credits}
+           {:db/id (e game)
+            :game/round new-round
+            :game/current-faction (e next-faction)}]
+          (mapcat #(unit-end-turn-tx db game %) units))))
 
 (defn end-turn! [conn game-id]
   (let [db @conn

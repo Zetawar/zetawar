@@ -19,8 +19,6 @@
                                      :db/isComponent true}
    :game/starting-faction           {:db/valueType   :db.type/ref}
    :game/current-faction            {:db/valueType   :db.type/ref}
-   :game/attacked-froms             {:db/valueType   :db.type/ref
-                                     :db/cardinality :db.cardinality/many}
 
    ;; Faction
    :faction/next-faction            {:db/valueType   :db.type/ref}
@@ -32,7 +30,7 @@
    ;; Unit
    :unit/type                       {:db/valueType   :db.type/ref}
    :unit/game-pos-idx               {:db/unique      :db.unique/identity}
-   :unit/attacked-froms             {:db/valueType   :db.type/ref
+   :unit/attacked-from              {:db/valueType   :db.type/ref
                                      :db/cardinality :db.cardinality/many}
    :unit/state                      {:db/valueType   :db.type/ref}
    :unit/terrain                    {:db/valueType   :db.type/ref}
