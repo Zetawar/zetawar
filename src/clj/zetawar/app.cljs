@@ -32,9 +32,10 @@
     [targeted-q targeted-r]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; Game State Encoding
+;;; Game state encoding
 
 ;; TODO: move to encoding or serialization ns?
+;; TODO: switch to base-122 encoding?
 
 (defn encode-game-state [game-state]
   (let [writer (transit/writer :json)]
@@ -54,7 +55,7 @@
     (transit/read reader transit-game-state)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; Player Setup
+;;; Player setup
 
 (defn create-players! [{:as app-ctx :keys [conn players]}]
   (let [factions (qess '[:find ?f
@@ -75,7 +76,7 @@
         (swap! players assoc color player)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; Game Setup
+;;; Game setup
 
 (defn start-new-game!
   ([{:as app-ctx :keys [conn players]} scenario-id]
@@ -88,7 +89,8 @@
            game-id (game/load-scenario! conn map-definitions scenario-def)
            app-eid (or (some-> (root @conn) e) -101)]
        (d/transact! conn (cond-> [{:db/id app-eid
-                                   :app/game [:game/id game-id]}]
+                                   :app/game [:game/id game-id]
+                                   :app/hide-win-message false}]
                            game (conj [:db.fn/retractEntity (e game)])))
        ;; TODO: remove test specific code
        (if players

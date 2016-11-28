@@ -10,6 +10,9 @@
    [zetawar.router :as router]
    [zetawar.util :refer [breakpoint inspect only oonly]]))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Global
+
 (defmethod router/handle-event ::alert
   [{:as handler-ctx :keys [ev-chan conn db]} [_ text]]
   (js/alert text))
@@ -28,6 +31,9 @@
 ;;       - set target to enemy
 ;;     - tile is a valid move destination?
 ;;       - set target to terrain
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Selection
 
 (defmethod router/handle-event ::select-hex
   [{:as handler-ctx :keys [db]} [_ ev-q ev-r]]
@@ -129,6 +135,9 @@
            (conj [:db/retract (e app) :app/targeted-q targeted-q]
                  [:db/retract (e app) :app/targeted-r targeted-r]))}))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Unit and base actions
+
 (defmethod router/handle-event ::move-selected-unit
   [{:as handler-ctx :keys [db]} _]
   (let [game (app/current-game db)
@@ -144,6 +153,7 @@
                   :action/to-r to-r}]
                 [::move-selection from-q from-r to-q to-r]]}))
 
+;; TODO: replace with move selection to target
 (defmethod router/handle-event ::move-selection
   [{:as handler-ctx :keys [db]} [_ from-q from-r to-q to-r]]
   (let [app (app/root db)
@@ -203,7 +213,6 @@
                   :action/r r}]
                 [::clear-selection]]}))
 
-;; TODO: remove unit type hard coding
 (defmethod router/handle-event ::build-unit
   [{:as handler-ctx :keys [db]} [_ unit-type-id]]
   (let [game (app/current-game db)
@@ -230,73 +239,43 @@
   [{:as handler-ctx :keys [ev-chan conn db]} _]
   (app/set-url-game-state! @conn))
 
-(defmethod router/handle-event ::new-game
-  [{:as handler-ctx :keys [ev-chan conn]} [_ scenario-id]]
-  (app/start-new-game! handler-ctx :sterlings-aruba-multiplayer))
-
-;; TODO: notify new AIs to start turn if they're plays as the current faction
-;; TODO: find a way to make player swapping nicer (maybe put in router?)
-;; TODO: cleanup return value construction
-(defmethod router/handle-event ::toggle-faction-ai
-  [{:as handler-ctx :keys [ev-chan conn db players]} [_ faction]]
-  (let [{:as app :keys [ai-turn-stepping]} (app/root db)
-        {:keys [game/factions]} (app/current-game db)
-        {:keys [faction/ai faction/color]} faction
-        other-factions (remove #(= (e faction) (e %)) factions)
-        tx [[:db/add (e faction) :faction/ai (not ai)]]
-        cur-player (color @players)
-        new-player (if ai
-                     (players/new-player handler-ctx ::players/human color)
-                     (players/new-player handler-ctx ::players/reference-ai color))
-        notify (when-not ai
-                 [[:zetawar.players/start-turn color]])]
-    (players/stop cur-player)
-    (players/start new-player)
-    (swap! players assoc color new-player)
-    (if (and (not ai)
-             (= (count other-factions)
-                (count (filter :faction/ai other-factions))))
-      {:tx (conj tx [:db/add (e app) :app/ai-turn-stepping (not ai-turn-stepping)])
-       :dispatch [[::alert "AI enabled for all factions, enabling AI turn stepping."]]
-       :notify notify}
-      {:tx (conj tx [:db/add (e app) :app/ai-turn-stepping false])
-       :notify notify})))
-
-(defmethod router/handle-event ::show-new-game-settings
-  [{:as handler-ctx :keys [ev-chan db]} _]
-  (let [app (app/root db)]
-    {:tx [[:db/add (e app) :app/show-new-game-settings true]]}))
-
-(defmethod router/handle-event ::hide-new-game-settings
-  [{:as handler-ctx :keys [ev-chan db]} _]
-  (let [app (app/root db)]
-    {:tx [[:db/add (e app) :app/show-new-game-settings false]]}))
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Unit picker
 
 (defmethod router/handle-event ::show-unit-picker
   [{:as handler-ctx :keys [ev-chan db]} _]
   (let [app (app/root db)]
-    {:tx [[:db/add (e app) :app/show-unit-picker true]]}))
+    {:tx [[:db/add (e app) :app/picking-unit true]]}))
 
 (defmethod router/handle-event ::hide-unit-picker
   [{:as handler-ctx :keys [ev-chan db]} _]
   (let [app (app/root db)]
-    {:tx [[:db/add (e app) :app/show-unit-picker false]]}))
+    {:tx [[:db/add (e app) :app/picking-unit false]]}))
 
-(defmethod router/handle-event ::hide-win-dialog
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Win message
+
+(defmethod router/handle-event ::hide-win-message
   [{:as handler-ctx :keys [ev-chan db]} _]
   (let [app (app/root db)]
-    {:tx [[:db/add (e app) :app/hide-win-dialog true]]}))
+    {:tx [[:db/add (e app) :app/hide-win-message true]]}))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Faction configuration
 
 (defmethod router/handle-event ::configure-faction
   [{:as handler-ctx :keys [ev-chan db]} [_ faction]]
   (let [app (app/root db)]
-    {:tx [[:db/add (e app) :app/faction-to-configure (e faction)]]}))
+    {:tx [[:db/add (e app) :app/configuring-faction (e faction)]]}))
 
 (defmethod router/handle-event ::hide-faction-settings
-  [{:as handler-ctx :keys [ev-chan db]} [_ faction]]
-  (let [app (app/root db)]
-    {:tx [[:db/retract (e app) :app/faction-to-configure (e (:app/faction-to-configure app))]]}))
+  [{:as handler-ctx :keys [ev-chan db]} _]
+  (let [app (app/root db)
+        faction-eid (-> app :app/configuring-faction e)]
+    {:tx [[:db/retract (e app) :app/configuring-faction faction-eid]]}))
 
+;; TODO: find a way to make player swapping nicer (maybe put in router?)
+;; TODO: cleanup return value construction
 (defmethod router/handle-event ::set-faction-player-type
   [{:as handler-ctx :keys [ev-chan conn db players]} [_ faction player-type-id]]
   (let [{:as app :keys [ai-turn-stepping]} (app/root db)
@@ -316,7 +295,24 @@
     (if (and ai (= (count other-factions)
                    (count (filter :faction/ai other-factions))))
       {:tx (conj tx [:db/add (e app) :app/ai-turn-stepping (not ai-turn-stepping)])
-       :dispatch [[::alert "AI enabled for all factions, enabling AI turn stepping."]]
+       :dispatch [[::alert "AI enabled for all factions. Enabling turn stepping."]]
        :notify notify}
       {:tx (conj tx [:db/add (e app) :app/ai-turn-stepping false])
        :notify notify})))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; New game
+
+(defmethod router/handle-event ::show-new-game-settings
+  [{:as handler-ctx :keys [ev-chan db]} _]
+  (let [app (app/root db)]
+    {:tx [[:db/add (e app) :app/configuring-new-game true]]}))
+
+(defmethod router/handle-event ::hide-new-game-settings
+  [{:as handler-ctx :keys [ev-chan db]} _]
+  (let [app (app/root db)]
+    {:tx [[:db/add (e app) :app/configuring-new-game false]]}))
+
+(defmethod router/handle-event ::start-new-game
+  [{:as handler-ctx :keys [ev-chan conn]} [_ scenario-id]]
+  (app/start-new-game! handler-ctx scenario-id))

@@ -11,15 +11,10 @@
    [zetawar.db :refer [e qe]]
    [zetawar.events.ui :as events.ui]
    [zetawar.game :as game]
-   [zetawar.hex :as hex]
    [zetawar.players :as players]
-   [zetawar.router :as router]
    [zetawar.subs :as subs]
    [zetawar.util :refer [breakpoint inspect only oonly]]
    [zetawar.views.common :refer [footer kickstarter-alert navbar]]))
-
-;; - terrains
-;; - factions
 
 ;; TODO: decide whether faction/terrains or terrain/owner is better
 ;; TODO: make faction/color a string instead of a symbol
@@ -28,16 +23,6 @@
 ;; - set round
 ;; - set map
 ;; - add factions (defined by map)
-
-;; Faction actions:
-;; - build (faction-eid, x, y, unit-type-id)
-;; - end-turn (faction-eid)
-
-;; Unit actions:
-;; - move (faction-eid, cx, cy, nx, ny)
-;; - attack (faction-eid, ax, ay, dx, dy)
-;; - repair (faction-eid, x, y)
-;; - capture (faction-eid, x, y)
 
 (def offset->pixel
   (memoize
@@ -140,6 +125,7 @@
         (for [terrain @(subs/terrains conn)]
           [tile app terrain])))
 
+;; TODO: base board size on map size
 (defn board [app]
   [:svg#board {:width 400 :height 300}
    [tiles app]])
@@ -173,6 +159,7 @@
   (let [{:keys [game/round]} @(subs/game conn)
         base-count @(subs/current-base-count conn)]
     [:div#faction-status
+     ;; TODO: make link red
      [:a {:href "#" :on-click #(dispatch [::events.ui/end-turn])}
       "End Turn?"]
      " · "
@@ -256,7 +243,10 @@
                 active (= faction-eid @(subs/current-faction-eid conn))
                 li-class (if active
                            "list-group-item active"
-                           "list-group-item")]
+                           "list-group-item")
+                icon-class (if (:faction/ai faction)
+                             "fa fa-fw fa-laptop clickable"
+                             "fa fa-fw fa-user clickable")]
             [:li {:class li-class}
              color
              " "
@@ -264,41 +254,37 @@
                [:span.fa.fa-angle-double-left
                 {:aria-hidden true}])
              [:div.pull-right
-              (if (:faction/ai faction)
-                [:span.fa.fa-fw.fa-laptop.clickable
-                 {:aria-hidden true
-                  :on-click #(dispatch [::events.ui/configure-faction faction])
-                  :title "Disable AI"}]
-                [:span.fa.fa-fw.fa-user.clickable
-                 {:aria-hidden true
-                  :on-click #(dispatch [::events.ui/configure-faction faction])
-                  :title "Enable AI"}])]]))))
+              [:span
+               {:class icon-class
+                :aria-hidden true
+                :on-click #(dispatch [::events.ui/configure-faction faction])
+                :title "Configure faction"}]]]))))
 
 ;; TODO: cleanup unit-picker
 (defn unit-picker [{:keys [conn dispatch] :as app}]
   (let [unit-types @(subs/available-unit-types conn)
         cur-faction @(subs/current-faction conn)
         color (name (:faction/color cur-faction))
-        hide #(dispatch [::events.ui/hide-unit-picker])]
-    [:> js/ReactBootstrap.Modal {:show @(subs/show-unit-picker? conn)
-                                 :on-hide hide}
+        hide-picker #(dispatch [::events.ui/hide-unit-picker])]
+    [:> js/ReactBootstrap.Modal {:show @(subs/picking-unit? conn)
+                                 :on-hide hide-picker}
      [:> js/ReactBootstrap.Modal.Header {:close-button true}
       [:> js/ReactBootstrap.Modal.Title
        "Select a unit to build"]]
      [:> js/ReactBootstrap.Modal.Body
       (into [:div.unit-picker]
             (for [{:keys [unit-type/id] :as unit-type} unit-types]
-              (let [image (->> (string/replace (:unit-type/image unit-type)
+              (let [;; TODO: replace with unit-type-image
+                    image (->> (string/replace (:unit-type/image unit-type)
                                                "COLOR" color)
                                (str "/images/game/"))
                     media-class (if (:affordable unit-type)
                                   "media clickable"
-                                  "media clickable text-muted")
-                    build-unit #(do
-                                  (dispatch [::events.ui/hide-unit-picker])
-                                  (dispatch [::events.ui/build-unit id]))]
+                                  "media clickable text-muted")]
                 [:div {:class media-class
-                       :on-click build-unit}
+                       :on-click #(when (:affordable unit-type)
+                                    (dispatch [::events.ui/hide-unit-picker])
+                                    (dispatch [::events.ui/build-unit id]))}
                  [:div.media-left.media-middle
                   [:img {:src image}]]
                  [:div.media-body
@@ -306,15 +292,15 @@
                    (:unit-type/name unit-type)]
                   (str "Cost: " (:unit-type/cost unit-type))]])))]
      [:> js/ReactBootstrap.Modal.Footer
-      [:button.btn.btn-default {:on-click hide}
+      [:button.btn.btn-default {:on-click hide-picker}
        "Cancel"]]]))
 
 (defn faction-settings [{:keys [conn dispatch] :as app}]
   (with-let [faction (subs/faction-to-configure conn)
              selected-player-type (r/atom nil)
-             hide #(do
-                     (.preventDefault %)
-                     (dispatch [::events.ui/hide-faction-settings]))
+             hide-settings #(do
+                              (.preventDefault %)
+                              (dispatch [::events.ui/hide-faction-settings]))
              select-player-type #(reset! selected-player-type (.-target.value %))
              set-player-type #(do
                                 (.preventDefault %)
@@ -325,7 +311,7 @@
 
                                 (dispatch [::events.ui/hide-faction-settings]))]
     [:> js/ReactBootstrap.Modal {:show (some? @faction)
-                                 :on-hide hide}
+                                 :on-hide hide-settings}
      [:> js/ReactBootstrap.Modal.Header {:close-button true}
       [:> js/ReactBootstrap.Modal.Title
        "Configure faction"]]
@@ -344,22 +330,22 @@
         [:> js/ReactBootstrap.Modal.Footer
          [:button.btn.btn-primary {:on-click set-player-type}
           "Save"]
-         [:button.btn.btn-default {:on-click hide}
+         [:button.btn.btn-default {:on-click hide-settings}
           "Cancel"]]]]]]))
 
 (defn new-game-settings [{:keys [conn dispatch] :as app}]
   (with-let [selected-scenario-id (r/atom :sterlings-aruba-multiplayer)
-             hide #(do
-                     (.preventDefault %)
-                     (dispatch [::events.ui/hide-new-game-settings]))
+             hide-settings #(do
+                              (.preventDefault %)
+                              (dispatch [::events.ui/hide-new-game-settings]))
              select-scenario #(reset! selected-scenario-id (keyword (.-target.value %)))
-             start #(do
-                      (.preventDefault %)
-                      (dispatch [::events.ui/new-game @selected-scenario-id])
-                      (reset! selected-scenario-id nil)
-                      (dispatch [::events.ui/hide-new-game-settings]))]
-    [:> js/ReactBootstrap.Modal {:show @(subs/show-new-game-settings? conn)
-                                 :on-hide hide}
+             start-new-game #(do
+                               (.preventDefault %)
+                               (dispatch [::events.ui/start-new-game @selected-scenario-id])
+                               (reset! selected-scenario-id nil)
+                               (dispatch [::events.ui/hide-new-game-settings]))]
+    [:> js/ReactBootstrap.Modal {:show @(subs/configuring-new-game? conn)
+                                 :on-hide hide-settings}
      [:> js/ReactBootstrap.Modal.Header {:close-button true}
       [:> js/ReactBootstrap.Modal.Title
        "Start a new game"]]
@@ -374,9 +360,9 @@
                 [:option {:value (name scenario-id)}
                  description]))
         [:> js/ReactBootstrap.Modal.Footer
-         [:button.btn.btn-primary {:on-click start}
+         [:button.btn.btn-primary {:on-click start-new-game}
           "Start"]
-         [:button.btn.btn-default {:on-click hide}
+         [:button.btn.btn-default {:on-click hide-settings}
           "Cancel"]]]]]]))
 
 ;; TODO: turn entire game interface into it's own component
@@ -388,8 +374,8 @@
    [unit-picker app]
    ;; TODO: break win dialog out into it's own component
    ;; TODO: add continue + start new game buttons
-   [:> js/ReactBootstrap.Modal {:show @(subs/show-win-dialog? conn)
-                                :on-hide #(dispatch [::events.ui/hide-win-dialog])}
+   [:> js/ReactBootstrap.Modal {:show @(subs/show-win-message? conn)
+                                :on-hide #(dispatch [::events.ui/hide-win-message])}
     [:> js/ReactBootstrap.Modal.Header
      [:> js/ReactBootstrap.Modal.Title
       "Congratulations! You won!"]]
@@ -400,7 +386,7 @@
       ]
      " on Twitter."]
     [:> js/ReactBootstrap.Modal.Footer
-     [:button.btn.btn-default {:on-click #(dispatch [::events.ui/hide-win-dialog])}
+     [:button.btn.btn-default {:on-click #(dispatch [::events.ui/hide-win-message])}
       "Close"]]]
    (navbar "Game")
    [:div.container

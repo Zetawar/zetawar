@@ -23,16 +23,13 @@
                    conn)))
 
 (deftrack app [conn]
-  @(inspect (posh/pull conn '[*] @(app-eid conn))))
+  @(posh/pull conn '[*] @(app-eid conn)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Game
 
 (deftrack game-eid [conn]
-  (ffirst @(posh/q '[:find ?g
-                     :where
-                     [_ :app/game ?g]]
-                   conn)))
+  (-> @(app conn) :app/game e))
 
 (deftrack game [conn]
   @(posh/pull conn '[*] @(game-eid conn)))
@@ -45,8 +42,8 @@
 
 (deftrack game-map [conn]
   @(posh/pull conn
-             '[:map/name]
-             @(game-map-eid conn)))
+              '[:map/name]
+              @(game-map-eid conn)))
 
 (deftrack terrain-eid-at [conn q r]
   (let [game-eid' @(game-eid conn)
@@ -73,6 +70,7 @@
      @(posh/pull conn [{:map/terrains terrain-pull}]
                  map-eid'))))
 
+;; TODO: add {:cache :forever} when new version of Posh is released
 (defn current-base-locations [conn]
   (posh/q '[:find ?q ?r
             :where
@@ -241,16 +239,18 @@
 (deftrack unit-type-at [conn q r]
   (get-in @(unit-at conn q r) [:unit/type :unit-type/id]))
 
+;; TODO: add {:cache :forever} when new version of Posh is released
 (deftrack enemy-locations [conn]
-  @(inspect (posh/q '[:find ?q ?r
-                      :in $ ?g ?cf
-                      :where
-                      [?g :game/factions ?f]
-                      [?f :faction/units ?u]
-                      [?u :unit/q ?q]
-                      [?u :unit/r ?r]
-                      [(not= ?f ?cf)]]
-                    conn @(game-eid conn) @(current-faction-eid conn))))
+  @(posh/q '[:find ?q ?r
+             :in $ ?g ?cf
+             :where
+             [_  :app/game ?g]
+             [?g :game/factions ?f]
+             [?f :faction/units ?u]
+             [?u :unit/q ?q]
+             [?u :unit/r ?r]
+             [(not= ?f ?cf)]]
+           conn @(game-eid conn) @(current-faction-eid conn)))
 
 (deftrack enemy-at? [conn q r]
   (contains? @(enemy-locations conn) [q r]))
@@ -296,12 +296,14 @@
       @(can-capture? conn q r)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; Unit Construction
+;;; Unit construction
 
+;; TODO: add {:cache :forever} when new version of Posh is released
 (deftrack available-unit-type-eids [conn]
   (->> @(posh/q '[:find ?ut
                   :in $ ?g
                   :where
+                  [_   :app/game ?g]
                   [?g  :game/current-faction ?f]
                   [?f  :faction/credits ?credits]
                   [?ut :unit-type/cost ?cost]
@@ -322,7 +324,7 @@
          (into []))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; Selection and Target
+;;; Selection and target
 
 (deftrack selected? [conn q r]
   (let [app' @(app conn)]
@@ -402,21 +404,33 @@
          @(enemy-in-range-of-selected? conn q r))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; User Interface
+;;; Unit picker
+
+(deftrack picking-unit? [conn]
+  (:app/picking-unit @(app conn)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Win message
+
+(deftrack show-win-message? [conn]
+  (and @(current-faction-won? conn)
+       (not (:faction/ai @(current-faction conn)))
+       (not (:app/hide-win-message @(app conn)))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Faction configuration
 
 (deftrack faction-to-configure [conn]
   (some->> @(app conn)
-           :app/faction-to-configure
+           :app/configuring-faction
            e
            (get @(factions-by-eid conn))))
 
-(deftrack show-unit-picker? [conn]
-  (:app/show-unit-picker @(app conn)))
+(deftrack configuring-faction? [conn]
+  (some? @(faction-to-configure conn)))
 
-(deftrack show-win-dialog? [conn]
-  (and @(current-faction-won? conn)
-       (not (:faction/ai @(current-faction conn)))
-       (not (:app/hide-win-dialog @(app conn)))))
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; New game configuration
 
-(deftrack show-new-game-settings? [conn]
-  (:app/show-new-game-settings @(app conn)))
+(deftrack configuring-new-game? [conn]
+  (:app/configuring-new-game @(app conn)))

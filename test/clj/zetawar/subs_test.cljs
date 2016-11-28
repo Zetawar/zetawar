@@ -26,7 +26,7 @@
     (testing "returned app has expected attributes"
       (is (:app/game @(subs/app conn))))))
 
-;; TODO: add show-win-dialog? test
+;; TODO: add show-win-message? test
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Game

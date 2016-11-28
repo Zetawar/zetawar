@@ -59,6 +59,7 @@
 
 (declare ^:dynamic *actor-score-fn*)
 
+;; TODO: remove units with nil scores
 (defn choose-actor [db game ctx]
   (let [actor-score (memoize (*actor-score-fn* db game ctx))]
     (->> (game/actionable-actors db game)
@@ -66,6 +67,7 @@
 
 (declare ^:dynamic *base-action-score-fn*)
 
+;; TODO: remove actions with nil scores
 (defn choose-base-action [db game ctx base]
   (let [base-action-score (memoize (*base-action-score-fn* db game ctx base))]
     (->> (game/base-actions db game base)
@@ -73,6 +75,7 @@
 
 (declare ^:dynamic *unit-action-score-fn*)
 
+;; TODO: remove actions with nil scores
 (defn choose-unit-action [db game ctx unit]
   (let [unit-action-score (memoize (*unit-action-score-fn* db game ctx unit))]
     (->> (game/unit-actions db game unit)
