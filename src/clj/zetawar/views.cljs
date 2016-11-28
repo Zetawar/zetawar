@@ -333,8 +333,10 @@
          [:button.btn.btn-default {:on-click hide-settings}
           "Cancel"]]]]]]))
 
+;; TODO: move default-scenario-id to data ns?
 (defn new-game-settings [{:keys [conn dispatch] :as app}]
-  (with-let [selected-scenario-id (r/atom :sterlings-aruba-multiplayer)
+  (with-let [default-scenario-id :sterlings-aruba-multiplayer
+             selected-scenario-id (r/atom default-scenario-id)
              hide-settings #(do
                               (.preventDefault %)
                               (dispatch [::events.ui/hide-new-game-settings]))
@@ -342,7 +344,7 @@
              start-new-game #(do
                                (.preventDefault %)
                                (dispatch [::events.ui/start-new-game @selected-scenario-id])
-                               (reset! selected-scenario-id nil)
+                               (reset! selected-scenario-id default-scenario-id)
                                (dispatch [::events.ui/hide-new-game-settings]))]
     [:> js/ReactBootstrap.Modal {:show @(subs/configuring-new-game? conn)
                                  :on-hide hide-settings}
