@@ -273,6 +273,7 @@
 (deftrack can-move? [conn q r]
   (when-let [unit @(unit-at conn q r)]
     (game/can-move? @conn @(game conn) unit)))
+
 (deftrack can-attack? [conn q r]
   (when-let [unit @(unit-at conn q r)]
     (and (game/can-attack? @conn @(game conn) unit)
