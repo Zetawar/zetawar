@@ -92,6 +92,16 @@
         (game/unit? actor)
         (choose-unit-action db game ctx actor)))))
 
+(defn wrap-exception-handler [f]
+  (fn [& args]
+    (let [f' (apply f args)]
+      (fn [& args']
+        (try
+          (apply f' args')
+          (catch :default ex
+            (log/error "Error running AI function:" ex)
+            nil))))))
+
 (defmethod handle-event ::players/update-game-state
   [{:as player :keys [conn faction-color fns]} [_ _ game-state]]
   (let [new-conn (d/create-conn db/schema)
@@ -100,10 +110,10 @@
     (let [db @conn
           game (game/game-by-id db game-id)
           {:keys [action-ctx actor-score-fn base-action-score-fn unit-action-score-fn]} fns
-          action (or (binding [*action-ctx* (or action-ctx (constantly nil))
-                               *actor-score-fn* actor-score-fn
-                               *base-action-score-fn* base-action-score-fn
-                               *unit-action-score-fn* unit-action-score-fn]
+          action (or (binding [*action-ctx* (wrap-exception-handler (or action-ctx (constantly nil)))
+                               *actor-score-fn* (wrap-exception-handler actor-score-fn)
+                               *base-action-score-fn* (wrap-exception-handler base-action-score-fn)
+                               *unit-action-score-fn* (wrap-exception-handler unit-action-score-fn)]
                        (choose-action player db game))
                      {:action/type :action.type/end-turn
                       :action/faction-color faction-color})]
