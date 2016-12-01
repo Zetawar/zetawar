@@ -70,7 +70,6 @@
      @(posh/pull conn [{:map/terrains terrain-pull}]
                  map-eid'))))
 
-;; TODO: add {:cache :forever} when new version of Posh is released
 (defn current-base-locations [conn]
   (posh/q '[:find ?q ?r
             :where
@@ -81,7 +80,8 @@
             [?m :map/terrains ?t]
             [?t :terrain/q ?q]
             [?t :terrain/r ?r]]
-          conn))
+          conn
+          {:cache :forever}))
 
 (deftrack current-base? [conn q r]
   (contains? @(current-base-locations conn) [q r]))
@@ -239,7 +239,6 @@
 (deftrack unit-type-at [conn q r]
   (get-in @(unit-at conn q r) [:unit/type :unit-type/id]))
 
-;; TODO: add {:cache :forever} when new version of Posh is released
 (deftrack enemy-locations [conn]
   @(posh/q '[:find ?q ?r
              :in $ ?g ?cf
@@ -250,7 +249,8 @@
              [?u :unit/q ?q]
              [?u :unit/r ?r]
              [(not= ?f ?cf)]]
-           conn @(game-eid conn) @(current-faction-eid conn)))
+           conn @(game-eid conn) @(current-faction-eid conn)
+           {:cache :forever}))
 
 (deftrack enemy-at? [conn q r]
   (contains? @(enemy-locations conn) [q r]))
@@ -299,7 +299,6 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Unit construction
 
-;; TODO: add {:cache :forever} when new version of Posh is released
 (deftrack available-unit-type-eids [conn]
   (->> @(posh/q '[:find ?ut
                   :in $ ?g
@@ -309,7 +308,8 @@
                   [?f  :faction/credits ?credits]
                   [?ut :unit-type/cost ?cost]
                   [?ut :unit-type/id ?unit-type-id]]
-                conn @(game-eid conn))
+                conn @(game-eid conn)
+                {:cache :forever})
        (map first)
        (into [])))
 

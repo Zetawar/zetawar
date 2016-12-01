@@ -34,7 +34,7 @@
    [org.webjars/font-awesome "4.7.0"]
    [pandeiro/boot-http "0.7.6" :scope "test"]
    [perun "0.3.0" :scope "test"]
-   [posh "0.5.4"]
+   [posh "0.5.5"]
    [reagent "0.6.0"]
    [weasel "0.7.0" :scope "test"]])
 
