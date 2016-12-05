@@ -178,7 +178,7 @@
                                  :parallel-build true})
         (target)))
 
-(deftask test
+(deftask run-tests
   "Run Zetawar tests."
   []
   (test-cljs :exit? true

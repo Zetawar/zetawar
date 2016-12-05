@@ -8,7 +8,7 @@ node {
       checkout scm
 
     stage 'Test'
-      sh "boot --no-colors ci"
+      sh "boot --no-colors run-tests"
 
     stage 'Build'
       sh "boot --no-colors build-site -e dev-builds"
