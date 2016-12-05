@@ -8,7 +8,7 @@ machine:
     version: 6.9.1
   environment:
     _JAVA_OPTIONS: "-Xms512m -Xmx1024m"
-    #PATH: "node_modules/.bin:$PATH"
+    PATH: "node_modules/.bin:$PATH"
 dependencies:
   cache_directories:
     - "node_modules"
