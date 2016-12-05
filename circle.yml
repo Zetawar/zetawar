@@ -8,14 +8,16 @@ machine:
     version: 6.9.1
   environment:
     _JAVA_OPTIONS: "-Xms512m -Xmx1024m"
+    #PATH: "node_modules/.bin:$PATH"
 dependencies:
   cache_directories:
+    - "node_modules"
     - "~/.boot/cache/bin"
     - "~/.boot/cache/lib"
   pre:
     - curl -L https://github.com/boot-clj/boot-bin/releases/download/latest/boot.sh -o ~/bin/boot
     - chmod +x ~/bin/boot
-    - npm install --global postcss-cli autoprefixer
+    - npm install
   override:
     - boot show -d
 test:

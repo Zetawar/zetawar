@@ -4,6 +4,7 @@
 /.cljs_rhino_repl
 /.nrepl-*
 /TAGS
+/node_modules
 /out
 /tags
 /target

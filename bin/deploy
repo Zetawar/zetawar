@@ -52,8 +52,8 @@ img_include_opts="--include '*.png' --include '*.jpg' --include '*.ico' --includ
 s3cmd sync --exclude  '*'                  --rinclude '^(?!doc).*\.css'  -m 'text/css'               $public_opt "$gzip_opt"  target/ $destination
 s3cmd sync --exclude  '*'                  --rinclude '^(?!doc).*\.js'   -m 'application/javascript' $public_opt "$gzip_opt"  target/ $destination
 s3cmd sync --exclude  '*'                  --rinclude '^(?!doc).*\.html' -m 'text/html'              $public_opt "$gzip_opt"  target/ $destination
-s3cmd sync --exclude  '*'                  $img_include_opts                                        $public_opt "$cache_opt" target/ $destination
+s3cmd sync --exclude  '*'                  $img_include_opts                                         $public_opt "$cache_opt" target/ $destination
 s3cmd sync --exclude  '*'                  --rinclude '^(?!doc).*\.svg'  -m 'image/svg+xml'          $public_opt "$cache_opt" target/ $destination
-s3cmd sync --rexclude '(\.htpasswd|doc.*)' --delete-removed                                         $public_opt              target/ $destination
+s3cmd sync --rexclude '(\.htpasswd|doc.*)' --delete-removed                                          $public_opt              target/ $destination
 
 s3cmd sync $public_opt target/doc/ $destination/doc/

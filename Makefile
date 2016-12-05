@@ -1,13 +1,13 @@
+.PHONY: build-staging build-prod deploy-staging deploy-prod
+
 build-staging:
-	BOOT_JVM_OPTIONS= boot build -e staging
+	boot build -e staging
 
 build-prod:
-	BOOT_JVM_OPTIONS= boot build -e prod
+	boot build -e prod
 
-deploy-staging:
-	BOOT_JVM_OPTIONS= boot build -e staging
+deploy-staging: build-staging
 	./bin/deploy -b staging.zetawar.com -P
 
-deploy-prod:
-	BOOT_JVM_OPTIONS= boot build -e prod
+deploy-prod: build-prod
 	./bin/deploy -b www.zetawar.com -P
