@@ -22,5 +22,5 @@ dependencies:
     - boot show -d
 test:
   override:
-    - boot ci
-    - boot build -e staging
+    - boot test
+    - boot build-site -e test

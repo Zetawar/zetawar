@@ -5,7 +5,6 @@
  '[[adzerk/boot-cljs "1.7.228-2" :scope "test"]
    [adzerk/boot-cljs-repl "0.3.3" :scope "test"]
    [adzerk/boot-reload "0.4.13" :scope "test"]
-   [adzerk/boot-test "1.1.2" :scope "test"]
    [binaryage/devtools "0.8.3" :scope "test"]
    [boot-codox "0.10.1" :scope "test"]
    [cljsjs/clipboard "1.5.9-0"]
@@ -42,7 +41,6 @@
  '[adzerk.boot-cljs :refer :all]
  '[adzerk.boot-cljs-repl :refer :all]
  '[adzerk.boot-reload :refer :all]
- '[adzerk.boot-test :refer :all]
  '[clojure.edn :as edn]
  '[clojure.string :as string]
  '[codox.boot :refer [codox]]
@@ -59,6 +57,7 @@
                :browsers "> 5%"})
 
 (deftask build-css
+  "Build Zetawar CSS."
   []
   (comp
    (sift :add-jar {'org.webjars/bootstrap-sass #"META-INF/resources/webjars/bootstrap-sass/3\.3\.7/stylesheets/.*\.scss$"
@@ -100,7 +99,7 @@
        (string/starts-with? path "posts/")))
 
 (deftask build-html
-  "Build HTML."
+  "Build Zetawar HTML."
   [m metadata-file FILE str]
   (comp (global-metadata :filename metadata-file)
         (markdown)
@@ -123,8 +122,34 @@
                     :out-dir "."
                     :page "blog/index.html")))
 
+(deftask build-cljs
+  "Build Zetawar ClojureScript for deployment."
+  []
+  (cljs :ids ["js/main"]
+        :optimizations :advanced
+        :source-map true
+        :compiler-options {:parallel-build true}))
+
+(deftask build-site
+  "Build Zetawar site for deployment."
+  [e environment ENV str]
+  (comp (build-cljs)
+        (build-html :metadata-file (str "perun.base." environment ".edn"))
+        (build-css)
+        (gzip :regex #{#"\.html$" #"\.css$" #"\.js$"})
+        ;; Fileset gets confused without move to *.orig
+        (sift :move {#"^(.*)\.html$" "$1.html.orig"
+                     #"^(.*)\.css$" "$1.css.orig"
+                     #"^(.*)\.js$" "$1.js.orig"})
+        (sift :to-source #{#"\.orig$"})
+        (sift :move {#"^(.*)\.html\.gz$" "$1.html"
+                     #"^(.*)\.css\.gz$" "$1.css"
+                     #"^(.*)\.js\.gz$" "$1.js"})
+        (codox :name "Zetawar" :language :clojurescript)
+        (target)))
+
 (deftask dev
-  "Run full dev environment."
+  "Run Zetawar dev environment."
   [_ reload-host    HOST str "Reload WebSocket host"
    _ reload-port    PORT int "Reload WebSocket port"
    _ cljs-repl-host HOST str "ClojureScript REPL host"
@@ -132,7 +157,6 @@
   (comp (serve)
         (repl)
         (watch)
-        ;;(test)
         (build-html :metadata-file "perun.base.dev.edn")
         (build-css)
         (reload :on-jsload 'zetawar.core/run
@@ -154,15 +178,8 @@
                                  :parallel-build true})
         (target)))
 
-(deftask clj-dev
-  "Watch code and run Clojure tests without building ClojureScript or site."
-  [H host HOST str]
-  (comp (repl)
-        (watch)
-        (test)))
-
-(deftask ci
-  "Run CI tests."
+(deftask test
+  "Run Zetawar tests."
   []
   (test-cljs :exit? true
              :cljs-opts {:externs ["js/externs.js"]
@@ -170,33 +187,7 @@
                                          :provides ["lzw"]}]}))
 
 (deftask serve-target
-  "Serve files in target directory."
+  "Serve files in target (useful for checking builds)."
   []
   (comp (serve :dir "target")
         (wait)))
-
-(deftask build-cljs
-  "Build ClojureScript for production and staging deployments."
-  []
-  (cljs :ids ["js/main"]
-        :optimizations :advanced
-        :source-map true
-        :compiler-options {:parallel-build true}))
-
-(deftask build
-  "Build Zetawar."
-  [e environment ENV str]
-  (comp (build-cljs)
-        (build-html :metadata-file (str "perun.base." environment ".edn"))
-        (build-css)
-        (gzip :regex #{#"\.html$" #"\.css$" #"\.js$"})
-        ;; Fileset gets confused without move to *.orig
-        (sift :move {#"^(.*)\.html$" "$1.html.orig"
-                     #"^(.*)\.css$" "$1.css.orig"
-                     #"^(.*)\.js$" "$1.js.orig"})
-        (sift :to-source #{#"\.orig$"})
-        (sift :move {#"^(.*)\.html\.gz$" "$1.html"
-                     #"^(.*)\.css\.gz$" "$1.css"
-                     #"^(.*)\.js\.gz$" "$1.js"})
-        (codox :name "Zetawar" :language :clojurescript)
-        (target)))
