@@ -11,7 +11,7 @@ node {
       sh "boot --no-colors run-tests"
 
     stage 'Build'
-      sh "boot --no-colors build-site -e dev-builds"
+      sh "PATH=\"node_modules/.bin:$PATH\" boot --no-colors build-site -e dev-builds"
 
     stage 'Deploy'
       sh "./bin/deploy -b dev.zetawar.com"
@@ -47,27 +47,23 @@ Check console output at ${env.BUILD_URL} to view the results.
     color = 'GREEN'
     colorCode = '#00FF00'
     recipients = SUCCESS_RECIPIENTS
+    subject = "A new Zetawar build is available!"
+    summary = "${subject} (http://dev.zetawar.com/)"
+    details = """${subject}
+
+You can find it at http://dev.zetawar.com/. Login as user:${DEV_SITE_USER} with password:${DEV_SITE_PASSWORD}.
+
+You're getting this email because you indicated you would like to receive build
+notifications when you filled out the Zetawar Kickstarter survey. If you no
+longer want to receive build notifications, please email builds@zetawar.com.
+"""
   } else {
     color = 'RED'
     colorCode = '#FF0000'
   }
+
   // Send notifications
-
-  // Override values for public builds
-  if (PUBLIC_BUILD) {
-    subject = "A new Zetawar build is available!"
-    summary = "${subject} (http://dev.zetawar.com/)"
-    details = """${subject} You can find it at http://dev.zetawar.com/. Login as
-${DEV_SITE_USER}:${DEV_SITE_PASSWORD}.
-
-You're receiving this email because you indicated you would like to receive
-build notifications when you filled out the Zetawar Kickstarter survey. If you
-no longer want to receive build notifications or would like to receive them less
-frequently (daily or weekly are the available options) email builds@zetawar.com.
-"""
-  }
-
-  if (!PUBLIC_BUILD || buildStatus == 'SUCCESS') {
+  if (SEND_NOTIFICATIONS) {
     emailext (
       to: recipients,
       replyTo: REPLY_TO,
