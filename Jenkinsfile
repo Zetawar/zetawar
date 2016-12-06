@@ -40,8 +40,8 @@ def notifyBuild(String buildStatus = 'STARTED') {
   def details = """\
 ${env.JOB_NAME} - Build # ${env.BUILD_NUMBER} - ${buildStatus}
 
-SEND_NOTIFICATIONS = ${SEND_NOTIFICATIONS ? \"foo\" : \"bar\"}
-BACKER_BUILD = ${BACKER_BUILD ? \"foo\" : \"bar\"}
+SEND_NOTIFICATIONS = ${SEND_NOTIFICATIONS ? 'foo' : bar'}
+BACKER_BUILD = ${BACKER_BUILD ? 'foo' : 'bar'}
 
 Check console output at ${env.BUILD_URL} to view the results.
 """
