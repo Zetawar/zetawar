@@ -40,9 +40,6 @@ def notifyBuild(String buildStatus = 'STARTED') {
   def details = """\
 ${env.JOB_NAME} - Build # ${env.BUILD_NUMBER} - ${buildStatus}
 
-SEND_NOTIFICATIONS = ${SEND_NOTIFICATIONS.getClass().getName()}
-BACKER_BUILD = ${BACKER_BUILD.getClass().getName()}
-
 Check console output at ${env.BUILD_URL} to view the results.
 """
 
@@ -55,29 +52,29 @@ Check console output at ${env.BUILD_URL} to view the results.
     colorCode = '#00FF00'
     recipients = SUCCESS_RECIPIENTS
 
-    //    if (BACKER_BUILD) {
-    //      subject = "A new Zetawar build is available!"
-    //      summary = "${subject} (http://dev.zetawar.com/)"
-    //      urlDetails = "A new Zetawar build is available at http://dev.zetawar.com/."
-    //      loginDetails = "Login as user:${DEV_SITE_USER} with password:${DEV_SITE_PASSWORD}."
-    //      footerDetails = """                                         \
-    //You're getting this email because you indicated you would like to receive build
-    //notifications when you filled out the Zetawar Kickstarter survey. If you no
-    //longer want to receive build notifications, please email builds@zetawar.com.
-    //""".split("\n").join(" ")
-    //      details = """                       \
-    //${urlDetails} ${loginDetails}
-    //
-    //${footerDetails}
-    //"""
-    //    }
+    if (BACKER_BUILD == 'true') {
+      subject = "A new Zetawar build is available!"
+      summary = "${subject} (http://dev.zetawar.com/)"
+      urlDetails = "A new Zetawar build is available at http://dev.zetawar.com/."
+      loginDetails = "Login as user:${DEV_SITE_USER} with password:${DEV_SITE_PASSWORD}."
+      footerDetails = """\
+You're getting this email because you indicated you would like to receive build
+notifications when you filled out the Zetawar Kickstarter survey. If you no
+longer want to receive build notifications, please email builds@zetawar.com.
+""".split("\n").join(" ")
+      details = """\
+${urlDetails} ${loginDetails}
+
+${footerDetails}
+"""
+    }
   } else {
     color = 'RED'
     colorCode = '#FF0000'
   }
 
   // Send notifications
-  if (SEND_NOTIFICATIONS && (buildStatus != 'SUCCESS' || BACKER_BUILD)) {
+  if (SEND_NOTIFICATIONS == 'true' && (buildStatus != 'SUCCESS' || BACKER_BUILD == 'true')) {
     emailext (
       to: recipients,
       replyTo: REPLY_TO,
