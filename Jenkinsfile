@@ -11,10 +11,10 @@ node {
       sh "boot --no-colors run-tests"
 
     stage 'Build'
-      sh "PATH=\"node_modules/.bin:$PATH\" boot --no-colors build-site -e {ZETAWAR_ENV}"
+      sh "PATH=\"node_modules/.bin:$PATH\" boot --no-colors build-site -e ${ZETAWAR_ENV}"
 
     stage 'Deploy'
-      sh "./bin/deploy -b {S3_BUCKET}"
+      sh "./bin/deploy -b ${S3_BUCKET}"
 
   } catch (err) {
     currentBuild.result = 'FAILURE'
