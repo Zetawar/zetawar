@@ -52,7 +52,7 @@ Check console output at ${env.BUILD_URL} to view the results.
     colorCode = '#00FF00'
     recipients = SUCCESS_RECIPIENTS
 
-    if (BACKER_BUILD == true) {
+    if (BACKER_BUILD == 'true') {
       subject = "A new Zetawar build is available!"
       summary = "${subject} (http://dev.zetawar.com/)"
       urlDetails = "A new Zetawar build is available at http://dev.zetawar.com/."
@@ -78,7 +78,7 @@ ${footerDetails}
   }
 
   // Send notifications
-  if (SEND_NOTIFICATIONS == true && (buildStatus != 'SUCCESS' || BACKER_BUILD == true)) {
+  if (SEND_NOTIFICATIONS == 'true' && (buildStatus != 'SUCCESS' || BACKER_BUILD == 'true')) {
     emailext (
       to: recipients,
       replyTo: REPLY_TO,
