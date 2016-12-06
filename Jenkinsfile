@@ -5,7 +5,7 @@ node {
 
   try {
     stage('Checkout') {
-      checkout scm, changelog: true
+      checkout changelog: true, scm
     }
 
     //stage('Test') {
