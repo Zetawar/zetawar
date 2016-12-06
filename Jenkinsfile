@@ -40,6 +40,8 @@ def notifyBuild(String buildStatus = 'STARTED') {
   def details = """\
 ${env.JOB_NAME} - Build # ${env.BUILD_NUMBER} - ${buildStatus}
 
+${SEND_NOTIFICATIONS} #{BACKER_BUILD}
+
 Check console output at ${env.BUILD_URL} to view the results.
 """
 
@@ -74,7 +76,7 @@ ${footerDetails}
   }
 
   // Send notifications
-  if (SEND_NOTIFICATIONS == true && (buildStatus != 'SUCCESS' || BACKER_BUILD == true)) {
+  if (SEND_NOTIFICATIONS && (buildStatus != 'SUCCESS' || BACKER_BUILD == true)) {
     emailext (
       to: recipients,
       replyTo: REPLY_TO,
