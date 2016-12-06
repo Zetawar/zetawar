@@ -3,9 +3,10 @@
 node {
   currentBuild.result = 'SUCCESS'
 
+
   try {
     stage('Checkout') {
-      checkout changelog: true, scm
+      checkout scm
     }
 
     //stage('Test') {
@@ -57,7 +58,8 @@ Check console output at ${env.BUILD_URL} to view the results.
       summary = "${subject} (http://dev.zetawar.com/)"
       urlDetails = "A new Zetawar build is available at http://dev.zetawar.com/."
       loginDetails = "Login as user:${DEV_SITE_USER} with password:${DEV_SITE_PASSWORD}."
-      changeDetails = sh(script: 'git log --pretty="- %s" $GIT_PREVIOUS_SUCCESSFUL_COMMIT $GIT_COMMIT', returnStdout: true)
+      //changeDetails = sh(script: 'git log --pretty="- %s" $GIT_PREVIOUS_SUCCESSFUL_COMMIT $GIT_COMMIT', returnStdout: true)
+      changeDetails = sh(script: 'env', returnStdout: true)
       footerDetails = """\
 You're getting this email because you indicated you would like to receive build
 notifications when you filled out the Zetawar Kickstarter survey. If you no
