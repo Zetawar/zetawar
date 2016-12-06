@@ -11,10 +11,10 @@ node {
       sh "boot --no-colors run-tests"
 
     stage 'Build'
-      sh "PATH=\"node_modules/.bin:$PATH\" boot --no-colors build-site -e dev-builds"
+      sh "PATH=\"node_modules/.bin:$PATH\" boot --no-colors build-site -e {ZETAWAR_ENV}"
 
     stage 'Deploy'
-      sh "./bin/deploy -b dev.zetawar.com"
+      sh "./bin/deploy -b {S3_BUCKET}"
 
   } catch (err) {
     currentBuild.result = 'FAILURE'
@@ -34,7 +34,8 @@ def notifyBuild(String buildStatus = 'STARTED') {
   def recipients = UNSUCCESSFUL_RECIPIENTS
   def subject = "${env.JOB_NAME} - Build # ${env.BUILD_NUMBER} - ${buildStatus}!"
   def summary = "${subject} (${env.BUILD_URL})"
-  def details = """${env.JOB_NAME} - Build # ${env.BUILD_NUMBER} - ${buildStatus}
+  def details = """\
+${env.JOB_NAME} - Build # ${env.BUILD_NUMBER} - ${buildStatus}
 
 Check console output at ${env.BUILD_URL} to view the results.
 """
@@ -47,20 +48,23 @@ Check console output at ${env.BUILD_URL} to view the results.
     color = 'GREEN'
     colorCode = '#00FF00'
     recipients = SUCCESS_RECIPIENTS
-    subject = "A new Zetawar build is available!"
-    summary = "${subject} (http://dev.zetawar.com/)"
-    urlDetails = "A new Zetawar build is available at http://dev.zetawar.com/."
-    loginDetails = "Login as user:${DEV_SITE_USER} with password:${DEV_SITE_PASSWORD}."
-    footerDetails = """\
+
+    if (BACKER_BUILD) {
+      subject = "A new Zetawar build is available!"
+      summary = "${subject} (http://dev.zetawar.com/)"
+      urlDetails = "A new Zetawar build is available at http://dev.zetawar.com/."
+      loginDetails = "Login as user:${DEV_SITE_USER} with password:${DEV_SITE_PASSWORD}."
+      footerDetails = """\
 You're getting this email because you indicated you would like to receive build
 notifications when you filled out the Zetawar Kickstarter survey. If you no
 longer want to receive build notifications, please email builds@zetawar.com.
 """.split("\n").join(" ")
-    details = """\
+      details = """\
 ${urlDetails} ${loginDetails}
 
 ${footerDetails}
 """
+    }
   } else {
     color = 'RED'
     colorCode = '#FF0000'
