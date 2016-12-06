@@ -9,17 +9,17 @@ node {
       checkout scm
     }
 
-    //stage('Test') {
-    //  sh "boot --no-colors run-tests"
-    //}
+    stage('Test') {
+      sh "boot --no-colors run-tests"
+    }
 
-    //stage('Build') {
-    //  sh "PATH=\"node_modules/.bin:$PATH\" boot --no-colors build-site -e ${ZETAWAR_ENV}"
-    //}
+    stage('Build') {
+      sh "PATH=\"node_modules/.bin:$PATH\" boot --no-colors build-site -e ${ZETAWAR_ENV}"
+    }
 
-    //stage('Deploy') {
-    //  sh "./bin/deploy -b ${S3_BUCKET}"
-    //}
+    stage('Deploy') {
+      sh "./bin/deploy -b ${S3_BUCKET}"
+    }
   } catch (err) {
     currentBuild.result = 'FAILURE'
     throw err
