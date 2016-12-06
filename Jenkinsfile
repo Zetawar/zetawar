@@ -4,18 +4,21 @@ node {
   currentBuild.result = 'SUCCESS'
 
   try {
-    stage 'Checkout'
+    stage('Checkout') {
       checkout scm
+    }
 
-    stage 'Test'
+    stage('Test') {
       sh "boot --no-colors run-tests"
+    }
 
-    stage 'Build'
+    stage('Build') {
       sh "PATH=\"node_modules/.bin:$PATH\" boot --no-colors build-site -e ${ZETAWAR_ENV}"
+    }
 
-    stage 'Deploy'
+    stage('Deploy') {
       sh "./bin/deploy -b ${S3_BUCKET}"
-
+    }
   } catch (err) {
     currentBuild.result = 'FAILURE'
     throw err
@@ -71,7 +74,7 @@ ${footerDetails}
   }
 
   // Send notifications
-  if (SEND_NOTIFICATIONS) {
+  if (SEND_NOTIFICATIONS && (buildStatus != 'SUCCESS' || BACKER_BUILD)) {
     emailext (
       to: recipients,
       replyTo: REPLY_TO,
