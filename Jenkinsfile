@@ -9,6 +9,10 @@ node {
       checkout scm
     }
 
+    stage('Prepare') {
+      sh "npm install"
+    }
+
     stage('Test') {
       sh "boot --no-colors run-tests"
     }
