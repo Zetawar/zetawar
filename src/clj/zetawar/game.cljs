@@ -281,83 +281,71 @@
 ;;; Movement
 
 ;; TODO: make not being able to walk through your own units a game option
-;; TODO: return moves as ({:from [q r] :to [q r] :path [[q r] [q r] ...] :cost n})
 (defn valid-moves [db game unit]
   (let [start [(:unit/q unit) (:unit/r unit)]
         u-faction (e (unit-faction db unit))
         unit-type (e (:unit/type unit))
+        unit-movement (get-in unit [:unit/type :unit-type/movement])
         unit-at (memoize #(unit-at db game %1 %2))
         adjacent-idxs (memoize (fn adjacent-idxs [q r]
                                  (mapv #(apply game-pos-idx game %) (hex/adjacents q r))))
-        terrain-type->cost (into {}
-                                 (d/q '[:find ?tt ?mc
-                                        :in $ ?ut
-                                        :where
-                                        [?e :terrain-effect/terrain-type ?tt]
-                                        [?e :terrain-effect/unit-type ?ut]
-                                        [?e :terrain-effect/movement-cost ?mc]]
-                                      db unit-type))
-        ;; TODO: move movment-cost into query
+        terrain-type->cost (into {} (d/q '[:find ?tt ?mc
+                                           :in $ ?ut
+                                           :where
+                                           [?e :terrain-effect/terrain-type ?tt]
+                                           [?e :terrain-effect/unit-type ?ut]
+                                           [?e :terrain-effect/movement-cost ?mc]]
+                                         db unit-type))
         adjacent-costs (memoize (fn adjacent-costs [q r]
-                                  (sequence (comp (map (fn [[q r tt]]
-                                                         (when-let [cost (terrain-type->cost tt)]
-                                                           [q r (terrain-type->cost tt)])))
-                                                  (remove nil?))
-                                            (d/q '[:find ?q ?r ?tt
-                                                   :in $ [?idx ...]
-                                                   :where
-                                                   [?t :terrain/game-pos-idx ?idx]
-                                                   [?t :terrain/q ?q]
-                                                   [?t :terrain/r ?r]
-                                                   [?t :terrain/type ?tt]]
-                                                 db (adjacent-idxs q r)))))
+                                  (into []
+                                        (keep (fn [[q r tt]]
+                                                (when-let [cost (terrain-type->cost tt)]
+                                                  [q r cost])))
+                                        ;; TODO: replace with index lookup instead of query
+                                        (d/q '[:find ?q ?r ?tt
+                                               :in $ [?idx ...]
+                                               :where
+                                               [?t :terrain/game-pos-idx ?idx]
+                                               [?t :terrain/q ?q]
+                                               [?t :terrain/r ?r]
+                                               [?t :terrain/type ?tt]]
+                                             db (adjacent-idxs q r)))))
         adjacent-enemy? (memoize (fn adjacent-enemy? [q r]
                                    (transduce
-                                    (comp (map #(-> (d/datoms db :avet :unit/game-pos-idx %) first :e))
-                                          (remove nil?)
+                                    (comp (keep #(-> (d/datoms db :avet :unit/game-pos-idx %) first :e))
                                           (map #(-> (d/datoms db :avet :faction/units %) first :e))
                                           (map #(not= u-faction %)))
                                     #(or %1 %2)
                                     false
                                     (adjacent-idxs q r))))
-        ;; TODO: rename moves arg to move-costs
-        ;; TODO: track move costs instead of remaining movement
-        expand-frontier (fn [frontier moves]
-                          (loop [[[[q r] movement] & remaining-frontier] (seq frontier) new-frontier {}]
-                            (if movement
-                              (let [costs (adjacent-costs q r)
+        ;; frontier = {[q r] [cost path], ...}
+        ;; moves = {[q r] [cost path], ...}
+        expand-frontier (fn expand-frontier [frontier moves]
+                          (loop [[[[q r] [frontier-cost path]] & remaining-frontier] frontier new-frontier {}]
+                            (if frontier-cost
+                              (let [remaining-movement (- unit-movement frontier-cost)
+                                    terrain-costs (adjacent-costs q r)
                                     ;; TODO: simplify
-
-                                    new-moves (into
-                                               {}
-                                               (comp
-                                                (map (fn [[q r cost]]
-                                                       ;; moving into zone of control depletes movement
-                                                       (if (adjacent-enemy? q r)
-                                                         [q r (max movement cost)]
-                                                         [q r cost])))
-                                                (remove nil?)
-                                                (map (fn [[q r cost]]
-                                                       (let [new-movement (- movement cost)]
-                                                         (when (and (> new-movement (get moves [q r] -1))
-                                                                    (> new-movement (get frontier [q r] -1))
-                                                                    (> new-movement (get new-frontier [q r] -1)))
-                                                           [[q r] new-movement]))))
-                                                (remove nil?))
-                                               costs)]
+                                    new-moves (into {}
+                                                    (keep (fn [[q r terrain-cost]]
+                                                            (let [terrain-cost (if (adjacent-enemy? q r) ;; zoc
+                                                                                 (max terrain-cost remaining-movement)
+                                                                                 terrain-cost)
+                                                                  new-move-cost (+ frontier-cost terrain-cost)]
+                                                              (when (and (<= new-move-cost (moves [q r] unit-movement))
+                                                                         (<= new-move-cost (new-frontier [q r] unit-movement)))
+                                                                [[q r] [new-move-cost (conj path [q r])]]))))
+                                                    terrain-costs)]
                                 (recur remaining-frontier (conj new-frontier new-moves)))
                               new-frontier)))]
-    (loop [frontier {start (get-in unit [:unit/type :unit-type/movement])} moves {}]
+    (loop [frontier {start [0 []]} moves {start [0 []]}]
       (let [new-frontier (expand-frontier frontier moves)
-            new-moves (conj moves frontier)]
+            new-moves (conj moves new-frontier)]
         (if (empty? new-frontier)
-          ;; TODO: simplify + use transducer
-          (->> (dissoc new-moves start)
-               (map first)
-               (remove #(apply unit-at %)) ; remove occupied locations
-               (map (fn [dest] {:from start :to dest}))
-               (into #{}))
-
+          (into #{}
+                (comp (remove #(apply unit-at (first %))) ; remove occupied destinations
+                      (map (fn [[dest [cost path]]] {:from start :to dest :cost cost :path path})))
+                (dissoc moves start))
           (recur new-frontier new-moves))))))
 
 ;; TODO: implement valid-move?
