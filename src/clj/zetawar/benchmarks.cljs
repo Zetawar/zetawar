@@ -3,6 +3,7 @@
    [clojure.string :as string]
    [datascript.core :as d]
    [reagent.core :as r]
+   [taoensso.timbre :as log]
    [zetawar.app :as app]
    [zetawar.data :as data]
    [zetawar.db :as db :refer [qe]]
@@ -11,16 +12,13 @@
 
 (defn setup-conn []
   (let [conn (d/create-conn db/schema)]
-    (app/start-new-game! conn :sterlings-aruba-multiplayer)
+    (app/start-new-game! {:conn conn} :sterlings-aruba-multiplayer)
     conn))
 
 (defn run-benchmarks []
   (let [suite (js/Benchmark.Suite.)
         db @(setup-conn)
-        game (qe '[:find ?g
-                   :where
-                   [_ :app/game ?g]]
-                 db)
+        game (app/current-game db)
         unit (game/unit-at db game 2 2)]
     (-> suite
         (.add "valid-moves"
