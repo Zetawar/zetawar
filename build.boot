@@ -17,7 +17,7 @@
    [com.stuartsierra/component "0.3.1"]
    [com.taoensso/timbre "4.7.4"]
    [crisptrutski/boot-cljs-test "0.2.2" :scope "test"]
-   [danielsz/boot-autoprefixer "0.0.8"]
+   [danielsz/boot-autoprefixer "0.0.9"]
    [datascript "0.15.4"]
    [deraen/boot-sass "0.3.0" :scope "test"]
    [devcards "0.2.2" :scope "test"]
@@ -69,7 +69,7 @@
    (sift :to-source #{#"bootstrap" #"font-awesome"}
          :to-resource #{#"fonts"})
    (sass :options {:precision 8})
-   (autoprefixer)
+   (autoprefixer :exec-path "node_modules/.bin/postcss")
    (sift :move {#"^main.css$" "css/main.css"})))
 
 (defn slug-fn [filename]

@@ -14,7 +14,7 @@ node {
     }
 
     stage('Build') {
-      sh "PATH=\"node_modules/.bin:$PATH\" boot --no-colors build-site -e ${ZETAWAR_ENV}"
+      sh "boot --no-colors build-site -e ${ZETAWAR_ENV}"
     }
 
     stage('Deploy') {
