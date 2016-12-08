@@ -296,28 +296,23 @@
                                            [?e :terrain-effect/unit-type ?ut]
                                            [?e :terrain-effect/movement-cost ?mc]]
                                          db unit-type))
+        terrain-cost-at (memoize (fn terrain-cost-at [q r]
+                                   (some-> (terrain-at db game q r)
+                                           :terrain/type
+                                           e
+                                           terrain-type->cost)))
         adjacent-costs (memoize (fn adjacent-costs [q r]
                                   (into []
-                                        (keep (fn [[q r tt]]
-                                                (when-let [cost (terrain-type->cost tt)]
-                                                  [q r cost])))
-                                        ;; TODO: replace with index lookup instead of query
-                                        (d/q '[:find ?q ?r ?tt
-                                               :in $ [?idx ...]
-                                               :where
-                                               [?t :terrain/game-pos-idx ?idx]
-                                               [?t :terrain/q ?q]
-                                               [?t :terrain/r ?r]
-                                               [?t :terrain/type ?tt]]
-                                             db (adjacent-idxs q r)))))
+                                        (keep #(when-let [cost (apply terrain-cost-at %)]
+                                                 (conj % cost)))
+                                        (hex/adjacents q r))))
+        enemy-at? (memoize (fn enemy-at? [q r]
+                             (some-> (unit-at q r)
+                                     :faction/_units
+                                     e
+                                     (not= u-faction))))
         adjacent-enemy? (memoize (fn adjacent-enemy? [q r]
-                                   (transduce
-                                    (comp (keep #(-> (d/datoms db :avet :unit/game-pos-idx %) first :e))
-                                          (map #(-> (d/datoms db :avet :faction/units %) first :e))
-                                          (map #(not= u-faction %)))
-                                    #(or %1 %2)
-                                    false
-                                    (adjacent-idxs q r))))
+                                   (some #(apply enemy-at? %) (hex/adjacents q r))))
         ;; frontier = {[q r] [cost path], ...}
         ;; moves = {[q r] [cost path], ...}
         expand-frontier (fn expand-frontier [frontier moves]
@@ -325,10 +320,9 @@
                             (if frontier-cost
                               (let [remaining-movement (- unit-movement frontier-cost)
                                     terrain-costs (adjacent-costs q r)
-                                    ;; TODO: simplify
                                     new-moves (into {}
                                                     (keep (fn [[q r terrain-cost]]
-                                                            (let [terrain-cost (if (adjacent-enemy? q r) ;; zoc
+                                                            (let [terrain-cost (if (adjacent-enemy? q r) ; check in zoc
                                                                                  (max terrain-cost remaining-movement)
                                                                                  terrain-cost)
                                                                   new-move-cost (+ frontier-cost terrain-cost)]

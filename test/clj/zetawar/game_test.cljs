@@ -173,7 +173,7 @@
   (let [db @(helper/create-aruba-conn)
         game (app/current-game db)
         unit (game/unit-at db game 2 2)]
-    (is (= #{:to :from}
+    (is (= #{:to :from :cost :path}
            (into #{} (-> (game/valid-moves db game unit)
                          first
                          keys))))
