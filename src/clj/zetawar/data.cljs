@@ -14,19 +14,36 @@
    :deep-water    {:name "Deep Water"
                    :image "tilesets/elite-command/terrains/deep-water.png"}})
 
+;; TODO: remove redundancy between state map and unit/can-capture flag (?)
 (def unit-state-maps
-  {:basic
+  {:move-attack
    {:start-state :start
     :built-state :done
     :states
-    {:start      {:move-unit    :moved-once
-                  :attack-unit  :done
-                  :repair-unit  :done
-                  :capture-base :done}
-     :moved-once {:attack-unit  :done
-                  :capture-base :done}
-     :done       {}}}})
+    {:start {:move-unit    :moved
+             :attack-unit  :done
+             :repair-unit  :done
+             :capture-base :done}
+     :moved {:attack-unit  :done
+             :capture-base :done}
+     :done  {}}}
+   ;; :free-attack-twice
+   ;; {:start-state :start
+   ;;  :built-state :done
+   ;;  :states
+   ;;  {:start              {:move-unit    :moved-1-attacked-0
+   ;;                        :attack-unit  :moved-0-attacked-1
+   ;;                        :repair-unit  :done}
+   ;;   :moved-0-attacked-1 {:attack-unit  :moved-0-attacked-2
+   ;;                        :move-unit    :moved-1-attacked-1}
+   ;;   :moved-0-attacked-2 {:move-unit    :done}
+   ;;   :moved-1-attacked-0 {:attack-unit  :moved-1-attacked-1}
+   ;;   :moved-1-attacked-1 {:attack-unit  :done}
+   ;;   :done               {}}}
+   })
 
+;; TODO: check how capturing armor works in Elite Command
+;; TODO: check how repair amount works in Elite Command
 (def units
   {:infantry {:name "Infantry"
               :cost 75
@@ -38,7 +55,7 @@
               :armor 6
               :capturing-armor 2
               :repair 1
-              :state-map :basic
+              :state-map :move-attack
               :image "tilesets/elite-command/units/infantry-COLOR.png"
               :terrain-effects
               {:plains    {:movement-cost 3 :attack-bonus 0 :armor-bonus 0}
@@ -46,7 +63,8 @@
                :woods     {:movement-cost 4 :attack-bonus 2 :armor-bonus 3}
                :base      {:movement-cost 2 :attack-bonus 2 :armor-bonus 3}}
               :attack-strengths
-              {:personnel 6}}
+              {:personnel 6
+               :armored 3}}
    :grenadier {:name "Grenadier"
                :cost 150
                :movement 9
@@ -57,7 +75,7 @@
                :armor 8
                :capturing-armor 2
                :repair 1
-               :state-map :basic
+               :state-map :move-attack
                :image "tilesets/elite-command/units/grenadier-COLOR.png"
                :terrain-effects
                {:plains    {:movement-cost 4 :attack-bonus 0  :armor-bonus 0}
@@ -65,7 +83,87 @@
                 :woods     {:movement-cost 4 :attack-bonus -1 :armor-bonus 3}
                 :base      {:movement-cost 3 :attack-bonus -1 :armor-bonus 3}}
                :attack-strengths
-               {:personnel 8}}})
+               {:personnel 8
+                :armored 9}}
+   :mortar {:name "Mortar"
+            :cost 200
+            :movement 9
+            :can-capture true
+            :min-range 2
+            :max-range 3
+            :armor-type :personnel
+            :armor 6
+            :capturing-armor 2
+            :repair 1
+            :state-map :move-attack
+            :image "tilesets/elite-command/units/mortar-COLOR.png"
+            :terrain-effects
+            {:plains    {:movement-cost 4 :attack-bonus  0 :armor-bonus 0}
+             :mountains {:movement-cost 9 :attack-bonus  3 :armor-bonus 5}
+             :woods     {:movement-cost 4 :attack-bonus -2 :armor-bonus 3}
+             :base      {:movement-cost 3 :attack-bonus -2 :armor-bonus 3}}
+            :attack-strengths
+            {:personnel 10
+             :armored 10}}
+   :ranger {:name "Ranger"
+            :cost 200
+            :movement 9
+            :can-capture true
+            :min-range 1
+            :max-range 1
+            :armor-type :personnel
+            :armor 6
+            :capturing-armor 2
+            :repair 1
+            :state-map :move-attack
+            :image "tilesets/elite-command/units/ranger-COLOR.png"
+            :terrain-effects
+            {:plains    {:movement-cost 3 :attack-bonus 0 :armor-bonus 0}
+             :mountains {:movement-cost 6 :attack-bonus 2 :armor-bonus 5}
+             :woods     {:movement-cost 3 :attack-bonus 2 :armor-bonus 4}
+             :base      {:movement-cost 2 :attack-bonus 2 :armor-bonus 3}}
+            :attack-strengths
+            {:personnel 9
+             :armored 4}}
+   ;; :humvee {:name "Humvee"
+   ;;          :cost 300
+   ;;          :movement 15
+   ;;          :can-capture false
+   ;;          :min-range 1
+   ;;          :max-range 1
+   ;;          :armor-type :armored
+   ;;          :armor 8
+   ;;          :capturing-armor 2
+   ;;          :repair 1
+   ;;          :state-map :free-attack-twice
+   ;;          :image "tilesets/elite-command/units/humvee-COLOR.png"
+   ;;          :terrain-effects
+   ;;          {:plains    {:movement-cost 3 :attack-bonus  0 :armor-bonus  0}
+   ;;           :woods     {:movement-cost 6 :attack-bonus -2 :armor-bonus -2}
+   ;;           :base      {:movement-cost 2 :attack-bonus  0 :armor-bonus  0}}
+   ;;          :attack-strengths
+   ;;          {:personnel 9
+   ;;           :armored 3}}
+   :tank {:name "Tank"
+          :cost 350
+          :movement 12
+          :can-capture false
+          :min-range 1
+          :max-range 1
+          :armor-type :armored
+          :armor 12
+          :capturing-armor 2
+          :repair 1
+          :state-map :move-attack
+          :image "tilesets/elite-command/units/tank-COLOR.png"
+          :terrain-effects
+          {:plains    {:movement-cost 3 :attack-bonus 0 :armor-bonus  0}
+           :woods     {:movement-cost 6 :attack-bonus 0 :armor-bonus -3}
+           :base      {:movement-cost 2 :attack-bonus 0 :armor-bonus -2}}
+          :attack-strengths
+          {:personnel 10
+           :armored 10}}
+   })
 
 ;; TODO: rename to maps
 (def map-definitions
