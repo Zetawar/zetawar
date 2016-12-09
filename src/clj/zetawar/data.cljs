@@ -27,20 +27,19 @@
      :moved {:attack-unit  :done
              :capture-base :done}
      :done  {}}}
-   ;; :free-attack-twice
-   ;; {:start-state :start
-   ;;  :built-state :done
-   ;;  :states
-   ;;  {:start              {:move-unit    :moved-1-attacked-0
-   ;;                        :attack-unit  :moved-0-attacked-1
-   ;;                        :repair-unit  :done}
-   ;;   :moved-0-attacked-1 {:attack-unit  :moved-0-attacked-2
-   ;;                        :move-unit    :moved-1-attacked-1}
-   ;;   :moved-0-attacked-2 {:move-unit    :done}
-   ;;   :moved-1-attacked-0 {:attack-unit  :moved-1-attacked-1}
-   ;;   :moved-1-attacked-1 {:attack-unit  :done}
-   ;;   :done               {}}}
-   })
+   :free-attack-twice
+   {:start-state :start
+    :built-state :done
+    :states
+    {:start              {:move-unit    :moved-1-attacked-0
+                          :attack-unit  :moved-0-attacked-1
+                          :repair-unit  :done}
+     :moved-0-attacked-1 {:attack-unit  :moved-0-attacked-2
+                          :move-unit    :moved-1-attacked-1}
+     :moved-0-attacked-2 {:move-unit    :done}
+     :moved-1-attacked-0 {:attack-unit  :moved-1-attacked-1}
+     :moved-1-attacked-1 {:attack-unit  :done}
+     :done               {}}}})
 
 ;; TODO: check how capturing armor works in Elite Command
 ;; TODO: check how repair amount works in Elite Command
@@ -125,25 +124,25 @@
             :attack-strengths
             {:personnel 9
              :armored 4}}
-   ;; :humvee {:name "Humvee"
-   ;;          :cost 300
-   ;;          :movement 15
-   ;;          :can-capture false
-   ;;          :min-range 1
-   ;;          :max-range 1
-   ;;          :armor-type :armored
-   ;;          :armor 8
-   ;;          :capturing-armor 2
-   ;;          :repair 1
-   ;;          :state-map :free-attack-twice
-   ;;          :image "tilesets/elite-command/units/humvee-COLOR.png"
-   ;;          :terrain-effects
-   ;;          {:plains    {:movement-cost 3 :attack-bonus  0 :armor-bonus  0}
-   ;;           :woods     {:movement-cost 6 :attack-bonus -2 :armor-bonus -2}
-   ;;           :base      {:movement-cost 2 :attack-bonus  0 :armor-bonus  0}}
-   ;;          :attack-strengths
-   ;;          {:personnel 9
-   ;;           :armored 3}}
+   :humvee {:name "Humvee"
+            :cost 300
+            :movement 15
+            :can-capture false
+            :min-range 1
+            :max-range 1
+            :armor-type :armored
+            :armor 8
+            :capturing-armor 2
+            :repair 1
+            :state-map :free-attack-twice
+            :image "tilesets/elite-command/units/humvee-COLOR.png"
+            :terrain-effects
+            {:plains    {:movement-cost 3 :attack-bonus  0 :armor-bonus  0}
+             :woods     {:movement-cost 6 :attack-bonus -2 :armor-bonus -2}
+             :base      {:movement-cost 2 :attack-bonus  0 :armor-bonus  0}}
+            :attack-strengths
+            {:personnel 9
+             :armored 3}}
    :tank {:name "Tank"
           :cost 350
           :movement 12

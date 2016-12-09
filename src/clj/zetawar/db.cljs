@@ -1,6 +1,7 @@
 (ns zetawar.db
   (:require
    [datascript.core :as d]
+   [taoensso.timbre :as log]
    [zetawar.util :refer [breakpoint inspect solo ssolo]]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -93,6 +94,11 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Utils
+
+(def prev-temp-id (atom -1000000))
+
+(defn next-temp-id []
+  (swap! prev-temp-id dec))
 
 (defn qe
   "Returns the single entity returned by a query."
