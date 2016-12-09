@@ -30,8 +30,8 @@
 (defn load-player-game-state! [conn game-state]
   (game/load-specs! conn)
   (game/load-game-state! conn
-                         data/map-definitions
-                         data/scenario-definitions
+                         data/maps
+                         data/scenarios
                          game-state))
 
 ;; requests

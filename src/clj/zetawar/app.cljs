@@ -80,13 +80,13 @@
 
 (defn start-new-game!
   ([{:as app-ctx :keys [conn players]} scenario-id]
-   (start-new-game! app-ctx data/map-definitions data/scenario-definitions scenario-id))
-  ([{:as app-ctx :keys [conn players]} map-definitions scenario-definitions scenario-id]
+   (start-new-game! app-ctx data/maps data/scenarios scenario-id))
+  ([{:as app-ctx :keys [conn players]} map-defs scenario-defs scenario-id]
    (let [game (current-game @conn)]
      (when-not game
        (game/load-specs! conn))
-     (let [scenario-def (scenario-definitions scenario-id)
-           game-id (game/load-scenario! conn map-definitions scenario-def)
+     (let [scenario-def (scenario-defs scenario-id)
+           game-id (game/load-scenario! conn map-defs scenario-def)
            app-eid (or (some-> (root @conn) e) -101)]
        (d/transact! conn (cond-> [{:db/id app-eid
                                    :app/game [:game/id game-id]
@@ -99,13 +99,13 @@
 
 (defn load-encoded-game-state!
   ([{:as app-ctx :keys [conn players]} encoded-game-state]
-   (load-encoded-game-state! app-ctx data/map-definitions data/scenario-definitions encoded-game-state))
-  ([{:as app-ctx :keys [conn players]} map-definitions scenario-definitions encoded-game-state]
+   (load-encoded-game-state! app-ctx data/maps data/scenarios encoded-game-state))
+  ([{:as app-ctx :keys [conn players]} map-defs scenario-defs encoded-game-state]
    (game/load-specs! conn)
    (let [game-state (decode-game-state encoded-game-state)
          game-id (game/load-game-state! conn
-                                        map-definitions
-                                        scenario-definitions
+                                        map-defs
+                                        scenario-defs
                                         game-state)]
      (d/transact! conn [{:db/id -1
                          :app/game [:game/id game-id]}])

@@ -119,7 +119,7 @@
 
 ;; TODO: base board size on map size
 (defn board [app]
-  [:svg#board {:width 400 :height 300}
+  [:svg#board {:width 500 :height 300}
    [tiles app]])
 
 (defn faction-credits [{:keys [conn] :as app}]
@@ -350,7 +350,7 @@
          "Scenario"]
         (into [:select.form-control {:id "scenario-id"
                                      :selected (some-> @selected-scenario-id name)}]
-              (for [[scenario-id {:keys [description]}] data/scenario-definitions]
+              (for [[scenario-id {:keys [description]}] data/scenarios]
                 [:option {:value (name scenario-id)}
                  description]))
         [:> js/ReactBootstrap.Modal.Footer

@@ -15,3 +15,8 @@
   (let [{:keys [app]} (component/start (system/new-system))]
     (app/start-new-game! app :sterlings-aruba-multiplayer)
     [views/board app]))
+
+(defcard-rg city-sprawl-multiplayer-card
+  (let [{:keys [app]} (component/start (system/new-system))]
+    (app/start-new-game! app :city-sprawl-multiplayer)
+    [views/board app]))

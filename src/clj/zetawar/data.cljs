@@ -164,8 +164,7 @@
            :armored 10}}
    })
 
-;; TODO: rename to maps
-(def map-definitions
+(def maps
   {:sterlings-aruba
    {:id :sterlings-aruba
     :name "Sterling's Aruba"
@@ -407,10 +406,219 @@
       :terrain-type :plains}
      ]
     }
+   :city-sprawl
+   {:id :city-sprawl
+    :name "City Sprawl"
+    :terrains
+    [;; Row 1
+     {:q 2
+      :r 0
+      :terrain-type :woods}
+     {:q 3
+      :r 0
+      :terrain-type :woods}
+     {:q 4
+      :r 0
+      :terrain-type :woods}
+     {:q 5
+      :r 0
+      :terrain-type :woods}
+     {:q 6
+      :r 0
+      :terrain-type :woods}
+     {:q 10
+      :r 0
+      :terrain-type :woods}
+     {:q 11
+      :r 0
+      :terrain-type :woods}
+     {:q 12
+      :r 0
+      :terrain-type :woods}
+     ;; Row 2
+     {:q 1
+      :r 1
+      :terrain-type :woods}
+     {:q 2
+      :r 1
+      :terrain-type :plains}
+     {:q 3
+      :r 1
+      :terrain-type :plains}
+     {:q 4
+      :r 1
+      :terrain-type :plains}
+     {:q 5
+      :r 1
+      :terrain-type :plains}
+     {:q 6
+      :r 1
+      :terrain-type :woods}
+     {:q 8
+      :r 1
+      :terrain-type :woods}
+     {:q 9
+      :r 1
+      :terrain-type :plains}
+     {:q 10
+      :r 1
+      :terrain-type :plains}
+     {:q 11
+      :r 1
+      :terrain-type :plains}
+     {:q 12
+      :r 1
+      :terrain-type :woods}
+     {:q 13
+      :r 1
+      :terrain-type :woods}
+     ;; Row 3
+     {:q 1
+      :r 2
+      :terrain-type :woods}
+     {:q 2
+      :r 2
+      :terrain-type :plains}
+     {:q 3
+      :r 2
+      :terrain-type :mountains}
+     ;; Multiplayer base location (unowned)
+     {:q 4
+      :r 2
+      :terrain-type :plains}
+     {:q 5
+      :r 2
+      :terrain-type :plains}
+     {:q 6
+      :r 2
+      :terrain-type :plains}
+     {:q 7
+      :r 2
+      :terrain-type :woods}
+     {:q 8
+      :r 2
+      :terrain-type :woods}
+     {:q 9
+      :r 2
+      :terrain-type :plains}
+     {:q 10
+      :r 2
+      :terrain-type :plains}
+     {:q 11
+      :r 2
+      :terrain-type :plains}
+     ;; Multiplayer base location (unowned)
+     {:q 12
+      :r 2
+      :terrain-type :plains}
+     {:q 13
+      :r 2
+      :terrain-type :plains}
+     {:q 14
+      :r 2
+      :terrain-type :woods}
+     ;; Row 4
+     {:q 0
+      :r 3
+      :terrain-type :plains}
+     {:q 1
+      :r 3
+      :terrain-type :plains}
+     {:q 2
+      :r 3
+      :terrain-type :mountains}
+     ;; Multiplayer base location (red owned)
+     {:q 3
+      :r 3
+      :terrain-type :plains}
+     {:q 4
+      :r 3
+      :terrain-type :mountains}
+     ;; Multiplayer base location (unowned)
+     {:q 5
+      :r 3
+      :terrain-type :plains}
+     {:q 6
+      :r 3
+      :terrain-type :woods}
+     {:q 7
+      :r 3
+      :terrain-type :mountains}
+     {:q 8
+      :r 3
+      :terrain-type :mountains}
+     {:q 9
+      :r 3
+      :terrain-type :plains}
+     ;; Multiplayer base location (unowned)
+     {:q 10
+      :r 3
+      :terrain-type :plains}
+     {:q 11
+      :r 3
+      :terrain-type :plains} ; should be desert
+     {:q 12
+      :r 3
+      :terrain-type :woods}
+     {:q 13
+      :r 3
+      :terrain-type :plains}
+     {:q 14
+      :r 3
+      :terrain-type :woods}
+     ;; Row 5 - TODO: need to finish this row
+     {:q 0
+      :r 4
+      :terrain-type :woods}
+     {:q 1
+      :r 4
+      :terrain-type :plains}
+     {:q 2
+      :r 4
+      :terrain-type :plains}
+     ;; Multiplayer base location (unowned)
+     {:q 3
+      :r 4
+      :terrain-type :plains}
+     {:q 4
+      :r 4
+      :terrain-type :plains}
+     {:q 5
+      :r 4
+      :terrain-type :plains}
+     {:q 6
+      :r 4
+      :terrain-type :mountains}
+     {:q 7
+      :r 4
+      :terrain-type :plains}
+     {:q 8
+      :r 4
+      :terrain-type :plains}
+     {:q 9
+      :r 4
+      :terrain-type :woods}
+     {:q 10
+      :r 4
+      :terrain-type :mountains}
+     {:q 11
+      :r 4
+      :terrain-type :plains}
+     {:q 12
+      :r 4
+      :terrain-type :mountains} ; should be desert
+     ;; Multiplayer base location (unowned)
+     {:q 13
+      :r 4
+      :terrain-type :plains}
+     {:q 14
+      :r 4
+      :terrain-type :woods}
+     ]
+    }
    })
 
-;; TODO: rename to scenarios
-(def scenario-definitions
+(def scenarios
   {:sterlings-aruba-multiplayer
    {:id :sterlings-aruba-multiplayer
     :description "Sterling's Aruba Multiplayer"
@@ -440,6 +648,36 @@
               {:q 7
                :r 8
                :unit-type :infantry}]}]
+    }
+   :city-sprawl-multiplayer
+   {:id :city-sprawl-multiplayer
+    :description "City Sprawl Multiplayer"
+    :map-id :city-sprawl
+    :max-unit-count 10
+    :credits-per-base 50
+    :bases
+    [{:q 4  :r 2}
+     {:q 12 :r 2}
+     {:q 3  :r 3}
+     {:q 5  :r 3}
+     {:q 10 :r 3}
+     {:q 2  :r 4}
+     {:q 4  :r 4}]
+    :factions
+    [{:color :red
+      :credits 300
+      :ai false
+      :bases [{:q 3 :r 3}]
+      :units [{:q 2 :r 2
+               :unit-type :infantry}]}
+     {:color :blue
+      :credits 300
+      :ai true
+      :bases [{:q 7 :r 6}]
+      :units [{:q 12 :r 3
+               :unit-type :infantry}
+              ]}
+     ]
     }
    }
   )

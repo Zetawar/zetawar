@@ -482,7 +482,7 @@
 
   (deftest test-map-tx
     (let [game-id (random-uuid)]
-      (is (= nil (game/map-tx game-id (:sterlings-aruba data/map-definitions))))
+      (is (= nil (game/map-tx game-id (:sterlings-aruba data/maps))))
       ))
 
   )
