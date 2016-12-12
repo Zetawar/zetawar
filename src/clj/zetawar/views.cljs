@@ -349,7 +349,8 @@
         [:label {:for "scenario-id"}
          "Scenario"]
         (into [:select.form-control {:id "scenario-id"
-                                     :selected (some-> @selected-scenario-id name)}]
+                                     :selected (some-> @selected-scenario-id name)
+                                     :on-change select-scenario}]
               (for [[scenario-id {:keys [description]}] data/scenarios]
                 [:option {:value (name scenario-id)}
                  description]))

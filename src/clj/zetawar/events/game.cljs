@@ -6,6 +6,7 @@
    [zetawar.game :as game]
    [zetawar.router :as router]))
 
+;; TODO: simplify
 (defmethod router/handle-event ::execute-action
   [{:as handler-ctx :keys [db]} [_ action]]
   (let [game (app/current-game db)]
