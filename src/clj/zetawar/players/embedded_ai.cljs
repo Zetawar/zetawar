@@ -49,6 +49,7 @@
   [{:as player :keys [faction-color]} _]
   {:dispatch [[:zetawar.events.player/send-game-state faction-color]]})
 
+;; TODO: apply actions incrementally instead of loading complete state every time
 (defmethod handle-event ::players/apply-action
   [{:as player :keys [db faction-color]} [_ _ action]]
   (when (and (= faction-color (:action/faction-color action))
