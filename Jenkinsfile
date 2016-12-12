@@ -18,11 +18,11 @@ node {
     }
 
     stage('Build') {
-      sh "boot --no-colors build-site -e ${ZETAWAR_ENV} ${PUBLIC_FLAG}"
+      sh "boot --no-colors build-site -e ${ZETAWAR_ENV}"
     }
 
     stage('Deploy') {
-      sh "./bin/deploy -b ${S3_BUCKET}"
+      sh "./bin/deploy -b ${S3_BUCKET} ${PUBLIC_FLAG}"
     }
   } catch (err) {
     currentBuild.result = 'FAILURE'
