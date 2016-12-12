@@ -18,7 +18,7 @@ node {
     }
 
     stage('Build') {
-      sh "boot --no-colors build-site -e ${ZETAWAR_ENV}"
+      sh "boot --no-colors build-site -e ${ZETAWAR_ENV} ${PUBLIC_FLAG}"
     }
 
     stage('Deploy') {
