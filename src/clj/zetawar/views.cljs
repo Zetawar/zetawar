@@ -117,9 +117,9 @@
         (for [terrain @(subs/terrains conn)]
           [tile app terrain])))
 
-;; TODO: base board size on map size
+;; TODO: computer board size based on map size
 (defn board [app]
-  [:svg#board {:width 500 :height 300}
+  [:svg#board {:width 500 :height 500}
    [tiles app]])
 
 (defn faction-credits [{:keys [conn] :as app}]
