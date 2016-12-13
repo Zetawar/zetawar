@@ -17,6 +17,8 @@
                    :image "tilesets/elite-command/terrains/deep-water.png"}})
 
 ;; TODO: remove redundancy between state map and unit/can-capture flag (?)
+;; TODO: move transitions one level deeper under :transitions key
+;; TODO: add :description for state maps and states
 (def unit-state-maps
   {:move-attack
    {:start-state :start
@@ -174,6 +176,7 @@
            :armored 10}}
    })
 
+;; TODO: remove redundant id keys
 (def maps
   {:sterlings-aruba
    {:id :sterlings-aruba
@@ -1075,6 +1078,7 @@
     }
    })
 
+;; TODO: remove redundant id keys
 (def scenarios
   {:sterlings-aruba-multiplayer
    {:id :sterlings-aruba-multiplayer

@@ -7,6 +7,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Schema
 
+;; TODO: add base-type (for shipyards, airfields, etc.)
 (def schema
   {;; App
    :app/game                        {:db/valueType   :db.type/ref}

@@ -12,7 +12,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Util
 
-;; TODO: benchmark vs bit shifting and without memoization
+;; TODO: benchmark vs bit shifting and with/without memoization
 (def game-pos-idx
   (memoize
    (fn game-pos-idx [game q r]
