@@ -116,17 +116,17 @@
             :min-range 1
             :max-range 1
             :armor-type :personnel
-            :armor 6
+            :armor 9
             :capturing-armor 2
             :repair 1
             :state-map :move-attack
             :image "tilesets/elite-command/units/ranger-COLOR.png"
             :terrain-effects
-            {:plains    {:movement-cost 3 :attack-bonus  0 :armor-bonus  0}
-             :mountains {:movement-cost 6 :attack-bonus  2 :armor-bonus  5}
-             :woods     {:movement-cost 3 :attack-bonus  2 :armor-bonus  4}
-             :desert    {:movement-cost 3 :attack-bonus -1 :armor-bonus -1}
-             :base      {:movement-cost 2 :attack-bonus  2 :armor-bonus  3}}
+            {:plains    {:movement-cost 3 :armor-bonus  0 :attack-bonus  0}
+             :mountains {:movement-cost 6 :armor-bonus  5 :attack-bonus  2}
+             :woods     {:movement-cost 3 :armor-bonus  4 :attack-bonus  2}
+             :desert    {:movement-cost 3 :armor-bonus -1 :attack-bonus -1}
+             :base      {:movement-cost 2 :armor-bonus  3 :attack-bonus  2}}
             :attack-strengths
             {:personnel 9
              :armored 4}}
@@ -138,6 +138,7 @@
             :max-range 1
             :armor-type :armored
             :armor 8
+            ;; TODO: capturing armor doesn't make sense for units that can't canpture
             :capturing-armor 2
             :repair 1
             :state-map :free-attack-twice
@@ -158,6 +159,7 @@
           :max-range 1
           :armor-type :armored
           :armor 12
+          ;; TODO: capturing armor doesn't make sense for units that can't canpture
           :capturing-armor 2
           :repair 1
           :state-map :move-attack
