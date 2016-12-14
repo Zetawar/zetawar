@@ -104,7 +104,7 @@
         (try
           (apply f' args')
           (catch :default ex
-            (log/error "Error running AI function:" ex)
+            (log/error "Error running player function:" ex)
             nil))))))
 
 (defmethod handle-event ::players/update-game-state
