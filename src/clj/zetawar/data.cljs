@@ -1109,13 +1109,14 @@
     }
    })
 
-;; TODO: add :allowed-unit-types
+;; TODO: add support for :allowed-unit-types
 ;; TODO: remove redundant id keys (?)
 (def scenarios
   {:sterlings-aruba-multiplayer
    {:id :sterlings-aruba-multiplayer
     :description "Sterling's Aruba Multiplayer"
     :map-id :sterlings-aruba
+    ;; TODO: rename to max-count-per-unit
     :max-unit-count 10
     :credits-per-base 100
     :bases

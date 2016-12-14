@@ -47,6 +47,7 @@
       ;; Default
       nil)))
 
+;; TODO: don't start game when running benchmarks
 (defn ^:export init []
   (when-not (site/viewing-devcards?)
     (reset! system (component/start (new-system)))
