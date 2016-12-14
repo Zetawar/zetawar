@@ -56,7 +56,7 @@
               :max-range 1
               :armor-type :personnel
               :armor 6
-              :capturing-armor 2
+              :capturing-armor 4
               :repair 1
               :state-map :move-attack
               :image "tilesets/elite-command/units/infantry-COLOR.png"
@@ -77,7 +77,7 @@
                :max-range 2
                :armor-type :personnel
                :armor 8
-               :capturing-armor 2
+               :capturing-armor 6
                :repair 1
                :state-map :move-attack
                :image "tilesets/elite-command/units/grenadier-COLOR.png"
@@ -98,7 +98,7 @@
             :max-range 3
             :armor-type :personnel
             :armor 6
-            :capturing-armor 2
+            :capturing-armor 4
             :repair 1
             :state-map :move-attack
             :image "tilesets/elite-command/units/mortar-COLOR.png"
@@ -119,7 +119,7 @@
             :max-range 1
             :armor-type :personnel
             :armor 9
-            :capturing-armor 2
+            :capturing-armor 7
             :repair 1
             :state-map :move-attack
             :image "tilesets/elite-command/units/ranger-COLOR.png"
