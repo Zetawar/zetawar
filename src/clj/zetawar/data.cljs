@@ -9,12 +9,18 @@
                    :image "tilesets/elite-command/terrains/woods.png"}
    :desert        {:name "Desert"
                    :image "tilesets/elite-command/terrains/desert.png"}
-   :base          {:name "Base"
-                   :image "tilesets/elite-command/terrains/base-COLOR.png"}
+   :tundra        {:name "Tundra"
+                   :image "tilesets/elite-command/terrains/tundra.png"}
+   :swamp         {:name "Swamp"
+                   :image "tilesets/elite-command/terrains/swamp.png"}
+   :ford          {:name "Ford"
+                   :image "tilesets/elite-command/terrains/ford.png"}
    :shallow-water {:name "Shallow Water"
                    :image "tilesets/elite-command/terrains/shallow-water.png"}
    :deep-water    {:name "Deep Water"
-                   :image "tilesets/elite-command/terrains/deep-water.png"}})
+                   :image "tilesets/elite-command/terrains/deep-water.png"}
+   :base          {:name "Base"
+                   :image "tilesets/elite-command/terrains/base-COLOR.png"}})
 
 ;; TODO: move transitions one level deeper under :transitions key
 ;; TODO: add :description for state maps and states
@@ -44,10 +50,12 @@
      :moved-1-attacked-1 {:attack-unit  :done}
      :done               {}}}})
 
+;; TODO: add support multiple zone of control types
 ;; TODO: check how capturing armor works in Elite Command
 ;; TODO: check how repair amount works in Elite Command
 ;; TODO: add :buildable-at => {<terrain type ids>...}
 (def units
+  ;; Personnel
   {:infantry {:name "Infantry"
               :cost 75
               :movement 9
@@ -65,10 +73,13 @@
                :mountains {:movement-cost 6 :armor-bonus  5 :attack-bonus  2}
                :woods     {:movement-cost 4 :armor-bonus  3 :attack-bonus  2}
                :desert    {:movement-cost 4 :armor-bonus -1 :attack-bonus -1}
+               :tundra    {:movement-cost 4 :armor-bonus -1 :attack-bonus -1}
+               :swamp     {:movement-cost 6 :armor-bonus -2 :attack-bonus -2}
+               :ford      {:movement-cost 5 :armor-bonus -1 :attack-bonus -1}
                :base      {:movement-cost 2 :armor-bonus  3 :attack-bonus  2}}
               :attack-strengths
               {:personnel 6
-               :armored 3}}
+               :armored   3}}
    :grenadier {:name "Grenadier"
                :cost 150
                :movement 9
@@ -86,10 +97,14 @@
                 :mountains {:movement-cost 9 :armor-bonus  5 :attack-bonus  2}
                 :woods     {:movement-cost 4 :armor-bonus  3 :attack-bonus -1}
                 :desert    {:movement-cost 5 :armor-bonus -1 :attack-bonus  0}
+                :tundra    {:movement-cost 5 :armor-bonus -1 :attack-bonus  0}
+                :swamp     {:movement-cost 9 :armor-bonus -2 :attack-bonus -2}
+                :ford      {:movement-cost 9 :armor-bonus -1 :attack-bonus -1}
                 :base      {:movement-cost 3 :armor-bonus  3 :attack-bonus -1}}
                :attack-strengths
                {:personnel 8
-                :armored 9}}
+                :armored   9}}
+   ;; TODO: mortar should not exert zone of control
    :mortar {:name "Mortar"
             :cost 200
             :movement 9
@@ -107,10 +122,13 @@
              :mountains {:movement-cost 9 :armor-bonus  5 :attack-bonus  3}
              :woods     {:movement-cost 4 :armor-bonus  3 :attack-bonus -2}
              :desert    {:movement-cost 5 :armor-bonus -1 :attack-bonus  0}
+             :tundra    {:movement-cost 5 :armor-bonus -1 :attack-bonus -1}
+             :swamp     {:movement-cost 9 :armor-bonus -2 :attack-bonus -2}
+             :ford      {:movement-cost 9 :armor-bonus -1 :attack-bonus -2}
              :base      {:movement-cost 3 :armor-bonus  3 :attack-bonus -2}}
             :attack-strengths
             {:personnel 10
-             :armored 10}}
+             :armored   10}}
    :ranger {:name "Ranger"
             :cost 200
             :movement 9
@@ -124,14 +142,19 @@
             :state-map :move-attack
             :image "tilesets/elite-command/units/ranger-COLOR.png"
             :terrain-effects
-            {:plains    {:movement-cost 3 :armor-bonus  0 :attack-bonus  0}
-             :mountains {:movement-cost 6 :armor-bonus  5 :attack-bonus  2}
-             :woods     {:movement-cost 3 :armor-bonus  4 :attack-bonus  2}
-             :desert    {:movement-cost 3 :armor-bonus -1 :attack-bonus -1}
-             :base      {:movement-cost 2 :armor-bonus  3 :attack-bonus  2}}
+            {:plains        {:movement-cost 3 :armor-bonus  0 :attack-bonus  0}
+             :mountains     {:movement-cost 6 :armor-bonus  5 :attack-bonus  2}
+             :woods         {:movement-cost 3 :armor-bonus  4 :attack-bonus  2}
+             :desert        {:movement-cost 3 :armor-bonus -1 :attack-bonus -1}
+             :tundra        {:movement-cost 3 :armor-bonus -1 :attack-bonus -1}
+             :swamp         {:movement-cost 3 :armor-bonus -2 :attack-bonus -2}
+             :ford          {:movement-cost 3 :armor-bonus  0 :attack-bonus  0}
+             :shallow-water {:movement-cost 6 :armor-bonus -2 :attack-bonus -2}
+             :base          {:movement-cost 2 :armor-bonus  3 :attack-bonus  2}}
             :attack-strengths
             {:personnel 9
-             :armored 4}}
+             :armored   4}}
+   ;; Armored
    :humvee {:name "Humvee"
             :cost 300
             :movement 15
@@ -144,13 +167,16 @@
             :state-map :free-attack-twice
             :image "tilesets/elite-command/units/humvee-COLOR.png"
             :terrain-effects
-            {:plains    {:movement-cost 3 :armor-bonus  0 :attack-bonus  0}
-             :woods     {:movement-cost 6 :armor-bonus -2 :attack-bonus -2}
-             :desert    {:movement-cost 3 :armor-bonus  0 :attack-bonus  0}
-             :base      {:movement-cost 2 :armor-bonus  0 :attack-bonus  0}}
+            {:plains    {:movement-cost 3  :armor-bonus  0 :attack-bonus  0}
+             :woods     {:movement-cost 6  :armor-bonus -2 :attack-bonus -2}
+             :desert    {:movement-cost 3  :armor-bonus  0 :attack-bonus  0}
+             :tundra    {:movement-cost 6  :armor-bonus  0 :attack-bonus  0}
+             :swamp     {:movement-cost 12 :armor-bonus -3 :attack-bonus -3}
+             :ford      {:movement-cost 12 :armor-bonus -1 :attack-bonus -1}
+             :base      {:movement-cost 2  :armor-bonus  0 :attack-bonus  0}}
             :attack-strengths
             {:personnel 9
-             :armored 3}}
+             :armored   3}}
    :tank {:name "Tank"
           :cost 350
           :movement 12
@@ -166,10 +192,13 @@
           {:plains    {:movement-cost 3 :armor-bonus  0 :attack-bonus 0}
            :woods     {:movement-cost 6 :armor-bonus -3 :attack-bonus 0}
            :desert    {:movement-cost 4 :armor-bonus  0 :attack-bonus 0}
+           :tundra    {:movement-cost 5 :armor-bonus  0 :attack-bonus 0}
+           :swamp     {:movement-cost 8 :armor-bonus -4 :attack-bonus 0}
+           :ford      {:movement-cost 8 :armor-bonus  0 :attack-bonus 0}
            :base      {:movement-cost 2 :armor-bonus -2 :attack-bonus 0}}
           :attack-strengths
           {:personnel 10
-           :armored 10}}
+           :armored   10}}
    })
 
 ;; TODO: remove redundant id keys
