@@ -960,26 +960,24 @@
   (into []
         (mapcat
          (fn [[unit-type-name unit-def]]
-           (let [{:keys [cost can-capture movement min-range max-range
-                         armor-type armor capturing-armor repair
-                         capturing-armor repair state-map image
-                         terrain-effects attack-strengths]} unit-def
+           (let [{:keys [armor capturing-armor state-map]} unit-def
                  unit-state-map-id (to-unit-state-map-id state-map)
                  unit-type-eid (db/next-temp-id)]
              (-> [{:db/id unit-type-eid
                    :unit-type/id (to-unit-type-id unit-type-name)
                    :unit-type/name (:name unit-def)
-                   :unit-type/cost cost
-                   :unit-type/can-capture can-capture
-                   :unit-type/movement movement
-                   :unit-type/min-range min-range
-                   :unit-type/max-range max-range
-                   :unit-type/armor-type (to-armor-type armor-type)
+                   :unit-type/cost (:cost unit-def)
+                   :unit-type/can-capture (:can-capture unit-def)
+                   :unit-type/movement (:movement unit-def)
+                   :unit-type/min-range (:min-range unit-def)
+                   :unit-type/max-range (:max-range unit-def)
+                   :unit-type/armor-type (-> unit-def :armor-type to-armor-type)
                    :unit-type/armor armor
-                   :unit-type/capturing-armor armor
-                   :unit-type/repair repair
+                   ;; FIXME: this should be getting capturing armor
+                   :unit-type/capturing-armor (or capturing-armor armor)
+                   :unit-type/repair (:repair unit-def)
                    :unit-type/state-map [:unit-state-map/id unit-state-map-id]
-                   :unit-type/image image}]
+                   :unit-type/image (:image unit-def)}]
                  (into (attack-strengths-tx db unit-type-eid attack-strengths))
                  (into (terrain-effects-tx db unit-type-eid terrain-effects))))))
         units-def))
