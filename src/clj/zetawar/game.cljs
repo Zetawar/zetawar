@@ -1180,9 +1180,8 @@
     (let [game (conn-game)
           starting-faction-eid (e (faction-by-color @conn game starting-faction-color))
           current-faction-eid (e (faction-by-color @conn game current-faction-color))]
-      (d/transact! conn [{:db/id (-> (conn-game) :game/map e)
-                          :map/starting-faction starting-faction-eid}
-                         {:db/id (e game)
+      (d/transact! conn [{:db/id (e game)
+                          :game/starting-faction starting-faction-eid
                           :game/current-faction current-faction-eid}]))
     game-id))
 
