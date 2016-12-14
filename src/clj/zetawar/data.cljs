@@ -16,7 +16,6 @@
    :deep-water    {:name "Deep Water"
                    :image "tilesets/elite-command/terrains/deep-water.png"}})
 
-;; TODO: remove redundancy between state map and unit/can-capture flag (?)
 ;; TODO: move transitions one level deeper under :transitions key
 ;; TODO: add :description for state maps and states
 (def unit-state-maps
@@ -47,6 +46,7 @@
 
 ;; TODO: check how capturing armor works in Elite Command
 ;; TODO: check how repair amount works in Elite Command
+;; TODO: add :buildable-at => {<terrain type ids>...}
 (def units
   {:infantry {:name "Infantry"
               :cost 75
@@ -140,8 +140,6 @@
             :max-range 1
             :armor-type :armored
             :armor 8
-            ;; TODO: capturing armor doesn't make sense for units that can't canpture
-            :capturing-armor 2
             :repair 1
             :state-map :free-attack-twice
             :image "tilesets/elite-command/units/humvee-COLOR.png"
@@ -161,8 +159,6 @@
           :max-range 1
           :armor-type :armored
           :armor 12
-          ;; TODO: capturing armor doesn't make sense for units that can't canpture
-          :capturing-armor 2
           :repair 1
           :state-map :move-attack
           :image "tilesets/elite-command/units/tank-COLOR.png"
@@ -1078,6 +1074,7 @@
     }
    })
 
+;; TODO: add :allowed-unit-types
 ;; TODO: remove redundant id keys
 (def scenarios
   {:sterlings-aruba-multiplayer
