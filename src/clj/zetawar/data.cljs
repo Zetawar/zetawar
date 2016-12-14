@@ -36,18 +36,24 @@
      :moved {:attack-unit  :done
              :capture-base :done}
      :done  {}}}
+
    :free-attack-twice
    {:start-state :start
     :built-state :done
     :states
     {:start              {:move-unit    :moved-1-attacked-0
                           :attack-unit  :moved-0-attacked-1
-                          :repair-unit  :done}
-     :moved-0-attacked-1 {:attack-unit  :moved-0-attacked-2
-                          :move-unit    :moved-1-attacked-1}
-     :moved-0-attacked-2 {:move-unit    :done}
-     :moved-1-attacked-0 {:attack-unit  :moved-1-attacked-1}
-     :moved-1-attacked-1 {:attack-unit  :done}
+                          :repair-unit  :done
+                          :capture-base :done}
+     :moved-0-attacked-1 {:move-unit    :moved-1-attacked-1
+                          :attack-unit  :moved-0-attacked-2
+                          :capture-base :done}
+     :moved-0-attacked-2 {:move-unit    :done
+                          :capture-base :done}
+     :moved-1-attacked-0 {:attack-unit  :moved-1-attacked-1
+                          :capture-base :done}
+     :moved-1-attacked-1 {:attack-unit  :done
+                          :capture-base :done}
      :done               {}}}})
 
 ;; TODO: add support multiple zone of control types
