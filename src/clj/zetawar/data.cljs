@@ -976,7 +976,7 @@
      {:q 10
       :r 11
       :terrain-type :mountains}
-     ;; Multiplayer base location (purple)
+     ;; Multiplayer base location (pink)
      {:q 11
       :r 11
       :terrain-type :plains}
@@ -1064,7 +1064,7 @@
      {:q 9
       :r 13
       :terrain-type :plains}
-     ;; Multiplayer base location (purple)
+     ;; Multiplayer base location (pink)
      {:q 10
       :r 13
       :terrain-type :plains}
@@ -1205,7 +1205,7 @@
                :unit-type :infantry}
               {:q 3 :r 12
                :unit-type :infantry}]}
-     {:color :purple
+     {:color :pink
       :credits 300
       :ai true
       :bases [{:q 11 :r 11}
