@@ -973,13 +973,12 @@
                    :unit-type/max-range (:max-range unit-def)
                    :unit-type/armor-type (-> unit-def :armor-type to-armor-type)
                    :unit-type/armor armor
-                   ;; FIXME: this should be getting capturing armor
                    :unit-type/capturing-armor (or capturing-armor armor)
                    :unit-type/repair (:repair unit-def)
                    :unit-type/state-map [:unit-state-map/id unit-state-map-id]
                    :unit-type/image (:image unit-def)}]
-                 (into (attack-strengths-tx db unit-type-eid attack-strengths))
-                 (into (terrain-effects-tx db unit-type-eid terrain-effects))))))
+                 (into (attack-strengths-tx db unit-type-eid (:attack-strengths unit-def)))
+                 (into (terrain-effects-tx db unit-type-eid (:terrain-effects unit-def)))))))
         units-def))
 
 (defn unit-states-tx [state-map-name states]
