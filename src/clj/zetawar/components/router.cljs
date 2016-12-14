@@ -32,6 +32,7 @@
 
 (defn new-router
   ([]
+   ;; TODO: size 10 dropping-buffer is arbitrary. is there a better way?
    (new-router (async/chan (async/dropping-buffer 10))
                (async/chan)
                (atom {})))

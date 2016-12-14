@@ -201,7 +201,7 @@
            :armored   10}}
    })
 
-;; TODO: remove redundant id keys
+;; TODO: remove redundant id keys (?)
 (def maps
   {:sterlings-aruba
    {:id :sterlings-aruba
@@ -1104,7 +1104,7 @@
    })
 
 ;; TODO: add :allowed-unit-types
-;; TODO: remove redundant id keys
+;; TODO: remove redundant id keys (?)
 (def scenarios
   {:sterlings-aruba-multiplayer
    {:id :sterlings-aruba-multiplayer

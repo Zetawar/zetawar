@@ -11,6 +11,8 @@
   (:require-macros
    [cljs.core.async.macros :refer [go go-loop]]))
 
+;; TODO: move to player/simple-embedded
+
 (defmulti handle-event (fn [player [ev-type & _]] ev-type))
 
 (defmethod handle-event :default
@@ -40,6 +42,7 @@
   (stop [player]
     (async/close! player-chan)))
 
+;; TODO: rename to simple-embedded-player
 (defn new-simple-embedded-ai-player [faction-color ev-chan notify-pub fns]
   (let [player-chan (async/chan (async/dropping-buffer 10))
         conn (d/create-conn db/schema)]
