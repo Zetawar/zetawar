@@ -56,7 +56,7 @@
                           :capture-base :done}
      :done               {}}}})
 
-;; TODO: add support multiple zone of control types
+;; TODO: add support for multiple zone of control types
 ;; TODO: check how capturing armor works in Elite Command
 ;; TODO: check how repair amount works in Elite Command
 ;; TODO: add :buildable-at => {<terrain type ids>...}
