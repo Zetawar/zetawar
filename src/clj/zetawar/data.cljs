@@ -22,8 +22,7 @@
    :base          {:name "Base"
                    :image "tilesets/elite-command/terrains/base-COLOR.png"}})
 
-;; TODO: move transitions one level deeper under :transitions key
-;; TODO: add :description for state maps and states
+;; TODO: add :description for state maps and states (?)
 (def unit-state-maps
   {:move-attack
    {:start-state :start
