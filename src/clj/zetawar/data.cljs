@@ -64,7 +64,7 @@
 
 ;; TODO: add support for multiple zone of control types
 ;; TODO: check how repair amount works in Elite Command
-;; TODO: add :buildable-at => {<terrain type ids>...}
+;; TODO: add :buildable-at (or -by?) => {<terrain type ids>...}
 (def units
   ;; Personnel
   {:infantry {:name "Infantry"
@@ -1114,8 +1114,15 @@
     }
    })
 
-;; TODO: add support for :allowed-unit-types
 ;; TODO: remove redundant id keys (?)
+;; TODO: add adjacent-attack-bonus (default = ?)
+;; TODO: add opposite-attack-bonus (default = ?)
+;; TODO: add flanking-attack-bonus (default = ?)
+;; TODO: add ranged-attack-bonus (default = ?)
+;; TODO: add support for :move-through-friendly flag (?)
+;; TODO: add support for :allowed-unit-types
+;; TODO: add support for :repair-anywhere flag (default = false)
+;; TODO: add support for :stochastic-attack flag (default = true)
 (def scenarios
   {:sterlings-aruba-multiplayer
    {:id :sterlings-aruba-multiplayer
@@ -1145,8 +1152,8 @@
                :unit-type :infantry}
               {:q 7
                :r 8
-               :unit-type :infantry}]}]
-    }
+               :unit-type :infantry}]}]}
+
    :city-sprawl-multiplayer
    {:id :city-sprawl-multiplayer
     :description "City Sprawl Multiplayer"
@@ -1217,8 +1224,4 @@
       :units [{:q 10 :r 11
                :unit-type :infantry}
               {:q 11 :r 12
-               :unit-type :infantry}]}
-     ]
-    }
-   }
-  )
+               :unit-type :infantry}]}]}})
