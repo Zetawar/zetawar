@@ -982,7 +982,7 @@
 (defn unit-states-tx [state-map-name states]
   (into []
         (map
-         (fn [[state-name transitions]]
+         (fn [[state-name states]]
            (let [parent-map-id (to-unit-state-map-id state-map-name)
                  state-id (to-unit-state-id state-map-name state-name)]
              {:db/id (db/next-temp-id)
@@ -993,7 +993,7 @@
 (defn unit-states-transitions-tx [state-map-name states]
   (into []
         (mapcat
-         (fn [[state-name transitions]]
+         (fn [[state-name {:keys [transitions]}]]
            (map
             (fn [[action new-state]]
               (let [state-id (to-unit-state-id state-map-name state-name)

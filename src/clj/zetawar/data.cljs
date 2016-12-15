@@ -29,35 +29,41 @@
    {:start-state :start
     :built-state :done
     :states
-    {:start {:move-unit    :moved
-             :attack-unit  :done
-             :repair-unit  :done
-             :capture-base :done}
-     :moved {:attack-unit  :done
-             :capture-base :done}
+    {:start {:transitions
+             {:move-unit    :moved
+              :attack-unit  :done
+              :repair-unit  :done
+              :capture-base :done}}
+     :moved {:transitions
+             {:attack-unit  :done
+              :capture-base :done}}
      :done  {}}}
 
    :free-attack-twice
    {:start-state :start
     :built-state :done
     :states
-    {:start              {:move-unit    :moved-1-attacked-0
-                          :attack-unit  :moved-0-attacked-1
-                          :repair-unit  :done
-                          :capture-base :done}
-     :moved-0-attacked-1 {:move-unit    :moved-1-attacked-1
-                          :attack-unit  :moved-0-attacked-2
-                          :capture-base :done}
-     :moved-0-attacked-2 {:move-unit    :done
-                          :capture-base :done}
-     :moved-1-attacked-0 {:attack-unit  :moved-1-attacked-1
-                          :capture-base :done}
-     :moved-1-attacked-1 {:attack-unit  :done
-                          :capture-base :done}
+    {:start              {:transitions
+                          {:move-unit    :moved-1-attacked-0
+                           :attack-unit  :moved-0-attacked-1
+                           :repair-unit  :done
+                           :capture-base :done}}
+     :moved-0-attacked-1 {:transitions
+                          {:move-unit    :moved-1-attacked-1
+                           :attack-unit  :moved-0-attacked-2
+                           :capture-base :done}}
+     :moved-0-attacked-2 {:transitions
+                          {:move-unit    :done
+                           :capture-base :done}}
+     :moved-1-attacked-0 {:transitions
+                          {:attack-unit  :moved-1-attacked-1
+                           :capture-base :done}}
+     :moved-1-attacked-1 {:transitions
+                          {:attack-unit  :done
+                           :capture-base :done}}
      :done               {}}}})
 
 ;; TODO: add support for multiple zone of control types
-;; TODO: check how capturing armor works in Elite Command
 ;; TODO: check how repair amount works in Elite Command
 ;; TODO: add :buildable-at => {<terrain type ids>...}
 (def units
