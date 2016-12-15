@@ -1116,7 +1116,6 @@
    {:id :sterlings-aruba-multiplayer
     :description "Sterling's Aruba Multiplayer"
     :map-id :sterlings-aruba
-    ;; TODO: rename to max-count-per-unit
     :max-count-per-unit 10
     :credits-per-base 100
     :bases

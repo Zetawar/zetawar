@@ -287,8 +287,6 @@
         unit-type (e (:unit/type unit))
         unit-movement (get-in unit [:unit/type :unit-type/movement])
         unit-at (memoize #(unit-at db game %1 %2))
-        adjacent-idxs (memoize (fn adjacent-idxs [q r]
-                                 (mapv #(apply game-pos-idx game %) (hex/adjacents q r))))
         terrain-type->cost (into {} (d/q '[:find ?tt ?mc
                                            :in $ ?ut
                                            :where
