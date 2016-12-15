@@ -48,7 +48,7 @@
                 :game/scenario-id
                 :game/map
                 :game/credits-per-base
-                :game/max-unit-count
+                :game/max-count-per-unit
                 :game/starting-faction
                 :game/current-faction
                 :game/factions

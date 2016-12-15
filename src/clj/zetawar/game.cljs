@@ -546,7 +546,7 @@
   (check-unit-current db game unit)
   (when (:unit/capturing unit)
     (throw (unit-ex "Unit cannot be repaired while capturing" unit)))
-  (when (>= (:unit/count unit) (:game/max-unit-count game))
+  (when (>= (:unit/count unit) (:game/max-count-per-unit game))
     (throw (unit-ex "Unit is already fully repaired" unit)))
   (checked-next-state db unit :action.type/repair-unit))
 
@@ -563,7 +563,7 @@
   ([db game unit]
    (let [new-state (check-can-repair db game unit)]
      [{:db/id (e unit)
-       :unit/count (min (:game/max-unit-count game)
+       :unit/count (min (:game/max-count-per-unit game)
                         (+ (:unit/count unit)
                            (get-in unit [:unit/type :unit-type/repair])))
        :unit/repaired true
@@ -667,7 +667,7 @@
        :unit/terrain (e base)
        :unit/round-built (:game/round game)
        :unit/type (e unit-type)
-       :unit/count (:game/max-unit-count game)
+       :unit/count (:game/max-count-per-unit game)
        :unit/move-count 0
        :unit/attack-count 0
        :unit/attacked-count 0
@@ -1053,12 +1053,12 @@
    (create-game! conn scenario-def {}))
   ([conn scenario-def game-state]
    (let [game-id (random-uuid)
-         {:keys [id credits-per-base max-unit-count]} scenario-def]
+         {:keys [id credits-per-base max-count-per-unit]} scenario-def]
      (d/transact! conn [{:db/id (db/next-temp-id)
                          :game/id game-id
                          :game/scenario-id id
                          :game/round (:round game-state 1)
-                         :game/max-unit-count max-unit-count
+                         :game/max-count-per-unit max-count-per-unit
                          :game/credits-per-base credits-per-base}])
      game-id)))
 
@@ -1096,7 +1096,7 @@
 
 (defn factions-units-tx [db game factions]
   (mapcat (fn [faction]
-            (let [{:keys [game/max-unit-count]} game
+            (let [{:keys [game/max-count-per-unit]} game
                   {:keys [units color]} faction
                   faction-eid (e (faction-by-color db game color))]
               (map
@@ -1111,7 +1111,7 @@
                             :unit/q q
                             :unit/r r
                             :unit/terrain (e terrain)
-                            :unit/count (:count unit max-unit-count)
+                            :unit/count (:count unit max-count-per-unit)
                             :unit/round-built (:round-built unit 0)
                             :unit/move-count (:move-count unit 0)
                             :unit/attack-count (:attack-count unit 0)

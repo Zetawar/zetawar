@@ -1117,7 +1117,7 @@
     :description "Sterling's Aruba Multiplayer"
     :map-id :sterlings-aruba
     ;; TODO: rename to max-count-per-unit
-    :max-unit-count 10
+    :max-count-per-unit 10
     :credits-per-base 100
     :bases
     [{:q 1 :r 2}
@@ -1147,7 +1147,7 @@
    {:id :city-sprawl-multiplayer
     :description "City Sprawl Multiplayer"
     :map-id :city-sprawl
-    :max-unit-count 10
+    :max-count-per-unit 10
     :credits-per-base 50
     :bases
     [{:q 4  :r 2}
