@@ -30,7 +30,7 @@
     [(inc q) (inc r)]))
 
 (defn southwest [q r]
-  (if (= (mod q 2) 0)
+  (if (= (mod r 2) 0)
     [(dec q) (inc r)]
     [q (inc r)]))
 
