@@ -8,6 +8,17 @@
    [zetawar.components.timbre :refer [new-timbre]]
    [zetawar.db :as db]))
 
+;; Integrant
+;; - zetawar.components/logger
+;;     returns nil
+;; - zetawar.components/datascript {:schema ...}
+;;     returns <DataScript>
+;; - zetawar.components/router {:datascript ...}
+;;     returns {:ev-chan ... :notify-chan ... :notify-pub ...}
+;; - zetawar.components/players {:router ...}
+;;     returns <atom {...}>
+;; - zetawar.components/views {:datascript ... :router ... :players ...}
+
 (defn new-system
   []
   (component/system-map

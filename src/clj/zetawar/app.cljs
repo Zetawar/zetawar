@@ -35,7 +35,7 @@
 ;;; Game state encoding
 
 ;; TODO: move to encoding or serialization ns?
-;; TODO: switch to base-122 encoding?
+;; TODO: document UTF-8 hack
 
 (defn encode-game-state [game-state]
   (let [writer (transit/writer :json)]
@@ -55,7 +55,7 @@
     (transit/read reader transit-game-state)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; Player setup
+;;; Game setup
 
 (defn create-players! [{:as app-ctx :keys [conn players]}]
   (let [factions (qess '[:find ?f
@@ -74,9 +74,6 @@
             player (players/new-player app-ctx player-type color)]
         (players/start player)
         (swap! players assoc color player)))))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; Game setup
 
 (defn start-new-game!
   ([{:as app-ctx :keys [conn players]} scenario-id]
@@ -109,7 +106,6 @@
                                         game-state)]
      (d/transact! conn [{:db/id -1
                          :app/game [:game/id game-id]}])
-
      ;; TODO: remove test specific code
      (if players
        (create-players! app-ctx)
