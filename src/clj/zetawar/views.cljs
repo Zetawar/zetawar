@@ -23,7 +23,7 @@
        [(* q 32) (* r 26)]
        [(+ 16 (* q 32)) (+ 26 (* (- r 1) 26))]))))
 
-(defn tile-border [{:keys [conn] :as app} q r]
+(defn tile-border [{:as view-ctx :keys [conn]} q r]
   (let [[x y] (offset->pixel q r)]
     [:g {:id (str "border-" q "," r)}
      (cond
@@ -52,7 +52,7 @@
         (get-in [:unit/type :unit-type/image])
         (string/replace "COLOR" color-name))))
 
-(defn board-unit [{:keys [conn dispatch] :as app} q r]
+(defn board-unit [{:as view-ctx :keys [conn dispatch]} q r]
   (when-let [unit @(subs/unit-at conn q r)]
     (let [[x y] (offset->pixel q r)
           image (unit-image unit)]
@@ -69,7 +69,7 @@
                 :width 32 :height 34
                 :xlink-href (str "/images/game/health/" (:unit/count unit) ".png")}]])))
 
-(defn tile-mask [{:keys [conn] :as app} q r]
+(defn tile-mask [{:as view-ctx :keys [conn]} q r]
   (let [[x y] (offset->pixel q r)
         show (or
               ;; No unit selected and tile contains current unit with no actions
@@ -96,42 +96,42 @@
         (get-in [:terrain/type :terrain-type/image])
         (string/replace "COLOR" color-name))))
 
-(defn terrain-tile [{:keys [conn] :as app} terrain q r]
+(defn terrain-tile [view-ctx terrain q r]
   (let [[x y] (offset->pixel q r)
         image (terrain-image terrain)]
     [:image {:x x :y y
              :width 32 :height 34
              :xlink-href (str "/images/game/" image)}]))
 
-(defn tile [{:keys [conn dispatch] :as app} terrain]
+(defn tile [{:as view-ctx :keys [dispatch]} terrain]
   (let [{:keys [terrain/q terrain/r]} terrain]
     ^{:key (str q "," r)}
     [:g {:on-click #(dispatch [::events.ui/select-hex q r])}
-     [terrain-tile app terrain q r]
-     [tile-border app q r]
-     [board-unit app q r]
-     [tile-mask app q r]]))
+     [terrain-tile view-ctx terrain q r]
+     [tile-border view-ctx q r]
+     [board-unit view-ctx q r]
+     [tile-mask view-ctx q r]]))
 
-(defn tiles [{:keys [conn] :as app}]
+(defn tiles [view-ctx]
   (into [:g]
-        (for [terrain @(subs/terrains conn)]
-          [tile app terrain])))
+        (for [terrain @(subs/terrains view-ctx)]
+          [tile view-ctx terrain])))
 
 ;; TODO: computer board size based on map size
-(defn board [app]
+(defn board [view-ctx]
   [:svg#board {:width 500 :height 500}
-   [tiles app]])
+   [tiles view-ctx]])
 
-(defn faction-credits [{:keys [conn] :as app}]
-  (let [{:keys [faction/credits]} @(subs/current-faction conn)
-        {:keys [map/credits-per-base]} @(subs/game-map conn)
-        income @(subs/current-income conn)]
+(defn faction-credits [view-ctx]
+  (let [{:keys [faction/credits]} @(subs/current-faction view-ctx)
+        {:keys [map/credits-per-base]} @(subs/game-map view-ctx)
+        income @(subs/current-income view-ctx)]
     [:p#faction-credits
      [:strong (str credits " Credits")]
      [:span.text-muted.pull-right (str "+" income)
       [:span.hidden-md "/turn"]]]))
 
-(defn copy-url-link [{:keys [conn dispatch] :as app}]
+(defn copy-url-link [view-ctx]
   (let [clipboard (atom nil)
         text-fn (fn [] js/window.location)]
     (r/create-class
@@ -147,7 +147,7 @@
         [:a {:href "#" :on-click #(.preventDefault %)}
          "Copy Link"])})))
 
-(defn faction-status [{:keys [conn dispatch] :as app}]
+(defn faction-status [{:as view-ctx :keys [conn dispatch]}]
   (let [{:keys [game/round]} @(subs/game conn)
         base-count @(subs/current-base-count conn)]
     [:div#faction-status
@@ -155,7 +155,7 @@
      [:a {:href "#" :on-click #(dispatch [::events.ui/end-turn])}
       "End Turn?"]
      " · "
-     [copy-url-link app]
+     [copy-url-link view-ctx]
      [:div.pull-right
       [:a {:href "#"
            :on-click (fn [e]
@@ -165,7 +165,7 @@
       " · "
       (str "Round " round)]]))
 
-(defn faction-actions [{:keys [conn dispatch] :as app}]
+(defn faction-actions [{:as view-ctx :keys [conn dispatch]}]
   ;; TODO: replace query with something from subs ns
   (let [[round current-color] (-> @(posh/q '[:find ?round ?current-color
                                              :where
@@ -224,7 +224,7 @@
         [:a {:href "https://www.kickstarter.com/projects/311016908/zetawar/posts/1608417"} "here"]
         "."])]))
 
-(defn faction-list [{:keys [conn dispatch] :as app}]
+(defn faction-list [{:as view-ctx :keys [conn dispatch]}]
   (into [:ul.list-group]
         (for [faction @(subs/factions conn)]
           (let [faction-eid (e faction)
@@ -253,7 +253,7 @@
                 :title "Configure faction"}]]]))))
 
 ;; TODO: cleanup unit-picker
-(defn unit-picker [{:keys [conn dispatch] :as app}]
+(defn unit-picker [{:as view-ctx :keys [conn dispatch]}]
   (let [unit-types @(subs/available-unit-types conn)
         cur-faction @(subs/current-faction conn)
         color (name (:faction/color cur-faction))
@@ -287,7 +287,7 @@
       [:button.btn.btn-default {:on-click hide-picker}
        "Cancel"]]]))
 
-(defn faction-settings [{:keys [conn dispatch] :as app}]
+(defn faction-settings [{:as views-ctx :keys [conn dispatch]}]
   (with-let [faction (subs/faction-to-configure conn)
              selected-player-type (r/atom nil)
              hide-settings #(do
@@ -326,7 +326,7 @@
           "Cancel"]]]]]]))
 
 ;; TODO: move default-scenario-id to data ns?
-(defn new-game-settings [{:keys [conn dispatch] :as app}]
+(defn new-game-settings [{:as view-ctx :keys [conn dispatch]}]
   (with-let [default-scenario-id :sterlings-aruba-multiplayer
              selected-scenario-id (r/atom default-scenario-id)
              hide-settings #(do
@@ -362,11 +362,11 @@
 
 ;; TODO: turn entire game interface into it's own component
 
-(defn app-root [{:keys [conn dispatch] :as app}]
+(defn app-root [{:as view-ctx :keys [conn dispatch]}]
   [:div
-   [new-game-settings app]
-   [faction-settings app]
-   [unit-picker app]
+   [new-game-settings view-ctx]
+   [faction-settings view-ctx]
+   [unit-picker view-ctx]
    ;; TODO: break win dialog out into it's own component
    ;; TODO: add continue + start new game buttons
    [:> js/ReactBootstrap.Modal {:show @(subs/show-win-message? conn)
@@ -388,10 +388,10 @@
     (kickstarter-alert)
     [:div.row
      [:div.col-md-2
-      [faction-credits app]
-      [faction-list app]
-      [faction-actions app]]
+      [faction-credits view-ctx]
+      [faction-list view-ctx]
+      [faction-actions view-ctx]]
      [:div.col-md-10
-      [faction-status app]
-      [board app]]]]
+      [faction-status view-ctx]
+      [board view-ctx]]]]
    (footer)])
