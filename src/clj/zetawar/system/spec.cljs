@@ -58,6 +58,9 @@
 ;; Views
 (s/def :zetawar.system.views/locale string?)
 
+;; TODO: add spec for dispatch function
+;; TODO: add spec for translate function
+
 (s/def :zetawar.system/views
   (s/keys :req-un [:zetawar.system.datascript/conn
                    :zetawar.system.router/ev-chan
