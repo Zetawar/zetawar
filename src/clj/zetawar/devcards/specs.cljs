@@ -2,9 +2,13 @@
   (:require
    [clojure.spec :as s]
    [clojure.test.check.generators]
-   [devcards.core :as dc :include-macros true])
+   [devcards.core :as dc :include-macros true]
+   [zetawar.system.spec :as system.spec])
   (:require-macros
    [devcards.core :refer [defcard defcard-rg]]))
+
+(defcard system-spec
+  (s/exercise :zetawar/system 5))
 
 (comment
 
