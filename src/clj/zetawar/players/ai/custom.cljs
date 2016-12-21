@@ -1,4 +1,4 @@
-(ns zetawar.players.custom-ai
+(ns zetawar.players.ai.custom
   (:require
    [cljs.core.async :as async]
    [datascript.core :as d]
@@ -8,7 +8,7 @@
    [zetawar.game :as game]
    [zetawar.hex :as hex]
    [zetawar.players :as players]
-   [zetawar.players.embedded-ai :refer [new-simple-embedded-ai-player]]))
+   [zetawar.players.simple-embedded :refer [simple-embedded-player]]))
 
 (defn action-ctx [db game]
   {})
@@ -47,7 +47,7 @@
              :actor-score-fn #'actor-score-fn
              :base-action-score-fn #'base-action-score-fn
              :unit-action-score-fn #'unit-action-score-fn}]
-    (new-simple-embedded-ai-player faction-color
-                                   ev-chan
-                                   notify-pub
-                                   fns)))
+    (simple-embedded-player faction-color
+                            ev-chan
+                            notify-pub
+                            fns)))

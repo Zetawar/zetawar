@@ -1,4 +1,4 @@
-(ns zetawar.players.embedded-ai
+(ns zetawar.players.simple-embedded
   (:require
    [cljs.core.async :as async]
    [datascript.core :as d]
@@ -10,8 +10,6 @@
    [zetawar.router :as router])
   (:require-macros
    [cljs.core.async.macros :refer [go go-loop]]))
-
-;; TODO: move to player/simple-embedded
 
 (defmulti handle-event (fn [player [ev-type & _]] ev-type))
 
@@ -25,7 +23,7 @@
     (doseq [new-msg (:dispatch ret)]
       (router/dispatch ev-chan new-msg))))
 
-(defrecord SimpleEmbeddedAIPlayer [faction-color ev-chan notify-pub player-chan conn fns]
+(defrecord SimpleEmbeddedPlayer [faction-color ev-chan notify-pub player-chan conn fns]
   players/Player
   (start [player]
     (let [{:keys [notify-pub]} player]
@@ -42,11 +40,10 @@
   (stop [player]
     (async/close! player-chan)))
 
-;; TODO: rename to simple-embedded-player
-(defn new-simple-embedded-ai-player [faction-color ev-chan notify-pub fns]
+(defn simple-embedded-player [faction-color ev-chan notify-pub fns]
   (let [player-chan (async/chan (async/dropping-buffer 10))
         conn (d/create-conn db/schema)]
-    (SimpleEmbeddedAIPlayer. faction-color ev-chan notify-pub player-chan conn fns)))
+    (SimpleEmbeddedPlayer. faction-color ev-chan notify-pub player-chan conn fns)))
 
 (defmethod handle-event ::players/start-turn
   [{:as player :keys [faction-color]} _]
