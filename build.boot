@@ -2,40 +2,44 @@
  :source-paths #{"src/clj" "src/js" "src/scss" "test/clj" "site"}
  :resource-paths #{"assets"}
  :dependencies
- '[[adzerk/boot-cljs "1.7.228-2" :scope "test"]
+ '[;; Dev
+   [adzerk/boot-cljs "1.7.228-2" :scope "test"]
    [adzerk/boot-cljs-repl "0.3.3" :scope "test"]
    [adzerk/boot-reload "0.4.13" :scope "test"]
    [binaryage/devtools "0.8.3" :scope "test"]
    [boot-codox "0.10.1" :scope "test"]
+   [com.cemerick/piggieback "0.2.1" :scope "test"]
+   [crisptrutski/boot-cljs-test "0.2.2" :scope "test"]
+   [deraen/boot-sass "0.3.0" :scope "test"]
+   [devcards "0.2.2" :scope "test"]
+   [org.clojure/tools.nrepl "0.2.12" :scope "test"]
+   [org.martinklepsch/boot-gzip "0.1.2" :scope "test"]
+   [org.slf4j/slf4j-nop "1.7.21" :scope "test"]
+   [pandeiro/boot-http "0.7.6" :scope "test"]
+   [perun "0.3.0" :scope "test"]
+   [weasel "0.7.0" :scope "test"]
+
+   ;; App
    [cljsjs/clipboard "1.5.9-0"]
    [cljsjs/react "15.3.1-0"]
    [cljsjs/react-bootstrap "0.30.6-0"]
    [cljsjs/react-dom "15.3.1-0"]
    [cljsjs/react-dom-server "15.3.1-0"]
-   [com.cemerick/piggieback "0.2.1" :scope "test"]
    [com.cognitect/transit-cljs "0.8.239"]
+   [com.gfredericks/test.chuck "0.2.7"]
    [com.stuartsierra/component "0.3.1"]
    [com.taoensso/timbre "4.7.4"]
-   [crisptrutski/boot-cljs-test "0.2.2" :scope "test"]
    [danielsz/boot-autoprefixer "0.0.9"]
    [datascript "0.15.4"]
-   [deraen/boot-sass "0.3.0" :scope "test"]
-   [devcards "0.2.2" :scope "test"]
    [hiccup "1.0.5"]
    [org.clojure/clojure "1.9.0-alpha14"]
    [org.clojure/clojurescript "1.9.293"]
    [org.clojure/core.async "0.2.395"]
    [org.clojure/test.check "0.9.0"]
-   [org.clojure/tools.nrepl "0.2.12" :scope "test"]
-   [org.martinklepsch/boot-gzip "0.1.2" :scope "test"]
-   [org.slf4j/slf4j-nop "1.7.21" :scope "test"]
    [org.webjars/bootstrap-sass "3.3.7"]
    [org.webjars/font-awesome "4.7.0"]
-   [pandeiro/boot-http "0.7.6" :scope "test"]
-   [perun "0.3.0" :scope "test"]
    [posh "0.5.5"]
-   [reagent "0.6.0"]
-   [weasel "0.7.0" :scope "test"]])
+   [reagent "0.6.0"]])
 
 (require
  '[adzerk.boot-cljs :refer :all]
