@@ -112,9 +112,9 @@
      [board-unit view-ctx q r]
      [tile-mask view-ctx q r]]))
 
-(defn tiles [view-ctx]
+(defn tiles [{:as view-ctx :keys [conn]}]
   (into [:g]
-        (for [terrain @(subs/terrains view-ctx)]
+        (for [terrain @(subs/terrains conn)]
           [tile view-ctx terrain])))
 
 ;; TODO: computer board size based on map size
@@ -122,10 +122,10 @@
   [:svg#board {:width 500 :height 500}
    [tiles view-ctx]])
 
-(defn faction-credits [view-ctx]
-  (let [{:keys [faction/credits]} @(subs/current-faction view-ctx)
-        {:keys [map/credits-per-base]} @(subs/game-map view-ctx)
-        income @(subs/current-income view-ctx)]
+(defn faction-credits [{:as view-ctx :keys [conn]}]
+  (let [{:keys [faction/credits]} @(subs/current-faction conn)
+        {:keys [map/credits-per-base]} @(subs/game-map conn)
+        income @(subs/current-income conn)]
     [:p#faction-credits
      [:strong (str credits " Credits")]
      [:span.text-muted.pull-right (str "+" income)
