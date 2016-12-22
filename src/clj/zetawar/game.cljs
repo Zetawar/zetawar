@@ -434,9 +434,10 @@
     (catch :default ex
       false)))
 
-;; TODO: add bonuses for flanking, etc.
 (defn attack-damage [db attacker defender attacker-terrain defender-terrain]
   (let [defender-armor-type (get-in defender [:unit/type :unit-type/armor-type])
+        [attacker-q attacker-r] (unit-hex attacker)
+        [defender-q defender-r] (unit-hex defender)
         attack-strength (oonly (d/q '[:find ?s
                                       :in $ ?u ?at
                                       :where
@@ -465,12 +466,33 @@
                                   [?e :terrain-effect/terrain-type ?tt]
                                   [?e :terrain-effect/unit-type ?ut]
                                   [?e :terrain-effect/armor-bonus ?d]]
-                                db (e defender) (e defender-terrain)))]
+                                db (e defender) (e defender-terrain)))
+        attack-hexes (into #{} (map terrain-hex) (:unit/attacked-from defender))
+        ranged-attack-hexes (into #{}
+                                  (filter #(> (apply hex/distance defender-q defender-r %) 1))
+                                  attack-hexes)
+        adjacent-attack-hexes (into #{}
+                                    (filter #(and (apply hex/adjacent? attacker-q attacker-r %)
+                                                  (apply hex/adjacent? defender-q defender-r %)))
+                                    attack-hexes)
+        opposite-attack-hexes (into #{}
+                                    (filter #(do (log/spy [attacker-q attacker-r defender-q defender-r %])
+                                                 (apply hex/opposite? attacker-q attacker-r defender-q defender-r %)))
+                                    attack-hexes)
+        flanking-attack-hexes (clojure.set/difference attack-hexes
+                                                      ranged-attack-hexes
+                                                      adjacent-attack-hexes
+                                                      opposite-attack-hexes)
+        ;; TODO: get multipliers from game entity
+        gang-up-bonus (+ (* (count ranged-attack-hexes) 1)
+                         (* (count adjacent-attack-hexes) 1)
+                         (* (count flanking-attack-hexes) 2)
+                         (* (count opposite-attack-hexes) 3))]
     (js/Math.round
      (max 0 (* (:unit/count attacker)
                (+ 0.5 (* 0.05 (+ (- (+ attack-strength attack-bonus)
                                     (+ armor armor-bonus))
-                                 (:unit/attacked-count defender)))))))))
+                                 gang-up-bonus))))))))
 
 (defn battle-damage
   ([db game attacker defender]
