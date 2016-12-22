@@ -12,6 +12,7 @@
    [crisptrutski/boot-cljs-test "0.2.2" :scope "test"]
    [deraen/boot-sass "0.3.0" :scope "test"]
    [devcards "0.2.2" :scope "test"]
+   [nightlight "1.3.2" :scope "test"]
    [org.clojure/tools.nrepl "0.2.12" :scope "test"]
    [org.martinklepsch/boot-gzip "0.1.2" :scope "test"]
    [org.slf4j/slf4j-nop "1.7.21" :scope "test"]
@@ -52,6 +53,7 @@
  '[danielsz.autoprefixer :refer [autoprefixer]]
  '[deraen.boot-sass :refer :all]
  '[io.perun :refer :all]
+ '[nightlight.boot :refer [nightlight]]
  '[org.martinklepsch.boot-gzip :refer [gzip]]
  '[pandeiro.boot-http :refer :all])
 
@@ -180,7 +182,8 @@
               :compiler-options {:devcards true
                                  :preloads '[zetawar.dev]
                                  :parallel-build true})
-        (target)))
+        (target)
+        (nightlight :port 4000 :url "http://localhost:3000")))
 
 (deftask run-tests
   "Run Zetawar tests."

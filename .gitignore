@@ -2,6 +2,7 @@
 *.jar
 .m2
 /.cljs_rhino_repl
+/.nightlight.edn
 /.nrepl-*
 /TAGS
 /node_modules

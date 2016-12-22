@@ -3,6 +3,7 @@
    [clojure.spec.test :as spec.test]
    [devcards.core :as devcards :include-macros true]
    [devtools.core :as devtools]
+   [nightlight.repl-server]
    [zetawar.devcards.prototype]
    [zetawar.devcards.scenarios]
    [zetawar.devcards.selection-and-target]
