@@ -41,6 +41,7 @@
    :unit-type/id                    {:db/unique      :db.unique/identity}
    :unit-type/name                  {:db/unique      :db.unique/identity}
    :unit-type/state-map             {:db/valueType   :db.type/ref}
+   :unit-type/zoc-armor-types       {:db/cardinality :db.cardinality/many}
 
    ;; Unit State Maps
    :unit-state-map/id               {:db/unique      :db.unique/identity}

@@ -283,8 +283,9 @@
 ;; TODO: make not being able to walk through your own units a game option
 (defn valid-moves [db game unit]
   (let [start [(:unit/q unit) (:unit/r unit)]
-        u-faction (e (unit-faction db unit))
-        unit-type (e (:unit/type unit))
+        u-faction-eid (e (unit-faction db unit))
+        unit-type-eid (e (:unit/type unit))
+        armor-type (-> unit :unit/type :unit-type/armor-type)
         unit-movement (get-in unit [:unit/type :unit-type/movement])
         unit-at (memoize #(unit-at db game %1 %2))
         terrain-type->cost (into {} (d/q '[:find ?tt ?mc
@@ -293,7 +294,7 @@
                                            [?e :terrain-effect/terrain-type ?tt]
                                            [?e :terrain-effect/unit-type ?ut]
                                            [?e :terrain-effect/movement-cost ?mc]]
-                                         db unit-type))
+                                         db unit-type-eid))
         terrain-cost-at (memoize (fn terrain-cost-at [q r]
                                    (some-> (terrain-at db game q r)
                                            :terrain/type
@@ -308,9 +309,15 @@
                              (some-> (unit-at q r)
                                      :faction/_units
                                      e
-                                     (not= u-faction))))
-        adjacent-enemy? (memoize (fn adjacent-enemy? [q r]
-                                   (some #(apply enemy-at? %) (hex/adjacents q r))))
+                                     (not= u-faction-eid))))
+        zoc-enemy-at? (memoize (fn zoc-enemy-at? [q r]
+                                 (when-let [other-unit (unit-at q r)]
+                                   (let [ou-faction-eid (-> other-unit :faction/_units e)
+                                         zoc-armor-types (-> other-unit :unit/type :unit-type/zoc-armor-types)]
+                                     (and (not= u-faction-eid ou-faction-eid)
+                                          (contains? zoc-armor-types armor-type))))))
+        adjacent-zoc-enemy? (memoize (fn adjacent-enemy? [q r]
+                                       (some #(apply zoc-enemy-at? %) (hex/adjacents q r))))
         ;; frontier = {[q r] [cost path], ...}
         ;; moves = {[q r] [cost path], ...}
         expand-frontier (fn expand-frontier [frontier moves]
@@ -320,13 +327,14 @@
                                     terrain-costs (adjacent-costs q r)
                                     new-moves (into {}
                                                     (keep (fn [[q r terrain-cost]]
-                                                            (let [terrain-cost (if (adjacent-enemy? q r) ; check in zoc
-                                                                                 (max terrain-cost remaining-movement)
-                                                                                 terrain-cost)
-                                                                  new-move-cost (+ frontier-cost terrain-cost)]
-                                                              (when (and (<= new-move-cost (moves [q r] unit-movement))
-                                                                         (<= new-move-cost (new-frontier [q r] unit-movement)))
-                                                                [[q r] [new-move-cost (conj path [q r])]]))))
+                                                            (when-not (enemy-at? q r)
+                                                              (let [terrain-cost (if (adjacent-zoc-enemy? q r) ; check in zoc
+                                                                                   (max terrain-cost remaining-movement)
+                                                                                   terrain-cost)
+                                                                    new-move-cost (+ frontier-cost terrain-cost)]
+                                                                (when (and (<= new-move-cost (moves [q r] unit-movement))
+                                                                           (<= new-move-cost (new-frontier [q r] unit-movement)))
+                                                                  [[q r] [new-move-cost (conj path [q r])]])))))
                                                     terrain-costs)]
                                 (recur remaining-frontier (conj new-frontier new-moves)))
                               new-frontier)))]
@@ -476,8 +484,7 @@
                                                   (apply hex/adjacent? defender-q defender-r %)))
                                     attack-hexes)
         opposite-attack-hexes (into #{}
-                                    (filter #(do (log/spy [attacker-q attacker-r defender-q defender-r %])
-                                                 (apply hex/opposite? attacker-q attacker-r defender-q defender-r %)))
+                                    (filter #(apply hex/opposite? attacker-q attacker-r defender-q defender-r %))
                                     attack-hexes)
         flanking-attack-hexes (clojure.set/difference attack-hexes
                                                       ranged-attack-hexes
@@ -996,7 +1003,8 @@
                    :unit-type/capturing-armor (or capturing-armor armor)
                    :unit-type/repair (:repair unit-def)
                    :unit-type/state-map [:unit-state-map/id unit-state-map-id]
-                   :unit-type/image (:image unit-def)}]
+                   :unit-type/image (:image unit-def)
+                   :unit-type/zoc-armor-types (map #(to-armor-type %) (:zoc unit-def))}]
                  (into (attack-strengths-tx db unit-type-eid (:attack-strengths unit-def)))
                  (into (terrain-effects-tx db unit-type-eid (:terrain-effects unit-def)))))))
         units-def))

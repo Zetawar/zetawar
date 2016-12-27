@@ -65,6 +65,7 @@
 ;; TODO: add support for multiple zone of control types
 ;; TODO: check how repair amount works in Elite Command
 ;; TODO: add :buildable-at (or -by?) => {<terrain type ids>...}
+;; TODO: rename zoc key (?)
 (def units
   ;; Personnel
   {:infantry {:name "Infantry"
@@ -90,7 +91,9 @@
                :base      {:movement-cost 2 :armor-bonus  3 :attack-bonus  2}}
               :attack-strengths
               {:personnel 6
-               :armored   3}}
+               :armored   3}
+              :zoc
+              [:personnel :armored]}
    :grenadier {:name "Grenadier"
                :cost 150
                :movement 9
@@ -114,7 +117,9 @@
                 :base      {:movement-cost 3 :armor-bonus  3 :attack-bonus -1}}
                :attack-strengths
                {:personnel 8
-                :armored   9}}
+                :armored   9}
+               :zoc
+               [:personnel :armored]}
    ;; TODO: mortar should not exert zone of control
    :mortar {:name "Mortar"
             :cost 200
@@ -164,7 +169,9 @@
              :base          {:movement-cost 2 :armor-bonus  3 :attack-bonus  2}}
             :attack-strengths
             {:personnel 9
-             :armored   4}}
+             :armored   4}
+            :zoc
+            [:personnel :armored]}
    ;; Armored
    :humvee {:name "Humvee"
             :cost 300
@@ -187,7 +194,9 @@
              :base      {:movement-cost 2  :armor-bonus  0 :attack-bonus  0}}
             :attack-strengths
             {:personnel 9
-             :armored   3}}
+             :armored   3}
+            :zoc
+            [:personnel :armored]}
    :tank {:name "Tank"
           :cost 350
           :movement 12
@@ -209,7 +218,9 @@
            :base      {:movement-cost 2 :armor-bonus -2 :attack-bonus 0}}
           :attack-strengths
           {:personnel 10
-           :armored   10}}
+           :armored   10}
+          :zoc
+          [:personnel :armored]}
    })
 
 ;; TODO: remove redundant id keys (?)
