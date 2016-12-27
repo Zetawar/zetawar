@@ -442,7 +442,7 @@
     (catch :default ex
       false)))
 
-(defn attack-damage [db attacker defender attacker-terrain defender-terrain]
+(defn attack-damage [db game attacker defender attacker-terrain defender-terrain]
   (let [defender-armor-type (get-in defender [:unit/type :unit-type/armor-type])
         [attacker-q attacker-r] (unit-hex attacker)
         [defender-q defender-r] (unit-hex defender)
@@ -495,20 +495,29 @@
                          (* (count adjacent-attack-hexes) 1)
                          (* (count flanking-attack-hexes) 2)
                          (* (count opposite-attack-hexes) 3))]
-    (js/Math.round
-     (max 0 (* (:unit/count attacker)
-               (+ 0.5 (* 0.05 (+ (- (+ attack-strength attack-bonus)
-                                    (+ armor armor-bonus))
-                                 gang-up-bonus))))))))
+    ;; TODO: test stochastic-attacks
+    (let [p (-> (+ 0.5 (* 0.05 (+ (- (+ attack-strength attack-bonus)
+                                     (+ armor armor-bonus))
+                                  gang-up-bonus)))
+                (max 0)
+                (min 1))]
+      (js/Math.round
+       (if (:game/stochastic-attacks game)
+         (let [hits (->> (repeatedly #(rand))
+                         (take (* 6 (:unit/count attacker)))
+                         (filter #(< % p))
+                         count)]
+           (quot hits 6))
+         (* (:unit/count attacker) p))))))
 
 (defn battle-damage
   ([db game attacker defender]
    (let [attacker-terrain (:unit/terrain attacker)
          defender-terrain (:unit/terrain defender)
          attack-count (:unit/attack-count attacker 0)
-         defender-damage (attack-damage db attacker defender attacker-terrain defender-terrain)
+         defender-damage (attack-damage db game attacker defender attacker-terrain defender-terrain)
          attacker-damage (if (in-range? db defender attacker)
-                           (attack-damage db defender attacker defender-terrain attacker-terrain)
+                           (attack-damage db game defender attacker defender-terrain attacker-terrain)
                            0)]
      [(min (:unit/count attacker) attacker-damage)
       (min (:unit/count defender) defender-damage)]))
