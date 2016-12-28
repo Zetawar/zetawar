@@ -55,7 +55,8 @@
  '[io.perun :refer :all]
  '[nightlight.boot :refer [nightlight]]
  '[org.martinklepsch.boot-gzip :refer [gzip]]
- '[pandeiro.boot-http :refer :all])
+ '[pandeiro.boot-http :refer :all]
+ '[zetawar.site])
 
 (task-options!
  test-cljs    {:js-env :phantom}
@@ -78,53 +79,27 @@
    (autoprefixer :exec-path "node_modules/.bin/postcss")
    (sift :move {#"^main.css$" "css/main.css"})))
 
-(defn slug-fn [filename]
-  (let [[year month day & parts] (string/split filename #"[-\.]")
-        name-part (some->> parts
-                           drop-last
-                           not-empty
-                           (string/join "-")
-                           string/lower-case)]
-    (when (and year month day name-part)
-      (str year "/" month "/" day "/" name-part))))
-
-(defn permalink-fn [{:keys [slug path filename] :as data}]
-  (if (string/starts-with? path "posts")
-    (str "/blog/" slug "/")
-    (str (string/replace filename #"\.markdown" "/"))))
-
-(defn devcards? [{:keys [path]}]
-  (= path "pages/devcards.markdown"))
-
-(defn page? [{:keys [path]}]
-  (and (not (devcards? path))
-       (string/starts-with? path "pages/")))
-
-(defn post? [{:keys [path]}]
-  (and (not (devcards? path))
-       (string/starts-with? path "posts/")))
-
 (deftask build-html
   "Build Zetawar HTML."
   [m metadata-file FILE str]
   (comp (global-metadata :filename metadata-file)
         (markdown)
-        (slug :slug-fn slug-fn)
-        (permalink :permalink-fn permalink-fn)
+        (slug :slug-fn zetawar.site/slug-fn)
+        (permalink :permalink-fn zetawar.site/permalink-fn)
         (render :renderer 'zetawar.views.site/render-page
-                :filterer page?
+                :filterer zetawar.site/page?
                 :out-dir ".")
         (render :renderer 'zetawar.views.site/render-blog-post
-                :filterer post?
+                :filterer zetawar.site/post?
                 :out-dir ".")
         (render :renderer 'zetawar.views.site/render-devcards
-                :filterer devcards?
+                :filterer zetawar.site/devcards?
                 :out-dir ".")
         (collection :renderer 'zetawar.views.site/render-index
                     :out-dir "."
                     :page "index.html")
         (collection :renderer 'zetawar.views.site/render-blog-index
-                    :filterer post?
+                    :filterer zetawar.site/post?
                     :out-dir "."
                     :page "blog/index.html")))
 
