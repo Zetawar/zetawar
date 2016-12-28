@@ -116,4 +116,10 @@
   (let [encoded-game-state (->> (current-game db)
                                 (game/get-game-state db)
                                 encode-game-state)]
+    ;; TODO: figure out why this horrible hack is necessary in Firefox
+    (set! js/window.onhashchange
+          (fn []
+            (when (not= encoded-game-state js/window.location.hash)
+              (set! js/window.location.hash encoded-game-state))
+            (set! js/window.onhashchange nil)))
     (set! js/window.location.hash encoded-game-state)))
