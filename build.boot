@@ -14,7 +14,7 @@
    [devcards "0.2.2" :scope "test"]
    [nightlight "1.3.2" :scope "test"]
    [org.clojure/tools.nrepl "0.2.12" :scope "test"]
-   [org.martinklepsch/boot-gzip "0.1.2" :scope "test"]
+   [org.martinklepsch/boot-gzip "0.1.3" :scope "test"]
    [org.slf4j/slf4j-nop "1.7.21" :scope "test"]
    [pandeiro/boot-http "0.7.6" :scope "test"]
    [perun "0.3.0" :scope "test"]
