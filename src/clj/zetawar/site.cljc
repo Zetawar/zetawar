@@ -3,19 +3,19 @@
    [clojure.string :as string])
   #?(:cljs
      (:require-macros
-      [zetawar.site :refer [get-site-prefix]])))
+      [zetawar.site :refer [env-prefix]])))
 
 #?(:clj
 
-   (defmacro get-site-prefix []
+   (defmacro env-prefix []
      (or (System/getenv "ZETAWAR_SITE_PREFIX") ""))
 
    )
 
-(def site-prefix (get-site-prefix))
+(def +prefix+ (env-prefix))
 
-(defn prefix-url [url]
-  (str site-prefix url))
+(defn prefix [& url-parts]
+  (apply str +prefix+ url-parts))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Perun
@@ -35,8 +35,8 @@
 
      (defn permalink-fn [{:keys [slug path filename] :as data}]
        (if (string/starts-with? path "posts")
-         (str site-prefix "/blog/" slug "/")
-         (str site-prefix (string/replace filename #"\.markdown" "/"))))
+         (str +prefix+ "/blog/" slug "/")
+         (str +prefix+ (string/replace filename #"\.markdown" "/"))))
 
      (defn devcards? [{:keys [path]}]
        (= path "pages/devcards.markdown"))

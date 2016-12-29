@@ -12,6 +12,7 @@
    [zetawar.events.ui :as events.ui]
    [zetawar.game :as game]
    [zetawar.players :as players]
+   [zetawar.site :as site]
    [zetawar.subs :as subs]
    [zetawar.util :refer [breakpoint inspect only oonly]]
    [zetawar.views.common :refer [footer kickstarter-alert navbar]]))
@@ -31,20 +32,20 @@
        @(subs/selected? conn q r)
        [:image {:x x :y y
                 :width 32 :height 34
-                :xlink-href "/images/game/borders/selected.png"}]
+                :xlink-href (site/prefix "/images/game/borders/selected.png")}]
 
        ;; Enemy unit targeted
        (and @(subs/targeted? conn q r)
             @(subs/enemy-at? conn q r))
        [:image {:x x :y y
                 :width 32 :height 34
-                :xlink-href "/images/game/borders/targeted-enemy.png"}]
+                :xlink-href (site/prefix "/images/game/borders/targeted-enemy.png")}]
 
        ;; Terrain targeted
        @(subs/targeted? conn q r)
        [:image {:x x :y y
                 :width 32 :height 34
-                :xlink-href "/images/game/borders/selected.png"}])]))
+                :xlink-href (site/prefix "/images/game/borders/selected.png")}])]))
 
 (defn unit-image [unit]
   (let [color-name (-> unit game/unit-color name)]
@@ -59,15 +60,15 @@
       [:g {:id (str "unit-" (e unit))}
        [:image {:x x :y y
                 :width 32 :height 34
-                :xlink-href (str "/images/game/" image)
+                :xlink-href (site/prefix "/images/game/" image)
                 :on-click #(dispatch [::events.ui/select-hex q r])}]
        (when (:unit/capturing unit)
          [:image {:x x :y y
                   :width 32 :height 34
-                  :xlink-href (str "/images/game/capturing.gif")}])
+                  :xlink-href (site/prefix "/images/game/capturing.gif")}])
        [:image {:x x :y y
                 :width 32 :height 34
-                :xlink-href (str "/images/game/health/" (:unit/count unit) ".png")}]])))
+                :xlink-href (site/prefix "/images/game/health/" (:unit/count unit) ".png")}]])))
 
 (defn tile-mask [{:as view-ctx :keys [conn]} q r]
   (let [[x y] (offset->pixel q r)
@@ -85,7 +86,7 @@
     [:image {:visibility (if show "visible" "hidden")
              :x x :y y
              :width 32 :height 34
-             :xlink-href "/images/game/mask.png"}]))
+             :xlink-href (site/prefix "/images/game/mask.png")}]))
 
 (defn terrain-image [terrain]
   (let [color-name (-> terrain

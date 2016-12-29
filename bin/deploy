@@ -3,14 +3,20 @@
 progname=$(basename $0)
 
 function usage {
-  echo "usage: $progname -b BUCKET [-p PREFIX] [-P]"
+  echo "usage: $progname [-s SOURCE] -b BUCKET [-p PREFIX] [-P]"
+  echo "	-s SOURCE	directory containing files to deploy"
   echo "	-b BUCKET	S3 bucket to deploy to"
   echo "	-p PREFIX	prefix within bucket"
   echo "	-P		make files public on S3"
 }
 
-while getopts ":b:p:P" opt; do
+source='target'
+
+while getopts ":s:b:p:P" opt; do
   case $opt in
+    s)
+      source="$OPTARG"
+      ;;
     b)
       bucket="$OPTARG"
       ;;
@@ -48,12 +54,13 @@ fi
 gzip_opt="--add-header=Content-Encoding: gzip"
 cache_opt="--add-header=Cache-Control: max-age=86400"
 img_include_opts="--include '*.png' --include '*.jpg' --include '*.ico' --include '*.gif'"
+rexlude='(\.htpasswd|doc.*|dev.*|staging.*|builds.*)'
 
-s3cmd sync --exclude  '*'                  --rinclude '^(?!doc).*\.css'  -m 'text/css'               $public_opt "$gzip_opt"  target/ $destination
-s3cmd sync --exclude  '*'                  --rinclude '^(?!doc).*\.js'   -m 'application/javascript' $public_opt "$gzip_opt"  target/ $destination
-s3cmd sync --exclude  '*'                  --rinclude '^(?!doc).*\.html' -m 'text/html'              $public_opt "$gzip_opt"  target/ $destination
-s3cmd sync --exclude  '*'                  $img_include_opts                                         $public_opt "$cache_opt" target/ $destination
-s3cmd sync --exclude  '*'                  --rinclude '^(?!doc).*\.svg'  -m 'image/svg+xml'          $public_opt "$cache_opt" target/ $destination
-s3cmd sync --rexclude '(\.htpasswd|doc.*)' --delete-removed                                          $public_opt              target/ $destination
+s3cmd sync --exclude  '*'       --rinclude '^(?!doc).*\.css'  -m 'text/css'               $public_opt "$gzip_opt"  $source/ $destination
+s3cmd sync --exclude  '*'       --rinclude '^(?!doc).*\.js'   -m 'application/javascript' $public_opt "$gzip_opt"  $source/ $destination
+s3cmd sync --exclude  '*'       --rinclude '^(?!doc).*\.html' -m 'text/html'              $public_opt "$gzip_opt"  $source/ $destination
+s3cmd sync --exclude  '*'       $img_include_opts                                         $public_opt "$cache_opt" $source/ $destination
+s3cmd sync --exclude  '*'       --rinclude '^(?!doc).*\.svg'  -m 'image/svg+xml'          $public_opt "$cache_opt" $source/ $destination
+s3cmd sync --rexclude $rexclude --delete-removed                                          $public_opt              $source/ $destination
 
-s3cmd sync $public_opt target/doc/ $destination/doc/
+s3cmd sync $public_opt $source/doc/ $destination/doc/
