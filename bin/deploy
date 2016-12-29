@@ -54,7 +54,7 @@ fi
 gzip_opt="--add-header=Content-Encoding: gzip"
 cache_opt="--add-header=Cache-Control: max-age=86400"
 img_include_opts="--include '*.png' --include '*.jpg' --include '*.ico' --include '*.gif'"
-rexlude='(\.htpasswd|doc.*|dev.*|staging.*|builds.*)'
+rexlude='(\.htpasswd|doc.*|builds.*)'
 
 s3cmd sync --exclude  '*'       --rinclude '^(?!doc).*\.css'  -m 'text/css'               $public_opt "$gzip_opt"  $source/ $destination
 s3cmd sync --exclude  '*'       --rinclude '^(?!doc).*\.js'   -m 'application/javascript' $public_opt "$gzip_opt"  $source/ $destination

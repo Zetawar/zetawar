@@ -5,7 +5,6 @@ node {
 
   sh 'git rev-parse HEAD > commit'
   def commitHash = readFile('commit').trim()
-  sh "echo ${commitHash}"
   def permaBuildSitePrefix = 'builds/${commitHash}/'
 
   try {
@@ -22,7 +21,7 @@ node {
     }
 
     stage('Build') {
-      sh "ZETAWAR_SITE_PREFIX=${sitePrefix} boot --no-colors build-site -e ${ZETAWAR_ENV}"
+      sh "boot --no-colors build-site -e ${ZETAWAR_ENV}"
       sh "ZETAWAR_SITE_PREFIX=${permaBuildSitePrefix} boot --no-colors build-site -e ${ZETAWAR_ENV} -t target.permabuild"
     }
 
