@@ -3,19 +3,19 @@
 node {
   currentBuild.result = 'SUCCESS'
 
-  def buildPrefix = 'dev'
+  def sitePrefix = 'dev'
   sh 'git rev-parse HEAD > commit'
   def commitHash = readFile('commit').trim()
-  def permaBuildPrefix = 'builds/dev/${commitHash}'
+  def permaBuildSitePrefix = 'builds/dev/${commitHash}'
   switch (env.BRANCH_NAME) {
     case 'release':
-      buildPrefix = ''
-      permaBuildPrefix = 'builds/release/${commitHash}';
+      sitePrefix = ''
+      permaBuildSitePrefix = 'builds/release/${commitHash}';
       break;
 
     case 'staging':
       buildPrefix = 'staging'
-      permaBuildPrefix = 'builds/staging/${commitHash}';
+      permaBuildSitePrefix = 'builds/staging/${commitHash}';
       break;
   }
 
@@ -33,13 +33,13 @@ node {
     }
 
     stage('Build') {
-      sh "ZETAWAR_BUILD_PREFIX=${buildPrefix} boot --no-colors build-site -e ${ZETAWAR_ENV}"
-      sh "ZETAWAR_BUILD_PREFIX=${permaBuildPrefix} boot --no-colors build-site -e ${ZETAWAR_ENV} -t target.permabuild"
+      sh "ZETAWAR_SITE_PREFIX=${sitePrefix} boot --no-colors build-site -e ${ZETAWAR_ENV}"
+      sh "ZETAWAR_SITE_PREFIX=${permaBuildSitePrefix} boot --no-colors build-site -e ${ZETAWAR_ENV} -t target.permabuild"
     }
 
     stage('Deploy') {
-      sh "./bin/deploy -b ${S3_BUCKET} -p '${permaBuildPrefix}' ${PUBLIC_FLAG}"
-      sh "./bin/deploy -s target.permabuild -b ${S3_BUCKET} -p ${permaBuildPrefix} ${PUBLIC_FLAG}"
+      sh "./bin/deploy -b ${S3_BUCKET} -p '${sitePrefix}' ${PUBLIC_FLAG}"
+      sh "./bin/deploy -s target.permabuild -b ${S3_BUCKET} -p ${permaBuildSitePrefix} ${PUBLIC_FLAG}"
     }
   } catch (err) {
     currentBuild.result = 'FAILURE'

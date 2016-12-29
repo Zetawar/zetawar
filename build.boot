@@ -113,8 +113,8 @@
 
 (deftask build-site
   "Build Zetawar site for deployment."
-  [e environment ENV  str
-   t target-dir  PATH str]
+  [e environment ENV  str "Perun environment"
+   t target-dir  PATH str "Target directory"]
   (comp (build-cljs)
         (build-html :metadata-file (str "perun.base." environment ".edn"))
         (build-css)
@@ -128,7 +128,7 @@
                      #"^(.*)\.css\.gz$" "$1.css"
                      #"^(.*)\.js\.gz$" "$1.js"})
         (codox :name "Zetawar" :language :clojurescript)
-        (target :dir target)))
+        (target :dir (when target-dir #{target-dir}))))
 
 (deftask dev
   "Run Zetawar dev environment."
