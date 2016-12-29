@@ -102,7 +102,7 @@
         image (terrain-image terrain)]
     [:image {:x x :y y
              :width 32 :height 34
-             :xlink-href (str "/images/game/" image)}]))
+             :xlink-href (site/prefix "/images/game/" image)}]))
 
 (defn tile [{:as view-ctx :keys [dispatch]} terrain]
   (let [{:keys [terrain/q terrain/r]} terrain]
