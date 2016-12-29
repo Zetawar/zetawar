@@ -3,22 +3,10 @@
 node {
   currentBuild.result = 'SUCCESS'
 
-  def sitePrefix = 'dev/'
   sh 'git rev-parse HEAD > commit'
   def commitHash = readFile('commit').trim()
   sh "echo ${commitHash}"
-  def permaBuildSitePrefix = 'builds/dev/${commitHash}'
-  switch (env.BRANCH_NAME) {
-    case 'release':
-      sitePrefix = ''
-      permaBuildSitePrefix = 'builds/release/${commitHash}';
-      break;
-
-    case 'staging':
-      sitePrefix = 'staging/'
-      permaBuildSitePrefix = 'builds/staging/${commitHash}';
-      break;
-  }
+  def permaBuildSitePrefix = 'builds/${commitHash}'
 
   try {
     stage('Checkout') {
@@ -39,7 +27,7 @@ node {
     }
 
     stage('Deploy') {
-      sh "./bin/deploy -b ${S3_BUCKET} -p '${sitePrefix}' ${PUBLIC_FLAG}"
+      sh "./bin/deploy -b ${S3_BUCKET} ${PUBLIC_FLAG}"
       sh "./bin/deploy -s target.permabuild -b ${S3_BUCKET} -p ${permaBuildSitePrefix} ${PUBLIC_FLAG}"
     }
   } catch (err) {
