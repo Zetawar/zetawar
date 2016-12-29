@@ -3,9 +3,10 @@
 node {
   currentBuild.result = 'SUCCESS'
 
-  def sitePrefix = 'dev'
+  def sitePrefix = 'dev/'
   sh 'git rev-parse HEAD > commit'
   def commitHash = readFile('commit').trim()
+  sh "echo ${commitHash}"
   def permaBuildSitePrefix = 'builds/dev/${commitHash}'
   switch (env.BRANCH_NAME) {
     case 'release':
@@ -14,7 +15,7 @@ node {
       break;
 
     case 'staging':
-      buildPrefix = 'staging'
+      sitePrefix = 'staging/'
       permaBuildSitePrefix = 'builds/staging/${commitHash}';
       break;
   }
