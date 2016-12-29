@@ -6,7 +6,7 @@ node {
   sh 'git rev-parse HEAD > commit'
   def commitHash = readFile('commit').trim()
   sh "echo ${commitHash}"
-  def permaBuildSitePrefix = 'builds/${commitHash}'
+  def permaBuildSitePrefix = 'builds/${commitHash}/'
 
   try {
     stage('Checkout') {
