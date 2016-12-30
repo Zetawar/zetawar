@@ -21,24 +21,24 @@
              "ga('send', 'pageview');")])
 
      (defn sentry [sentry-url environment]
-       [:script {:src "https://cdn.ravenjs.com/3.9.1/raven.min.js"}]
-       [:script (str "Raven.config('" sentry-url "', {"
-                     "release: '" site/build "',"
-                     "environment: '" environment "',"
-                     "tags: {git_commit: '" site/build "'}"
-                     "}).install()")])
+       [[:script {:src "https://cdn.ravenjs.com/3.9.1/raven.min.js"}]
+        [:script (str "Raven.config('" sentry-url "', {"
+                      "release: '" site/build "',"
+                      "environment: '" environment "',"
+                      "tags: {git_commit: '" site/build "'}"
+                      "}).install()")]])
 
      (defn head [{global-meta :meta :as data} title]
-       [:head
-        [:meta {:charset "utf-8"}]
-        [:meta {:http-equiv "X-UA-Compatible" :content "IE=edge"}]
-        [:meta {:name "viewport" :content "width=device-width, initial-scale=1"}]
-        [:title title]
-        (include-css "/css/main.css")
-        (some-> (:google-analytics-tracking-id global-meta)
-                ga)
-        (some-> (:sentry-url global-meta)
-                (sentry (:sentry-environment global-meta)))])
+       (into [:head
+              [:meta {:charset "utf-8"}]
+              [:meta {:http-equiv "X-UA-Compatible" :content "IE=edge"}]
+              [:meta {:name "viewport" :content "width=device-width, initial-scale=1"}]
+              [:title title]
+              (include-css "/css/main.css")
+              (some-> (:google-analytics-tracking-id global-meta)
+                      ga)]
+             (some-> (:sentry-url global-meta)
+                     (sentry (:sentry-environment global-meta)))))
 
      ))
 
