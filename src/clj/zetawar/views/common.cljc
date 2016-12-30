@@ -101,7 +101,7 @@
   [:div.container
    [:div#footer
     [:p
-     "Build "
+     "Build: "
      (if (not-empty site/build)
        [:a {:href (str "/builds/" site/build)} site/build]
        "DEV")]
