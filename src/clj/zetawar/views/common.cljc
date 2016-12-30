@@ -1,51 +1,46 @@
 (ns zetawar.views.common
-  #?@(
-      :clj [(:require
-              [clojure.pprint :refer [pprint]]
-              [clojure.java.io :as io]
-              [hiccup.page :refer [html5 include-css include-js]])]
+  #?@(:clj [(:require
+             [clojure.pprint :refer [pprint]]
+             [clojure.java.io :as io]
+             [hiccup.page :refer [html5 include-css include-js]]
+             [zetawar.site :as site])]
       :cljs [(:require
-               [cljsjs.react-bootstrap])]
-      )
-  )
+              [cljsjs.react-bootstrap]
+              [zetawar.site :as site])]))
 
 #?(:clj
-    (do
+   (do
 
-      (defn ga [tracking-id]
-        [:script
-         (str "(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){"
-              "(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),"
-              "m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)"
-              "})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');"
-              "ga('create', '" tracking-id "', 'auto');"
-              "ga('send', 'pageview');")])
+     (defn ga [tracking-id]
+       [:script
+        (str "(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){"
+             "(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),"
+             "m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)"
+             "})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');"
+             "ga('create', '" tracking-id "', 'auto');"
+             "ga('send', 'pageview');")])
 
-      (defn rollbar [access-token environment]
-        [:script
-         (str "var _rollbarConfig={"
-              "accessToken:'" access-token "',"
-              "captureUncaught:true,"
-              "captureUnhandledRejections:false,"
-              "payload:{"
-              "environment: '" environment "'"
-              "}"
-              "};"
-              (-> (io/resource "js/vendor/rollbar-snippet.js") io/file slurp))])
+     (defn sentry [sentry-url environment]
+       [:script {:src "https://cdn.ravenjs.com/3.9.1/raven.min.js"}]
+       [:script (str "Raven.config('" sentry-url "', {"
+                     "release: '" site/build "',"
+                     "environment: '" environment "',"
+                     "tags: {git_commit: '" site/build "'}"
+                     "}).install()")])
 
-      (defn head [{global-meta :meta :as data} title]
-        [:head
-         [:meta {:charset "utf-8"}]
-         [:meta {:http-equiv "X-UA-Compatible" :content "IE=edge"}]
-         [:meta {:name "viewport" :content "width=device-width, initial-scale=1"}]
-         [:title title]
-         (include-css "/css/main.css")
-         (some-> (:google-analytics-tracking-id global-meta)
-                 ga)
-         (some-> (:rollbar-access-token global-meta)
-                 (rollbar (:rollbar-environment global-meta)))])
+     (defn head [{global-meta :meta :as data} title]
+       [:head
+        [:meta {:charset "utf-8"}]
+        [:meta {:http-equiv "X-UA-Compatible" :content "IE=edge"}]
+        [:meta {:name "viewport" :content "width=device-width, initial-scale=1"}]
+        [:title title]
+        (include-css "/css/main.css")
+        (some-> (:google-analytics-tracking-id global-meta)
+                ga)
+        (some-> (:sentry-url global-meta)
+                (sentry (:sentry-environment global-meta)))])
 
-      ))
+     ))
 
 (def nav-links
   [{:href "/"        :title "Game"}
@@ -106,11 +101,17 @@
   [:div.container
    [:div#footer
     [:p
+     "Build "
+     (if (not-empty site/build)
+       [:a {:href (str "/builds/" site/build)} site/build]
+       "DEV")]
+    [:p
      "Follow "
      [:a {:href "https://twitter.com/ZetawarGame"} "@ZetawarGame"]
      " for updates. "
      "Questions or comments? Send us some "
-     [:a {:href "http://goo.gl/forms/RgTpkCYDBk"} "feedback"]]
+     [:a {:href "http://goo.gl/forms/RgTpkCYDBk"} "feedback"]
+     "."]
     [:p
      "Copyright 2016 Arugaba LLC, All Rights Reserved."]
     [:p

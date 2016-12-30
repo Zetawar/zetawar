@@ -3,19 +3,26 @@
    [clojure.string :as string])
   #?(:cljs
      (:require-macros
-      [zetawar.site :refer [env-prefix]])))
+      [zetawar.site :refer [env-prefix env-build]])))
 
 #?(:clj
+   (do
 
-   (defmacro env-prefix []
-     (or (System/getenv "ZETAWAR_SITE_PREFIX") ""))
+     (defmacro env-prefix []
+       (or (System/getenv "ZETAWAR_PREFIX") ""))
 
+     (defmacro env-build []
+       (or (System/getenv "ZETAWAR_BUILD") ""))
+
+     )
    )
 
 (def +prefix+ (env-prefix))
 
 (defn prefix [& url-parts]
   (apply str +prefix+ url-parts))
+
+(def build (env-build))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Perun

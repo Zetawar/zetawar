@@ -1,5 +1,5 @@
 {
- :rollbar-access-token "beb79e2dd6b8403d98c7bcb6a9bf63c1"
- :environment "development"
+ :sentry-url "https://c2df777d930c4862bf77c03db7167263@sentry.io/125725"
+ :sentry-environment "development"
  :site-title "Zetawar Development Builds"
  }

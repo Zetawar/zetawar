@@ -5,7 +5,7 @@ node {
 
   sh 'git rev-parse HEAD > commit'
   def commitHash = readFile('commit').trim()
-  def permaBuildSitePrefix = "builds/${commitHash}/"
+  def permaBuildPrefix = "builds/${commitHash}/"
 
   try {
     stage('Checkout') {
@@ -21,13 +21,13 @@ node {
     }
 
     stage('Build') {
-      sh "boot --no-colors build-site -e ${ZETAWAR_ENV}"
-      sh "ZETAWAR_SITE_PREFIX=${permaBuildSitePrefix} boot --no-colors build-site -e ${ZETAWAR_ENV} -t target.permabuild"
+      sh "ZETAWAR_BUILD='${commitHash}' boot --no-colors build-site -e ${ZETAWAR_ENV}"
+      sh "ZETAWAR_BUILD='${commitHash}' ZETAWAR_PREFIX=${permaBuildPrefix} boot --no-colors build-site -e ${ZETAWAR_ENV} -t target.permabuild"
     }
 
     stage('Deploy') {
       sh "./bin/deploy -b ${S3_BUCKET} ${PUBLIC_FLAG}"
-      sh "./bin/deploy -s target.permabuild -b ${S3_BUCKET} -p ${permaBuildSitePrefix} ${PUBLIC_FLAG}"
+      sh "./bin/deploy -s target.permabuild -b ${S3_BUCKET} -p ${permaBuildPrefix} ${PUBLIC_FLAG}"
     }
   } catch (err) {
     currentBuild.result = 'FAILURE'
