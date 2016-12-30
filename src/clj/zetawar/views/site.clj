@@ -2,7 +2,8 @@
   (:require
    [clojure.pprint :refer [pprint]]
    [zetawar.views.common :refer [footer head kickstarter-alert navbar]]
-   [hiccup.page :refer [html5 include-js]])
+   [hiccup.page :refer [html5 include-js]]
+   [zetawar.site :as site])
   (:import
    [java.text SimpleDateFormat]
    [java.util TimeZone]))
@@ -22,7 +23,7 @@
        [:div.container.text-center
         [:img {:src "/images/spin-64.gif"}]]
        (footer)]
-      (include-js "/js/main.js")])))
+      (include-js (site/prefix "/js/main.js"))])))
 
 (defn render-blog-index [data]
   (let [{:keys [entries] global-meta :meta} data]
@@ -41,7 +42,7 @@
                   (date-fmt (:date-published entry))]]
                 (:content entry)]))]
       (footer)
-      (include-js "/js/main.js")])))
+      (include-js (site/prefix "/js/main.js"))])))
 
 (defn render-blog-post [data]
   (let [{:keys [entry] global-meta :meta} data]
@@ -57,7 +58,7 @@
          (date-fmt (:date-published entry))]
         (:content entry)]]
       (footer)
-      (include-js "/js/main.js")])))
+      (include-js (site/prefix "/js/main.js"))])))
 
 (defn render-page [data]
   (let [{:keys [entry] global-meta :meta} data]
@@ -69,11 +70,11 @@
        (kickstarter-alert)
        (:content entry)]
       (footer)
-      (include-js "/js/main.js")])))
+      (include-js (site/prefix "/js/main.js"))])))
 
 (defn render-devcards [data]
   (let [{:keys [entry] global-meta :meta} data]
     (html5
      (head data "Zetawar Devcards")
      [:body#devcards
-      (include-js "/js/main.js")])))
+      (include-js (site/prefix "/js/main.js"))])))

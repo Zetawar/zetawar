@@ -34,7 +34,7 @@
               [:meta {:http-equiv "X-UA-Compatible" :content "IE=edge"}]
               [:meta {:name "viewport" :content "width=device-width, initial-scale=1"}]
               [:title title]
-              (include-css "/css/main.css")
+              (include-css (site/prefix "/css/main.css"))
               (some-> (:google-analytics-tracking-id global-meta)
                       ga)]
              (some-> (:sentry-url global-meta)
@@ -43,10 +43,10 @@
      ))
 
 (def nav-links
-  [{:href "/"        :title "Game"}
-   {:href "/blog"    :title "Blog"}
-   {:href "/roadmap" :title "Roadmap"}
-   {:href "/backers" :title "Backers"}])
+  [{:href (site/prefix "/")        :title "Game"}
+   {:href (site/prefix "/blog")    :title "Blog"}
+   {:href (site/prefix "/roadmap") :title "Roadmap"}
+   {:href (site/prefix "/backers") :title "Backers"}])
 
 (defn navbar
   ([] (navbar nil))

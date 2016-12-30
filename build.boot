@@ -109,7 +109,9 @@
   (cljs :ids ["js/main"]
         :optimizations :advanced
         :source-map true
-        :compiler-options {:parallel-build true}))
+        :compiler-options {:asset-path (str (System/getenv "ZETAWAR_PREFIX")
+                                            "/js/main.out")
+                           :parallel-build true}))
 
 (deftask build-site
   "Build Zetawar site for deployment."
