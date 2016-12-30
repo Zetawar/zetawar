@@ -21,7 +21,7 @@
       [:div#main
        (navbar "Game")
        [:div.container.text-center
-        [:img {:src "/images/spin-64.gif"}]]
+        [:img {:src (site/prefix "/images/spin-64.gif")}]]
        (footer)]
       (include-js (site/prefix "/js/main.js"))])))
 

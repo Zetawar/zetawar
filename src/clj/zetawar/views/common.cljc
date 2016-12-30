@@ -1,12 +1,13 @@
 (ns zetawar.views.common
-  #?@(:clj [(:require
-             [clojure.pprint :refer [pprint]]
-             [clojure.java.io :as io]
-             [hiccup.page :refer [html5 include-css include-js]]
-             [zetawar.site :as site])]
-      :cljs [(:require
-              [cljsjs.react-bootstrap]
-              [zetawar.site :as site])]))
+  #?@(:clj
+      [(:require
+        [clojure.java.io :as io]
+        [hiccup.page :refer [html5 include-css include-js]]
+        [zetawar.site :as site])]
+      :cljs
+      [(:require
+        [cljsjs.react-bootstrap]
+        [zetawar.site :as site])]))
 
 #?(:clj
    (do
@@ -58,7 +59,7 @@
         [:div.container
          [:div.navbar-header
           [:a.navbar-brand {:href "/"}
-           [:img {:src "/images/navbar-logo.svg"}]
+           [:img {:src (site/prefix "/images/navbar-logo.svg")}]
            "Zetawar"]]
          [:div#navbar-collapse.collapse.navbar-collapse
           (into [:ul.nav.navbar-nav ]
@@ -71,7 +72,7 @@
        [:> js/ReactBootstrap.Navbar.Header
         [:> js/ReactBootstrap.Navbar.Brand
          [:a {:href "/"}
-          [:img {:src "/images/navbar-logo.svg"}]
+          [:img {:src (site/prefix "/images/navbar-logo.svg")}]
           "Zetawar"]]
         [:> js/ReactBootstrap.Navbar.Toggle]]
        [:> js/ReactBootstrap.Navbar.Collapse
