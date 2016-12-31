@@ -48,7 +48,7 @@ fi
 destination="s3://$bucket"
 
 if [[ $prefix ]]; then
-  destination="${destination}${prefix}"
+  destination="${destination}${prefix}/"
 fi
 
 gzip_opt="--add-header=Content-Encoding: gzip"
