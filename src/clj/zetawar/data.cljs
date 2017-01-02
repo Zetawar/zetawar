@@ -1,5 +1,56 @@
 (ns zetawar.data)
 
+(def dicts
+  {:en
+   {;; General
+    :save-button "Save"
+    :cancel-button "Cancel"
+    :close-button "Close"
+
+    ;; Game actions and labels
+    :credits-label "Credits"
+    :copy-game-url-link "Copy Link"
+    :new-game-link "New Game"
+    :end-turn-link "End Turn?"
+    :round-label "Round"
+
+    ;; Faction configuration
+    :configure-faction-tip"Configure faction"
+    :configure-faction-title "Configure faction"
+    :player-type-label "Player type"
+
+    ;; New game settings
+    :new-game-title "Start a new game"
+    :scenario-label "Scenario"
+    :start-button "Start"
+
+    ;; Unit and base actions
+    :move-unit-button "Move"
+    :build-unit-button "Build"
+    :attack-unit-button "Attack"
+    :repair-unit-button "Repair"
+    :capture-base-button "Capture"
+
+    ;; Building units
+    :build-title "Select a unit to build"
+    :unit-cost-label "Cost"
+
+    ;; Win dialog
+    :win-title "Congratulations! You won!"
+    :win-body
+    (str "Thanks for playing Zetawar! If you're interested in staying up-to-date "
+         "with Zetawar as it develops, please follow "
+         "<a href=\"https://twitter.com/ZetawarGame\">ZetawarGame</a> on Twitter.")
+
+    ;; Gameplay tips
+    :select-unit-or-base-tip "Select a unit or base."
+    :select-target-or-destination-tip "Select a destination or target to move or attack."
+    :multiplayer-tip
+    (str "To play multiplayer follow the instructions "
+         "<a href=\"https://www.kickstarter.com/projects/311016908/zetawar/posts/1608417\">"
+         "here</a>.")
+    }})
+
 (def terrains
   {:plains        {:name "Plains"
                    :image "tilesets/elite-command/terrains/plains.png"}

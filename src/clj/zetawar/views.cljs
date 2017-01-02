@@ -123,16 +123,16 @@
   [:svg#board {:width 500 :height 500}
    [tiles view-ctx]])
 
-(defn faction-credits [{:as view-ctx :keys [conn]}]
+(defn faction-credits [{:as view-ctx :keys [conn translate]}]
   (let [{:keys [faction/credits]} @(subs/current-faction conn)
         {:keys [map/credits-per-base]} @(subs/game-map conn)
         income @(subs/current-income conn)]
     [:p#faction-credits
-     [:strong (str credits " Credits")]
+     [:strong (str credits " " (translate :credits-label))]
      [:span.text-muted.pull-right (str "+" income)
       [:span.hidden-md "/turn"]]]))
 
-(defn copy-url-link [view-ctx]
+(defn copy-url-link [{:as view-ctx :keys [translate]}]
   (let [clipboard (atom nil)
         text-fn (fn [] js/window.location)]
     (r/create-class
@@ -146,15 +146,15 @@
       :reagent-render
       (fn [this]
         [:a {:href "#" :on-click #(.preventDefault %)}
-         "Copy Link"])})))
+         (translate :copy-game-url-link)])})))
 
-(defn faction-status [{:as view-ctx :keys [conn dispatch]}]
+(defn faction-status [{:as view-ctx :keys [conn dispatch translate]}]
   (let [{:keys [game/round]} @(subs/game conn)
         base-count @(subs/current-base-count conn)]
     [:div#faction-status
      ;; TODO: make link red
      [:a {:href "#" :on-click #(dispatch [::events.ui/end-turn])}
-      "End Turn?"]
+      (translate :end-turn-link)]
      " · "
      [copy-url-link view-ctx]
      [:div.pull-right
@@ -162,11 +162,11 @@
            :on-click (fn [e]
                        (.preventDefault e)
                        (dispatch [::events.ui/show-new-game-settings]))}
-       "New Game"]
+       (translate :new-game-link)]
       " · "
-      (str "Round " round)]]))
+      (str (translate :round-label) " " round)]]))
 
-(defn faction-actions [{:as view-ctx :keys [conn dispatch]}]
+(defn faction-actions [{:as view-ctx :keys [conn dispatch translate]}]
   ;; TODO: replace query with something from subs ns
   (let [[round current-color] (-> @(posh/q '[:find ?round ?current-color
                                              :where
@@ -181,27 +181,27 @@
        [:p
         [:button.btn.btn-primary.btn-block
          {:on-click #(dispatch [::events.ui/move-selected-unit])}
-         "Move"]])
+         (translate :move-unit-button)]])
      (when @(subs/selected-can-build? conn)
        [:p
         [:button.btn.btn-primary.btn-block
          {:on-click #(dispatch [::events.ui/show-unit-picker])}
-         "Build"]])
+         (translate :build-unit-button)]])
      (when @(subs/selected-can-attack-targeted? conn)
        [:p
         [:button.btn.btn-danger.btn-block
          {:on-click #(dispatch [::events.ui/attack-targeted])}
-         "Attack"]])
+         (translate :attack-unit-button)]])
      (when @(subs/selected-can-repair? conn)
        [:p
         [:button.btn.btn-success.btn-block
          {:on-click #(dispatch [::events.ui/repair-selected])}
-         "Repair"]])
+         (translate :repair-unit-button)]])
      (when @(subs/selected-can-capture? conn)
        [:p
         [:button.btn.btn-primary.btn-block
          {:on-click #(dispatch [::events.ui/capture-selected])}
-         "Capture"]])
+         (translate :capture-base-button)]])
      ;; TODO: cleanup conditionals
      ;; TODO: make help text a separate component
      (when (not (or @(subs/selected-can-move? conn)
@@ -209,7 +209,8 @@
                     @(subs/selected-can-attack? conn)
                     @(subs/selected-can-repair? conn)
                     @(subs/selected-can-capture? conn)))
-       [:p.hidden-xs.hidden-sm "Select a unit or base."])
+       [:p.hidden-xs.hidden-sm
+        (translate :select-unit-or-base-tip)])
      (when (and
             (or @(subs/selected-can-move? conn)
                 @(subs/selected-can-attack? conn))
@@ -217,15 +218,14 @@
              (or @(subs/selected-can-move-to-targeted? conn)
                  @(subs/selected-can-attack-targeted? conn))))
        [:p.hidden-xs.hidden-sm
-        "Select a destination or target to move or attack."])
+        (translate :select-target-or-destination-tip)])
      ;; TODO: only display when starting faction is active
      (when (= round 1)
        [:p.hidden-xs.hidden-sm
-        "To play multiplayer follow the instructions "
-        [:a {:href "https://www.kickstarter.com/projects/311016908/zetawar/posts/1608417"} "here"]
-        "."])]))
+        {:dangerouslySetInnerHTML {:__html (translate :multiplayer-tip)}}])]))
 
-(defn faction-list [{:as view-ctx :keys [conn dispatch]}]
+
+(defn faction-list [{:as view-ctx :keys [conn dispatch translate]}]
   (into [:ul.list-group]
         (for [faction @(subs/factions conn)]
           (let [faction-eid (e faction)
@@ -251,10 +251,10 @@
                {:class icon-class
                 :aria-hidden true
                 :on-click #(dispatch [::events.ui/configure-faction faction])
-                :title "Configure faction"}]]]))))
+                :title (translate :configure-faction-tip)}]]]))))
 
 ;; TODO: cleanup unit-picker
-(defn unit-picker [{:as view-ctx :keys [conn dispatch]}]
+(defn unit-picker [{:as view-ctx :keys [conn dispatch translate]}]
   (let [unit-types @(subs/available-unit-types conn)
         cur-faction @(subs/current-faction conn)
         color (name (:faction/color cur-faction))
@@ -263,7 +263,7 @@
                                  :on-hide hide-picker}
      [:> js/ReactBootstrap.Modal.Header {:close-button true}
       [:> js/ReactBootstrap.Modal.Title
-       "Select a unit to build"]]
+       (translate :build-title)]]
      [:> js/ReactBootstrap.Modal.Body
       (into [:div.unit-picker]
             (for [{:keys [unit-type/id] :as unit-type} unit-types]
@@ -288,7 +288,7 @@
       [:button.btn.btn-default {:on-click hide-picker}
        "Cancel"]]]))
 
-(defn faction-settings [{:as views-ctx :keys [conn dispatch]}]
+(defn faction-settings [{:as views-ctx :keys [conn dispatch translate]}]
   (with-let [faction (subs/faction-to-configure conn)
              selected-player-type (r/atom nil)
              hide-settings #(do
@@ -307,12 +307,12 @@
                                  :on-hide hide-settings}
      [:> js/ReactBootstrap.Modal.Header {:close-button true}
       [:> js/ReactBootstrap.Modal.Title
-       "Configure faction"]]
+       (translate :configure-faction-title)]]
      [:> js/ReactBootstrap.Modal.Body
       [:form
        [:div.form-group
         [:label {:for "player-type"}
-         "Player type"]
+         (translate :player-type-label)]
         (into [:select.form-control {:id "player-type"
                                      :selected (or @selected-player-type
                                                    (:faction/player-type @faction))
@@ -322,12 +322,12 @@
                  description]))
         [:> js/ReactBootstrap.Modal.Footer
          [:button.btn.btn-primary {:on-click set-player-type}
-          "Save"]
+          (translate :save-button)]
          [:button.btn.btn-default {:on-click hide-settings}
-          "Cancel"]]]]]]))
+          (translate :cancel-button)]]]]]]))
 
 ;; TODO: move default-scenario-id to data ns?
-(defn new-game-settings [{:as view-ctx :keys [conn dispatch]}]
+(defn new-game-settings [{:as view-ctx :keys [conn dispatch translate]}]
   (with-let [default-scenario-id :sterlings-aruba-multiplayer
              selected-scenario-id (r/atom default-scenario-id)
              hide-settings #(do
@@ -343,12 +343,12 @@
                                  :on-hide hide-settings}
      [:> js/ReactBootstrap.Modal.Header {:close-button true}
       [:> js/ReactBootstrap.Modal.Title
-       "Start a new game"]]
+       (translate :new-game-title)]]
      [:> js/ReactBootstrap.Modal.Body
       [:form
        [:div.form-group
         [:label {:for "scenario-id"}
-         "Scenario"]
+         (translate :scenario-label)]
         (into [:select.form-control {:id "scenario-id"
                                      :selected (some-> @selected-scenario-id name)
                                      :on-change select-scenario}]
@@ -357,13 +357,13 @@
                  description]))
         [:> js/ReactBootstrap.Modal.Footer
          [:button.btn.btn-primary {:on-click start-new-game}
-          "Start"]
+          (translate :start-button)]
          [:button.btn.btn-default {:on-click hide-settings}
-          "Cancel"]]]]]]))
+          (translate :cancel-button)]]]]]]))
 
 ;; TODO: turn entire game interface into it's own component
 
-(defn app-root [{:as view-ctx :keys [conn dispatch]}]
+(defn app-root [{:as view-ctx :keys [conn dispatch translate]}]
   [:div
    [new-game-settings view-ctx]
    [faction-settings view-ctx]
@@ -374,16 +374,12 @@
                                 :on-hide #(dispatch [::events.ui/hide-win-message])}
     [:> js/ReactBootstrap.Modal.Header
      [:> js/ReactBootstrap.Modal.Title
-      "Congratulations! You won!"]]
+      (translate :win-title)]]
     [:> js/ReactBootstrap.Modal.Body
-     "Thanks for playing Zetawar! If you're interested in staying up-to-date"
-     " with Zetawar as it develops, please follow "
-     [:a {:href "https://twitter.com/ZetawarGame"}
-      ]
-     " on Twitter."]
+     {:dangerouslySetInnerHTML {:__html (translate :win-body)}}]
     [:> js/ReactBootstrap.Modal.Footer
      [:button.btn.btn-default {:on-click #(dispatch [::events.ui/hide-win-message])}
-      "Close"]]]
+      (translate :close-button)]]]
    (navbar "Game")
    [:div.container
     (kickstarter-alert)
