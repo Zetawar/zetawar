@@ -56,15 +56,13 @@
                    :zetawar.system.router/notify-pub]))
 
 ;; Views
-(s/def :zetawar.system.views/locale string?)
-
-;; TODO: add spec for dispatch function
-;; TODO: add spec for translate function
+(s/def :zetawar.system.views/dispatch fn?)
+(s/def :zetawar.system.views/translate fn?)
 
 (s/def :zetawar.system/views
   (s/keys :req-un [:zetawar.system.datascript/conn
-                   :zetawar.system.router/ev-chan
-                   :zetawar.system.views/locale]))
+                   :zetawar.system.views/dispatch
+                   :zetawar.system.views/translate]))
 
 ;; System
 (s/def :zetawar/system

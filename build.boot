@@ -33,6 +33,7 @@
    [danielsz/boot-autoprefixer "0.0.9"]
    [datascript "0.15.4"]
    [hiccup "1.0.5"]
+   [integrant "0.1.5"]
    [org.clojure/clojure "1.9.0-alpha14"]
    [org.clojure/clojurescript "1.9.293"]
    [org.clojure/core.async "0.2.395"]
@@ -57,7 +58,8 @@
  '[nightlight.boot :refer [nightlight]]
  '[org.martinklepsch.boot-gzip :refer [gzip]]
  '[pandeiro.boot-http :refer :all]
- '[zetawar.site])
+ '[zetawar.site]
+ '[integrant.core])
 
 (task-options!
  test-cljs    {:js-env :phantom}

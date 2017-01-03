@@ -1,7 +1,7 @@
 (ns zetawar.core
   (:require
-   [com.stuartsierra.component :as component]
    [datascript.core :as d]
+   [integrant.core :as ig]
    [posh.core :as posh]
    [reagent.core :as r]
    [taoensso.timbre :as log]
@@ -15,7 +15,7 @@
    [zetawar.players.ai.reference]
    [zetawar.players.human]
    [zetawar.site :as site]
-   [zetawar.system :refer [new-system]]
+   [zetawar.system :as system]
    [zetawar.util :refer [breakpoint inspect]]
    [zetawar.views :as views]
    [zetawar.views.common :refer [navbar]]))
@@ -31,7 +31,7 @@
       "app"
       (let [target (.getElementById js/document "main")]
         (r/render-component
-         [views/app-root (:app @system)]
+         [views/app-root (:zetawar.system/views @system)]
          target))
 
       "site"
@@ -50,8 +50,8 @@
 ;; TODO: don't start game when running benchmarks
 (defn ^:export init []
   (when-not (site/viewing-devcards?)
-    (reset! system (component/start (new-system)))
-    (let [app-ctx (:app @system)
+    (reset! system (ig/init system/config))
+    (let [app-ctx (:zetawar.system/views @system)
           encoded-game-state (some-> js/window.location.hash
                                      not-empty
                                      (subs 1))]
