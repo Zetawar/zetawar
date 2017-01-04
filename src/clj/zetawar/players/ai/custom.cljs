@@ -10,43 +10,40 @@
    [zetawar.players :as players]
    [zetawar.players.simple-embedded :refer [simple-embedded-player]]))
 
-(defn action-ctx [db game]
-  {})
+(defn score-actor [db game actor actor-ctx]
+  (cond
+    (game/unit? actor) (rand-int 100)
+    (game/base? actor) (+ (rand-int 100) 100)))
 
-(defn actor-score-fn [db game ctx]
-  (fn [actor]
-    (cond
-      (game/unit? actor) (rand-int 100)
-      (game/base? actor) (+ (rand-int 100) 100))))
+(defn score-base-action [db game base action-ctx action]
+  (rand-int 200))
 
-(defn base-action-score-fn [db game ctx base]
-  (fn [action]
-    (rand-int 200)))
+(defn mk-unit-action-ctx [db game actor-ctx unit]
+  (assoc actor-ctx :closest-base (game/closest-capturable-base db game unit)))
 
-(defn unit-action-score-fn [db game ctx unit]
-  (let [closest-base (game/closest-capturable-base db game unit)]
-    (fn [action]
-      (case (:action/type action)
-        :action.type/capture-base
-        200
+(defn score-unit-action [db game unit action-ctx action]
+  (let [{:keys [closest-base]} action-ctx]
+    (case (:action/type action)
+      :action.type/capture-base
+      200
 
-        :action.type/attack-unit
-        100
+      :action.type/attack-unit
+      100
 
-        :action.type/move-unit
-        (let [[base-q base-r] (game/terrain-hex closest-base)
-              {:keys [action/to-q action/to-r]} action
-              base-distance (hex/distance base-q base-r to-q to-r)]
-          (- 100 base-distance))
+      :action.type/move-unit
+      (let [[base-q base-r] (game/terrain-hex closest-base)
+            {:keys [action/to-q action/to-r]} action
+            base-distance (hex/distance base-q base-r to-q to-r)]
+        (- 100 base-distance))
 
-        0))))
+      0)))
 
-(defmethod players/new-player ::players/custom-ai
+(defmethod players/new-player ::players/reference-ai
   [{:as app-ctx :keys [ev-chan notify-pub]} player-type faction-color]
-  (let [fns {:action-ctx #'action-ctx
-             :actor-score-fn #'actor-score-fn
-             :base-action-score-fn #'base-action-score-fn
-             :unit-action-score-fn #'unit-action-score-fn}]
+  (let [fns {:score-actor #'score-actor
+             :score-base-action #'score-base-action
+             :mk-unit-action-ctx #'mk-unit-action-ctx
+             :score-unit-action #'score-unit-action}]
     (simple-embedded-player faction-color
                             ev-chan
                             notify-pub

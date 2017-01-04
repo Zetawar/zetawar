@@ -28,6 +28,7 @@
       (d/transact! conn tx))
     (doseq [new-msg (:dispatch ret)]
       (dispatch ev-chan new-msg))
+    ;; TODO: block with timeout when notifying players
     (doseq [notify-msg (:notify ret)]
       (players/notify notify-chan notify-msg))))
 

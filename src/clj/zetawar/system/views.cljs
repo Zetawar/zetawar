@@ -10,7 +10,7 @@
 (defmethod ig/init-key :zetawar.system/views [_ opts]
   (let [{:keys [datascript players router locale]} opts
         {:keys [conn]} datascript
-        {:keys [ev-chan]} router
+        {:keys [ev-chan notify-pub]} router
         dispatch #(router/dispatch ev-chan %)
         translate (-> data/dicts
                       tongue/build-translate
@@ -18,5 +18,7 @@
     (posh/posh! conn)
     {:conn conn
      :players players
+     :ev-chan ev-chan
+     :notify-pub notify-pub
      :dispatch dispatch
      :translate translate}))

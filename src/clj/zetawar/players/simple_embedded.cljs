@@ -56,56 +56,56 @@
              (not= (:action/type action) :action.type/end-turn))
     {:dispatch [[:zetawar.events.player/send-game-state faction-color]]}))
 
-(declare ^:dynamic *action-ctx*)
+(declare ^:dynamic *mk-actor-ctx*)
 
-(declare ^:dynamic *actor-score-fn*)
+(declare ^:dynamic *score-actor*)
 
-;; TODO: cleanup choose-* functions
 (defn choose-actor [db game ctx]
-  (let [actor-score (memoize (*actor-score-fn* db game ctx))]
-    (->> (game/actionable-actors db game)
-         (keep (juxt identity actor-score))
-         (apply max-key second)
-         first)))
+  (->> (game/actionable-actors db game)
+       (keep (juxt identity #(*score-actor* db game ctx %)))
+       (apply max-key second)
+       first))
 
-(declare ^:dynamic *base-action-score-fn*)
+(declare ^:dynamic *mk-base-action-ctx*)
 
-(defn choose-base-action [db game ctx base]
-  (let [base-action-score (memoize (*base-action-score-fn* db game ctx base))]
-    (->> (game/base-actions db game base)
-         (keep (juxt identity base-action-score))
-         (apply max-key second)
-         first)))
+(declare ^:dynamic *score-base-action*)
 
-(declare ^:dynamic *unit-action-score-fn*)
+(defn choose-base-action [db game base action-ctx]
+  (->> (game/base-actions db game base)
+       (keep (juxt identity #(*score-base-action* db game base action-ctx %)))
+       (apply max-key second)
+       first))
 
-(defn choose-unit-action [db game ctx unit]
-  (let [unit-action-score (memoize (*unit-action-score-fn* db game ctx unit))]
-    (->> (game/unit-actions db game unit)
-         (keep (juxt identity unit-action-score))
-         (apply max-key second)
-         first)))
+(declare ^:dynamic *mk-unit-action-ctx*)
+
+(declare ^:dynamic *score-unit-action*)
+
+(defn choose-unit-action [db game unit action-ctx]
+  (->> (game/unit-actions db game unit)
+       (keep (juxt identity #(*score-unit-action* db game unit action-ctx %)))
+       (apply max-key second)
+       first))
 
 (defn choose-action [player db game]
-  (let [ctx (*action-ctx* db game)
-        actor (choose-actor db game ctx)]
+  (let [actor-ctx (*mk-actor-ctx* db game)
+        actor (choose-actor db game actor-ctx)]
     (when actor
       (cond
         (game/base? actor)
-        (choose-base-action db game ctx actor)
+        (let [action-ctx (*mk-base-action-ctx* db game actor-ctx actor)]
+          (choose-base-action db game actor action-ctx))
 
         (game/unit? actor)
-        (choose-unit-action db game ctx actor)))))
+        (let [action-ctx (*mk-unit-action-ctx* db game actor-ctx actor)]
+          (choose-unit-action db game actor action-ctx))))))
 
 (defn wrap-exception-handler [f]
   (fn [& args]
-    (let [f' (apply f args)]
-      (fn [& args']
-        (try
-          (apply f' args')
-          (catch :default ex
-            (log/error "Error running player function:" ex)
-            nil))))))
+    (try
+      (apply f args)
+      (catch :default ex
+        (log/error "Error running player function:" ex)
+        nil))))
 
 (defmethod handle-event ::players/update-game-state
   [{:as player :keys [conn faction-color fns]} [_ _ game-state]]
@@ -114,11 +114,15 @@
     (reset! conn @new-conn)
     (let [db @conn
           game (game/game-by-id db game-id)
-          {:keys [action-ctx actor-score-fn base-action-score-fn unit-action-score-fn]} fns
-          action (or (binding [*action-ctx* (wrap-exception-handler (or action-ctx (constantly nil)))
-                               *actor-score-fn* (wrap-exception-handler actor-score-fn)
-                               *base-action-score-fn* (wrap-exception-handler base-action-score-fn)
-                               *unit-action-score-fn* (wrap-exception-handler unit-action-score-fn)]
+          {:keys [mk-actor-ctx score-actor
+                  mk-base-action-ctx score-base-action
+                  mk-unit-action-ctx score-unit-action]} fns
+          action (or (binding [*mk-actor-ctx* (wrap-exception-handler (or mk-actor-ctx (constantly nil)))
+                               *score-actor* (wrap-exception-handler score-actor)
+                               *mk-base-action-ctx* (wrap-exception-handler (or mk-base-action-ctx (fn [db game actor-ctx base] actor-ctx)))
+                               *score-base-action* (wrap-exception-handler score-base-action)
+                               *mk-unit-action-ctx* (wrap-exception-handler (or mk-unit-action-ctx (fn [db game actor-ctx unit] actor-ctx)))
+                               *score-unit-action* (wrap-exception-handler score-unit-action)]
                        (choose-action player db game))
                      {:action/type :action.type/end-turn
                       :action/faction-color faction-color})]
