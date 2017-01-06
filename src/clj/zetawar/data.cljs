@@ -7,11 +7,13 @@
     :cancel-button "Cancel"
     :close-button "Close"
 
-    ;; Game actions and labels
-    :credits-label "Credits"
+    ;; Game links
     :copy-game-url-link "Copy Link"
     :new-game-link "New Game"
     :end-turn-link "End Turn?"
+
+    ;; Game labels
+    :credits-label "Credits"
     :round-label "Round"
 
     ;; Faction configuration
