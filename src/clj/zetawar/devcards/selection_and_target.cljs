@@ -1,8 +1,8 @@
 (ns zetawar.devcards.selection-and-target
   (:require
-   [com.stuartsierra.component :as component]
    [datascript.core :as d]
    [devcards.core :as dc :include-macros true]
+   [integrant.core :as ig]
    [posh.core :as posh]
    [reagent.core :as r]
    [zetawar.app :as app]
@@ -10,31 +10,35 @@
    [zetawar.db :refer [e]]
    [zetawar.game :as game]
    [zetawar.subs :as subs]
-   [zetawar.system :refer [new-system]]
+   [zetawar.system :as system]
    [zetawar.util :refer [breakpoint inspect]]
    [zetawar.views :as views])
   (:require-macros
    [devcards.core :refer [defcard defcard-rg]]))
 
 (defcard-rg unit-selected
-  (let [{:keys [app]} (component/start (new-system))
-        {:keys [conn]} app]
-    (app/start-new-game! app :sterlings-aruba-multiplayer)
+  (let [system (ig/init system/game-config)
+        game-cfg (:zetawar.system/game system)
+        views-cfg (:zetawar.system/game-views system)
+        conn (:conn views-cfg)]
+    (app/start-new-game! game-cfg :sterlings-aruba-multiplayer)
     (d/transact! conn [{:db/id (-> @conn app/root e)
                         :app/selected-q 2
                         :app/selected-r 2}])
     [:div.row
      [:div.col-md-2
-      [views/faction-list app]
-      [views/faction-actions app]]
+      [views/faction-list views-cfg]
+      [views/faction-actions views-cfg]]
      [:div.col-md-10
-      [views/faction-status app]
-      [views/board app]]]))
+      [views/faction-status views-cfg]
+      [views/board views-cfg]]]))
 
 (defcard-rg moved-unit-selected
-  (let [{:keys [app]} (component/start (new-system))
-        {:keys [conn]} app]
-    (app/start-new-game! app :sterlings-aruba-multiplayer)
+  (let [system (ig/init system/game-config)
+        game-cfg (:zetawar.system/game system)
+        views-cfg (:zetawar.system/game-views system)
+        conn (:conn views-cfg)]
+    (app/start-new-game! game-cfg :sterlings-aruba-multiplayer)
     (let [game (app/current-game @conn)
           unit (game/unit-at @conn game 2 2)]
       (d/transact! conn [{:db/id (-> @conn app/root e)
@@ -43,16 +47,18 @@
                          [:db/add (e unit) :unit/move-count 1]]))
     [:div.row
      [:div.col-md-2
-      [views/faction-list app]
-      [views/faction-actions app]]
+      [views/faction-list views-cfg]
+      [views/faction-actions views-cfg]]
      [:div.col-md-10
-      [views/faction-status app]
-      [views/board app]]]))
+      [views/faction-status views-cfg]
+      [views/board views-cfg]]]))
 
 (defcard-rg moved-unit-with-attacks
-  (let [{:keys [app]} (component/start (new-system))
-        {:keys [conn]} app]
-    (app/start-new-game! app :sterlings-aruba-multiplayer)
+  (let [system (ig/init system/game-config)
+        game-cfg (:zetawar.system/game system)
+        views-cfg (:zetawar.system/game-views system)
+        conn (:conn views-cfg)]
+    (app/start-new-game! game-cfg :sterlings-aruba-multiplayer)
     (let [game (app/current-game @conn)
           unit (game/unit-at @conn game 2 2)]
       (d/transact! conn (into (game/teleport-tx @conn game 2 2 6 8)
@@ -62,16 +68,18 @@
                                [:db/add (e unit) :unit/move-count 1]])))
     [:div.row
      [:div.col-md-2
-      [views/faction-list app]
-      [views/faction-actions app]]
+      [views/faction-list views-cfg]
+      [views/faction-actions views-cfg]]
      [:div.col-md-10
-      [views/faction-status app]
-      [views/board app]]]))
+      [views/faction-status views-cfg]
+      [views/board views-cfg]]]))
 
 (defcard-rg targeted-enemy
-  (let [{:keys [app]} (component/start (new-system))
-        {:keys [conn]} app]
-    (app/start-new-game! app :sterlings-aruba-multiplayer)
+  (let [system (ig/init system/game-config)
+        game-cfg (:zetawar.system/game system)
+        views-cfg (:zetawar.system/game-views system)
+        conn (:conn views-cfg)]
+    (app/start-new-game! game-cfg :sterlings-aruba-multiplayer)
     (let [game (app/current-game @conn)
           unit (game/unit-at @conn game 2 2)]
       (d/transact! conn (into (game/teleport-tx @conn game 2 2 6 8)
@@ -83,23 +91,25 @@
                                [:db/add (e unit) :unit/move-count 1]])))
     [:div.row
      [:div.col-md-2
-      [views/faction-list app]
-      [views/faction-actions app]]
+      [views/faction-list views-cfg]
+      [views/faction-actions views-cfg]]
      [:div.col-md-10
-      [views/faction-status app]
-      [views/board app]]]))
+      [views/faction-status views-cfg]
+      [views/board views-cfg]]]))
 
 (defcard-rg base-selected
-  (let [{:keys [app]} (component/start (new-system))
-        {:keys [conn]} app]
-    (app/start-new-game! app :sterlings-aruba-multiplayer)
+  (let [system (ig/init system/game-config)
+        game-cfg (:zetawar.system/game system)
+        views-cfg (:zetawar.system/game-views system)
+        conn (:conn views-cfg)]
+    (app/start-new-game! game-cfg :sterlings-aruba-multiplayer)
     (d/transact! conn [{:db/id (-> @conn app/root e)
                         :app/selected-q 1
                         :app/selected-r 2}])
     [:div.row
      [:div.col-md-2
-      [views/faction-list app]
-      [views/faction-actions app]]
+      [views/faction-list views-cfg]
+      [views/faction-actions views-cfg]]
      [:div.col-md-10
-      [views/faction-status app]
-      [views/board app]]]))
+      [views/faction-status views-cfg]
+      [views/board views-cfg]]]))

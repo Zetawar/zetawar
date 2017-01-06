@@ -1,13 +1,12 @@
 (ns zetawar.devcards.prototype
   (:require
    [clojure.string :as string]
-   [taoensso.timbre :as log]
-   [com.stuartsierra.component :as component]
    [datascript.core :as d]
    [devcards.core :as dc :include-macros true]
    [goog.string :as gstring]
    [posh.core :as posh]
    [reagent.core :as r]
+   [taoensso.timbre :as log]
    [zetawar.app :as app]
    [zetawar.data :as data]
    [zetawar.db :refer [e]]
@@ -15,7 +14,7 @@
    [zetawar.game :as game]
    [zetawar.router :as router]
    [zetawar.subs :as subs]
-   [zetawar.system :refer [new-system]]
+   [zetawar.system :as system]
    [zetawar.util :refer [breakpoint inspect]]
    [zetawar.views :as views])
   (:require-macros

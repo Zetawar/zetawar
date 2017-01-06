@@ -1,8 +1,8 @@
 (ns zetawar.devcards.scenarios
   (:require
-   [com.stuartsierra.component :as component]
    [datascript.core :as d]
    [devcards.core :as dc :include-macros true]
+   [integrant.core :as ig]
    [posh.core :as posh]
    [reagent.core :as r]
    [zetawar.app :as app]
@@ -12,11 +12,15 @@
    [devcards.core :refer [defcard defcard-rg]]))
 
 (defcard-rg sterlings-aruba-multiplayer-card
-  (let [{:keys [app]} (component/start (system/new-system))]
-    (app/start-new-game! app :sterlings-aruba-multiplayer)
-    [views/board app]))
+  (let [system (ig/init system/game-config)
+        game-cfg (:zetwar.system/game system)
+        views-cfg (:zetwar.system/game-views system)]
+    (app/start-new-game! game-cfg :sterlings-aruba-multiplayer)
+    [views/board views-cfg]))
 
 (defcard-rg city-sprawl-multiplayer-card
-  (let [{:keys [app]} (component/start (system/new-system))]
-    (app/start-new-game! app :city-sprawl-multiplayer)
-    [views/board app]))
+  (let [system (ig/init system/game-config)
+        game-cfg (:zetwar.system/game system)
+        views-cfg (:zetwar.system/game-views system)]
+    (app/start-new-game! game-cfg :city-sprawl-multiplayer)
+    [views/board views-cfg]))

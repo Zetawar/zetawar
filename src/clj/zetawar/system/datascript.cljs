@@ -7,3 +7,5 @@
   (let [{:keys [schema]} opts]
     {:schema schema
      :conn (d/create-conn schema)}))
+
+;; TODO: implement resume-key

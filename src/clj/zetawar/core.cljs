@@ -1,8 +1,6 @@
 (ns zetawar.core
   (:require
-   [datascript.core :as d]
    [integrant.core :as ig]
-   [posh.core :as posh]
    [reagent.core :as r]
    [taoensso.timbre :as log]
    [zetawar.app :as app]
@@ -29,9 +27,10 @@
                     .-id)]
     (case body-id
       "app"
-      (let [target (.getElementById js/document "main")]
+      (let [target (.getElementById js/document "main")
+            views-cfg (:zetawar.system/game-views @system)]
         (r/render-component
-         [views/app-root (:zetawar.system/views @system)]
+         [views/app-root views-cfg]
          target))
 
       "site"
@@ -50,12 +49,12 @@
 ;; TODO: don't start game when running benchmarks
 (defn ^:export init []
   (when-not (site/viewing-devcards?)
-    (reset! system (ig/init system/config))
-    (let [app-ctx (:zetawar.system/views @system)
+    (reset! system (ig/init system/game-config))
+    (let [game-cfg (:zetawar.system/game @system)
           encoded-game-state (some-> js/window.location.hash
                                      not-empty
                                      (subs 1))]
       (if encoded-game-state
-        (app/load-encoded-game-state! app-ctx encoded-game-state)
-        (app/start-new-game! app-ctx :sterlings-aruba-multiplayer))
+        (app/load-encoded-game-state! game-cfg encoded-game-state)
+        (app/start-new-game! game-cfg :sterlings-aruba-multiplayer))
       (set! (.-onload js/window) run))))
