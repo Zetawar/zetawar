@@ -159,8 +159,7 @@
                                  (System/getenv "ZETAWAR_CLJS_REPL_PORT")))
         (cljs :ids ["js/main"]
               :optimizations :none
-              :compiler-options {:devcards true
-                                 :preloads '[zetawar.dev]
+              :compiler-options {:preloads '[zetawar.dev]
                                  :parallel-build true})
         (target)
         (nightlight :port 4000 :url "http://localhost:3000")))

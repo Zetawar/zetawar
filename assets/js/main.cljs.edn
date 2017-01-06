@@ -1,6 +1,8 @@
 {:require [zetawar.core]
  :init-fns [zetawar.core/init]
- :compiler-options {:asset-path "/js/main.out"
+ :modules {:devcards {:entries #{"zetawar.devcards"}}}
+ :compiler-options {:devcards true
+                    :asset-path "/js/main.out"
                     :externs ["js/externs.js"]
                     :foreign-libs [{:file "lzw.js"
                                     :provides ["lzw"]}]}}

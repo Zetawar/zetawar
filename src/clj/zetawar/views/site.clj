@@ -69,7 +69,9 @@
        (kickstarter-alert)
        (:content entry)]
       (footer)
-      (include-js (site/prefix "/js/main.js"))])))
+      (include-js (site/prefix "/js/main.js"))
+      (when (site/devcards? entry)
+        (include-js (site/prefix "/js/main/devcards.js")))])))
 
 (defn render-devcards [data]
   (let [{:keys [entry] global-meta :meta} data]

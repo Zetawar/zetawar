@@ -18,6 +18,7 @@
   (log/debugf "Dispatching event: %s" (pr-str msg))
   (put! ch msg))
 
+;; TODO: add pause for rendering after fixed interval
 ;; TODO: handle exceptions
 (defn handle-event* [{:as router-ctx :keys [conn ev-chan notify-chan]} msg]
   (let [ev-ctx (assoc router-ctx :db @conn)
