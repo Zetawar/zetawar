@@ -153,7 +153,9 @@
         base-count @(subs/current-base-count conn)]
     [:div#faction-status
      ;; TODO: make link red
-     [:a {:href "#" :on-click #(dispatch [::events.ui/end-turn])}
+     [:a {:href "#" :on-click (fn [e]
+                                (.preventDefault e)
+                                (dispatch [::events.ui/end-turn]))}
       (translate :end-turn-link)]
      " · "
      [copy-url-link view-ctx]

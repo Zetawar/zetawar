@@ -111,15 +111,9 @@
        (create-players! app-ctx)
        (log/warnf "Skipping player creation for tests")))))
 
-;; TODO: put URL in paste buffer
+;; TODO: put URL in paste buffer automatically
 (defn set-url-game-state! [db]
   (let [encoded-game-state (->> (current-game db)
                                 (game/get-game-state db)
                                 encode-game-state)]
-    ;; TODO: figure out why this horrible hack is necessary in Firefox
-    (set! js/window.onhashchange
-          (fn []
-            (when (not= encoded-game-state js/window.location.hash)
-              (set! js/window.location.hash encoded-game-state))
-            (set! js/window.onhashchange nil)))
     (set! js/window.location.hash encoded-game-state)))
