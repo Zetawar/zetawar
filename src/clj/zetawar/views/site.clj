@@ -1,5 +1,6 @@
 (ns zetawar.views.site
   (:require
+   [clojure.pprint :refer [pprint]]
    [zetawar.views.common :refer [footer head kickstarter-alert navbar]]
    [hiccup.page :refer [html5 include-js]]
    [zetawar.site :as site])
@@ -69,13 +70,12 @@
        (kickstarter-alert)
        (:content entry)]
       (footer)
-      (include-js (site/prefix "/js/main.js"))
-      (when (site/devcards? entry)
-        (include-js (site/prefix "/js/main/devcards.js")))])))
+      (include-js (site/prefix "/js/main.js"))])))
 
 (defn render-devcards [data]
   (let [{:keys [entry] global-meta :meta} data]
     (html5
      (head data "Zetawar Devcards")
      [:body#devcards
-      (include-js (site/prefix "/js/main.js"))])))
+      (include-js (site/prefix "/js/main.js"))
+      (include-js (site/prefix "/js/main/devcards.js"))])))
