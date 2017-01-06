@@ -173,7 +173,6 @@
                 :armored   9}
                :zoc
                [:personnel :armored]}
-   ;; TODO: mortar should not exert zone of control
    :mortar {:name "Mortar"
             :cost 200
             :movement 9
@@ -277,6 +276,7 @@
    })
 
 ;; TODO: remove redundant id keys (?)
+;; TODO: rename :name to :description (?)
 (def maps
   {:sterlings-aruba
    {:id :sterlings-aruba
