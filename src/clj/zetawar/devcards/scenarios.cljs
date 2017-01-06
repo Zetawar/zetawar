@@ -13,14 +13,14 @@
 
 (defcard-rg sterlings-aruba-multiplayer-card
   (let [system (ig/init system/game-config)
-        game-cfg (:zetwar.system/game system)
-        views-cfg (:zetwar.system/game-views system)]
+        game-cfg (:zetawar.system/game system)
+        views-cfg (:zetawar.system/game-views system)]
     (app/start-new-game! game-cfg :sterlings-aruba-multiplayer)
     [views/board views-cfg]))
 
 (defcard-rg city-sprawl-multiplayer-card
   (let [system (ig/init system/game-config)
-        game-cfg (:zetwar.system/game system)
-        views-cfg (:zetwar.system/game-views system)]
+        game-cfg (:zetawar.system/game system)
+        views-cfg (:zetawar.system/game-views system)]
     (app/start-new-game! game-cfg :city-sprawl-multiplayer)
     [views/board views-cfg]))
