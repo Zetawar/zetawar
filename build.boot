@@ -17,7 +17,7 @@
    [org.martinklepsch/boot-gzip "0.1.3" :scope "test"]
    [org.slf4j/slf4j-nop "1.7.21" :scope "test"]
    [pandeiro/boot-http "0.7.6" :scope "test"]
-   [perun "0.3.0" :scope "test"]
+   [perun "0.4.1-SNAPSHOT" :scope "test"]
    [weasel "0.7.0" :scope "test"]
 
    ;; App
