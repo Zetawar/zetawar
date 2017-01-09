@@ -44,10 +44,10 @@
      ))
 
 (def nav-links
-  [{:href (site/prefix "/")        :title "Game"}
-   {:href (site/prefix "/blog")    :title "Blog"}
-   {:href (site/prefix "/roadmap") :title "Roadmap"}
-   {:href (site/prefix "/backers") :title "Backers"}])
+  [{:href (site/prefix "/")                            :title "Game"}
+   {:href (site/prefix "/blog")                        :title "Blog"}
+   {:href "https://github.com/zetawar/zetawar/issues"  :title "Roadmap"}
+   {:href (site/prefix "/backers")                     :title "Backers"}])
 
 (defn navbar
   ([] (navbar nil))
