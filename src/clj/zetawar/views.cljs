@@ -216,7 +216,8 @@
        [:p.hidden-xs.hidden-sm
         (translate :select-target-or-destination-tip)])
      ;; TODO: only display when starting faction is active
-     (when (= round 1)
+     (when (and (= round 1)
+                (not @(subs/selected-hex conn)))
        [:p.hidden-xs.hidden-sm
         {:dangerouslySetInnerHTML {:__html (translate :multiplayer-tip)}}])]))
 
