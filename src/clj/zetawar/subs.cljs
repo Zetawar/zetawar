@@ -7,6 +7,7 @@
    [zetawar.db :refer [e qe]]
    [zetawar.game :as game]
    [zetawar.hex :as hex]
+   [zetawar.tiles :as tiles]
    [zetawar.util :refer [breakpoint inspect select-values]])
   (:require-macros
    [zetawar.subs :refer [deftrack]]))
@@ -60,6 +61,7 @@
                                    :terrain-type/image]
                     :terrain/owner [:faction/color]}])
 
+;; TODO: use terrains output instead of running a separate query
 (deftrack terrain-at [conn q r]
   (when-let [terrain-eid @(terrain-eid-at conn q r)]
     @(posh/pull conn terrain-pull terrain-eid)))
@@ -70,6 +72,26 @@
      @(posh/pull conn [{:map/terrains terrain-pull}]
                  map-eid'))))
 
+(deftrack map-width [conn]
+  (or (->> @(terrains conn)
+           (map :terrain/q)
+           (apply max))
+      0))
+
+(deftrack map-height [conn]
+  (or (->> @(terrains conn)
+           (map :terrain/r)
+           (apply max))
+      0))
+
+(deftrack map-width-px [conn]
+  (* (+ tiles/width tiles/odd-row-column-offset)
+     @(map-width conn)))
+
+(deftrack map-height-px [conn]
+  (* tiles/height @(map-height conn)))
+
+;; TODO: use terrains output instead of running a separate query
 (defn current-base-locations [conn]
   (posh/q '[:find ?q ?r
             :where
@@ -194,10 +216,10 @@
   (let [game-eid' @(game-eid conn)
         idx (game/game-pos-idx game-eid' q r)]
     (ffirst @(posh/q '[:find ?u
-                      :in $ ?idx
-                      :where
-                      [?u :unit/game-pos-idx ?idx]]
-                    conn idx))))
+                       :in $ ?idx
+                       :where
+                       [?u :unit/game-pos-idx ?idx]]
+                     conn idx))))
 
 (deftrack unit-at? [conn q r]
   (some? @(unit-eid-at conn q r)))

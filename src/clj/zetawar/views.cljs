@@ -112,9 +112,9 @@
         (for [terrain @(subs/terrains conn)]
           [tile view-ctx terrain])))
 
-;; TODO: computer board size based on map size
-(defn board [view-ctx]
-  [:svg#board {:width 500 :height 500}
+(defn board [{:as view-ctx :keys [conn]}]
+  [:svg#board {:width @(subs/map-width-px conn)
+               :height @(subs/map-height-px conn)}
    [tiles view-ctx]])
 
 (defn faction-credits [{:as view-ctx :keys [conn translate]}]
