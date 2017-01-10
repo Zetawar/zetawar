@@ -85,11 +85,14 @@
       0))
 
 (deftrack map-width-px [conn]
-  (* (+ tiles/width tiles/odd-row-column-offset)
-     @(map-width conn)))
+  (+ tiles/odd-row-column-offset
+     (* tiles/width
+        (inc @(map-width conn)))))
 
 (deftrack map-height-px [conn]
-  (* tiles/height @(map-height conn)))
+  (+ tiles/height
+     (* tiles/row-offset
+        @(map-height conn))))
 
 ;; TODO: use terrains output instead of running a separate query
 (defn current-base-locations [conn]
