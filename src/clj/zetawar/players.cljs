@@ -28,7 +28,7 @@
   (async/put! notify-chan msg))
 
 (defn load-player-game-state! [conn game-state]
-  (game/load-specs! conn)
+  (game/load-ruleset! conn)
   (game/load-game-state! conn
                          data/maps
                          data/scenarios

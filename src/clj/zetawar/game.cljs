@@ -1062,11 +1062,13 @@
                          :unit-state-map/built-state [:unit-state/id built-id]}])))))
         state-maps-def))
 
-;; TODO: rename (?)
-(defn load-specs! [conn]
-  (d/transact! conn (terrain-types-tx data/terrains))
-  (d/transact! conn (unit-state-map-tx data/unit-state-maps))
-  (d/transact! conn (unit-types-tx @conn data/units)))
+(defn load-ruleset!
+  ([conn ruleset]
+   (d/transact! conn (terrain-types-tx (:terrains ruleset)))
+   (d/transact! conn (unit-state-map-tx (:unit-state-maps ruleset)))
+   (d/transact! conn (unit-types-tx @conn (:units ruleset))))
+  ([conn]
+   (load-ruleset! conn data/ruleset)))
 
 (defn game-map-tx [game map-def]
   (let [map-eid (db/next-temp-id)]

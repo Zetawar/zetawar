@@ -81,7 +81,7 @@
   ([{:as app-ctx :keys [conn players]} map-defs scenario-defs scenario-id]
    (let [game (current-game @conn)]
      (when-not game
-       (game/load-specs! conn))
+       (game/load-ruleset! conn))
      (let [scenario-def (scenario-defs scenario-id)
            game-id (game/load-scenario! conn map-defs scenario-def)
            app-eid (or (some-> (root @conn) e) -101)]
@@ -98,7 +98,7 @@
   ([{:as app-ctx :keys [conn players]} encoded-game-state]
    (load-encoded-game-state! app-ctx data/maps data/scenarios encoded-game-state))
   ([{:as app-ctx :keys [conn players]} map-defs scenario-defs encoded-game-state]
-   (game/load-specs! conn)
+   (game/load-ruleset! conn)
    (let [game-state (decode-game-state encoded-game-state)
          game-id (game/load-game-state! conn
                                         map-defs
