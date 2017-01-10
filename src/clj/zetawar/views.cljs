@@ -14,37 +14,31 @@
    [zetawar.players :as players]
    [zetawar.site :as site]
    [zetawar.subs :as subs]
+   [zetawar.tiles :as tiles]
    [zetawar.util :refer [breakpoint inspect only oonly]]
    [zetawar.views.common :refer [footer kickstarter-alert navbar]]))
 
-(def offset->pixel
-  (memoize
-   (fn [q r]
-     (if (= 0 (mod r 2))
-       [(* q 32) (* r 26)]
-       [(+ 16 (* q 32)) (+ 26 (* (- r 1) 26))]))))
-
 (defn tile-border [{:as view-ctx :keys [conn]} q r]
-  (let [[x y] (offset->pixel q r)]
+  (let [[x y] (tiles/offset->pixel q r)]
     [:g {:id (str "border-" q "," r)}
      (cond
        ;; Selected
        @(subs/selected? conn q r)
        [:image {:x x :y y
-                :width 32 :height 34
+                :width tiles/width :height tiles/height
                 :xlink-href (site/prefix "/images/game/borders/selected.png")}]
 
        ;; Enemy unit targeted
        (and @(subs/targeted? conn q r)
             @(subs/enemy-at? conn q r))
        [:image {:x x :y y
-                :width 32 :height 34
+                :width tiles/width :height tiles/height
                 :xlink-href (site/prefix "/images/game/borders/targeted-enemy.png")}]
 
        ;; Terrain targeted
        @(subs/targeted? conn q r)
        [:image {:x x :y y
-                :width 32 :height 34
+                :width tiles/width :height tiles/height
                 :xlink-href (site/prefix "/images/game/borders/selected.png")}])]))
 
 (defn unit-image [unit]
@@ -55,23 +49,23 @@
 
 (defn board-unit [{:as view-ctx :keys [conn dispatch]} q r]
   (when-let [unit @(subs/unit-at conn q r)]
-    (let [[x y] (offset->pixel q r)
+    (let [[x y] (tiles/offset->pixel q r)
           image (unit-image unit)]
       [:g {:id (str "unit-" (e unit))}
        [:image {:x x :y y
-                :width 32 :height 34
+                :width tiles/width :height tiles/height
                 :xlink-href (site/prefix "/images/game/" image)
                 :on-click #(dispatch [::events.ui/select-hex q r])}]
        (when (:unit/capturing unit)
          [:image {:x x :y y
-                  :width 32 :height 34
+                  :width tiles/width :height tiles/height
                   :xlink-href (site/prefix "/images/game/capturing.gif")}])
        [:image {:x x :y y
-                :width 32 :height 34
+                :width tiles/width :height tiles/height
                 :xlink-href (site/prefix "/images/game/health/" (:unit/count unit) ".png")}]])))
 
 (defn tile-mask [{:as view-ctx :keys [conn]} q r]
-  (let [[x y] (offset->pixel q r)
+  (let [[x y] (tiles/offset->pixel q r)
         show (or
               ;; No unit selected and tile contains current unit with no actions
               (and (not @(subs/unit-selected? conn))
@@ -85,7 +79,7 @@
                    (not @(subs/valid-destination-for-selected? conn q r))))]
     [:image {:visibility (if show "visible" "hidden")
              :x x :y y
-             :width 32 :height 34
+             :width tiles/width :height tiles/height
              :xlink-href (site/prefix "/images/game/mask.png")}]))
 
 (defn terrain-image [terrain]
@@ -98,10 +92,10 @@
         (string/replace "COLOR" color-name))))
 
 (defn terrain-tile [view-ctx terrain q r]
-  (let [[x y] (offset->pixel q r)
+  (let [[x y] (tiles/offset->pixel q r)
         image (terrain-image terrain)]
     [:image {:x x :y y
-             :width 32 :height 34
+             :width tiles/width :height tiles/height
              :xlink-href (site/prefix "/images/game/" image)}]))
 
 (defn tile [{:as view-ctx :keys [dispatch]} terrain]
