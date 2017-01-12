@@ -32,8 +32,17 @@
 (deftrack game-eid [conn]
   (-> @(app conn) :app/game e))
 
+(def game-pull [:game/credits-per-base
+                :game/max-count-per-unit
+                :game/scenario-id
+                :game/map
+                {:game/factions []}
+                :game/starting-faction
+                :game/current-faction
+                :game/round])
+
 (deftrack game [conn]
-  @(posh/pull conn '[*] @(game-eid conn)))
+  @(posh/pull conn game-pull @(game-eid conn)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Map
@@ -115,13 +124,9 @@
 ;;; Factions
 
 (deftrack faction-eids [conn]
-  (->> @(posh/q '[:find ?f
-                  :where
-                  [_  :app/game ?g]
-                  [?g :game/factions ?f]]
-                conn)
-       (map first)
-       (into [])))
+  (into []
+        (map e)
+        (:game/factions @(game conn))))
 
 (def faction-pull '[:faction/color
                     :faction/credits
