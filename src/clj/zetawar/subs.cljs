@@ -32,7 +32,8 @@
 (deftrack game-eid [conn]
   (-> @(app conn) :app/game e))
 
-(def game-pull [:game/credits-per-base
+(def game-pull [:game/id
+                :game/credits-per-base
                 :game/max-count-per-unit
                 :game/scenario-id
                 :game/map
