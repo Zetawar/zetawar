@@ -72,7 +72,7 @@
   (let [conn (helper/create-aruba-conn)]
     (testing "game map returned by subscription has expected attributes"
       (is (= #{:db/id
-               :map/name}
+               :map/description}
              (into #{} (keys @(subs/game-map conn))))))))
 
 (deftest test-terrains
@@ -201,7 +201,7 @@
                (into #{} unit-keys)))
         (is (= #{:db/id
                  :unit-type/id
-                 :unit-type/name
+                 :unit-type/description
                  :unit-type/min-range
                  :unit-type/max-range
                  :unit-type/can-capture

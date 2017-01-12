@@ -961,7 +961,7 @@
          (fn [[terrain-type-name terrain-def]]
            {:db/id (db/next-temp-id)
             :terrain-type/id (to-terrain-type-id terrain-type-name)
-            :terrain-type/name (:name terrain-def)
+            :terrain-type/description (:description terrain-def)
             :terrain-type/image (:image terrain-def)}))
         terrains-def))
 
@@ -1001,7 +1001,7 @@
                  unit-type-eid (db/next-temp-id)]
              (-> [{:db/id unit-type-eid
                    :unit-type/id (to-unit-type-id unit-type-name)
-                   :unit-type/name (:name unit-def)
+                   :unit-type/description (:description unit-def)
                    :unit-type/cost (:cost unit-def)
                    :unit-type/can-capture (:can-capture unit-def)
                    :unit-type/movement (:movement unit-def)
@@ -1074,7 +1074,7 @@
   (let [map-eid (db/next-temp-id)]
     (into [{:db/id map-eid
             :map/id (:id map-def)
-            :map/name (:name map-def)
+            :map/description (:description map-def)
             :game/_map (e game)}]
           (map
            (fn [t]

@@ -39,7 +39,6 @@
 
    ;; Unit Type
    :unit-type/id                    {:db/unique      :db.unique/identity}
-   :unit-type/name                  {:db/unique      :db.unique/identity}
    :unit-type/state-map             {:db/valueType   :db.type/ref}
    :unit-type/zoc-armor-types       {:db/cardinality :db.cardinality/many}
 
@@ -83,7 +82,6 @@
 
    ;; Terrain type
    :terrain-type/id                 {:db/unique      :db.unique/identity}
-   :terrain-type/name               {:db/unique      :db.unique/identity}
 
    ;; Unit strength
    :unit-strength/unit-type         {:db/valueType   :db.type/ref}

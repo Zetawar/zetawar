@@ -279,7 +279,7 @@
                   [:img {:src image}]]
                  [:div.media-body
                   [:h4.media-heading
-                   (:unit-type/name unit-type)]
+                   (:unit-type/description unit-type)]
                   (str "Cost: " (:unit-type/cost unit-type))]])))]
      [:> js/ReactBootstrap.Modal.Footer
       [:button.btn.btn-default {:on-click hide-picker}

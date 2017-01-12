@@ -43,7 +43,7 @@
 
 (deftrack game-map [conn]
   @(posh/pull conn
-              '[:map/name]
+              '[:map/description]
               @(game-map-eid conn)))
 
 (deftrack terrain-eid-at [conn q r]
@@ -239,7 +239,7 @@
                        :unit/capturing
                        {:faction/_units [:faction/color]
                         :unit/type [:unit-type/id
-                                    :unit-type/name
+                                    :unit-type/description
                                     :unit-type/can-capture
                                     :unit-type/min-range
                                     :unit-type/max-range

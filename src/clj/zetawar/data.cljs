@@ -55,25 +55,25 @@
 
 (def ruleset
   {:terrains
-   {:plains        {:name "Plains"
+   {:plains        {:description "Plains"
                     :image "tilesets/elite-command/terrains/plains.png"}
-    :mountains     {:name "Mountains"
+    :mountains     {:description "Mountains"
                     :image "tilesets/elite-command/terrains/mountains.png"}
-    :woods         {:name "Woods"
+    :woods         {:description "Woods"
                     :image "tilesets/elite-command/terrains/woods.png"}
-    :desert        {:name "Desert"
+    :desert        {:description "Desert"
                     :image "tilesets/elite-command/terrains/desert.png"}
-    :tundra        {:name "Tundra"
+    :tundra        {:description "Tundra"
                     :image "tilesets/elite-command/terrains/tundra.png"}
-    :swamp         {:name "Swamp"
+    :swamp         {:description "Swamp"
                     :image "tilesets/elite-command/terrains/swamp.png"}
-    :ford          {:name "Ford"
+    :ford          {:description "Ford"
                     :image "tilesets/elite-command/terrains/ford.png"}
-    :shallow-water {:name "Shallow Water"
+    :shallow-water {:description "Shallow Water"
                     :image "tilesets/elite-command/terrains/shallow-water.png"}
-    :deep-water    {:name "Deep Water"
+    :deep-water    {:description "Deep Water"
                     :image "tilesets/elite-command/terrains/deep-water.png"}
-    :base          {:name "Base"
+    :base          {:description "Base"
                     :image "tilesets/elite-command/terrains/base-COLOR.png"}}
 
    ;; TODO: add :description for state maps and states (?)
@@ -119,7 +119,7 @@
    ;; TODO: check how repair amount works in Elite Command
    ;; TODO: add :buildable-at (or -by?) => {<terrain type ids>...}
    :units
-   {:infantry {:name "Infantry"
+   {:infantry {:description "Infantry"
                :cost 75
                :movement 9
                :can-capture true
@@ -145,7 +145,7 @@
                 :armored   3}
                :zoc
                [:personnel :armored]}
-    :grenadier {:name "Grenadier"
+    :grenadier {:description "Grenadier"
                 :cost 150
                 :movement 9
                 :can-capture true
@@ -171,7 +171,7 @@
                  :armored   9}
                 :zoc
                 [:personnel :armored]}
-    :mortar {:name "Mortar"
+    :mortar {:description "Mortar"
              :cost 200
              :movement 9
              :can-capture true
@@ -195,7 +195,7 @@
              :attack-strengths
              {:personnel 10
               :armored   10}}
-    :ranger {:name "Ranger"
+    :ranger {:description "Ranger"
              :cost 200
              :movement 9
              :can-capture true
@@ -223,7 +223,7 @@
              :zoc
              [:personnel :armored]}
     ;; Armored
-    :humvee {:name "Humvee"
+    :humvee {:description "Humvee"
              :cost 300
              :movement 15
              :can-capture false
@@ -247,7 +247,7 @@
               :armored   3}
              :zoc
              [:personnel :armored]}
-    :tank {:name "Tank"
+    :tank {:description "Tank"
            :cost 350
            :movement 12
            :can-capture false
@@ -273,11 +273,10 @@
            [:personnel :armored]}}})
 
 ;; TODO: remove redundant id keys (?)
-;; TODO: rename :name to :description (?)
 (def maps
   {:sterlings-aruba
    {:id :sterlings-aruba
-    :name "Sterling's Aruba"
+    :description "Sterling's Aruba"
     :terrains
     [;; Row 1
      {:q 1
@@ -518,7 +517,7 @@
     }
    :city-sprawl
    {:id :city-sprawl
-    :name "City Sprawl"
+    :description "City Sprawl"
     :terrains
     [;; Row 1
      {:q 2
