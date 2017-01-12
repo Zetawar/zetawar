@@ -36,14 +36,15 @@
                 :game/credits-per-base
                 :game/max-count-per-unit
                 :game/scenario-id
-                :game/map
+                {:game/map []}
                 {:game/factions []}
                 :game/starting-faction
                 :game/current-faction
                 :game/round])
 
 (deftrack game [conn]
-  @(posh/pull conn game-pull @(game-eid conn)))
+  (log/spy
+   @(posh/pull conn game-pull @(game-eid conn))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Map

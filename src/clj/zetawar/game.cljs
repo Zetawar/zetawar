@@ -955,11 +955,12 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Setup
 
-(defn terrain-types-tx [terrains-def]
+(defn terrain-types-tx [game terrains-def]
   (into []
         (map
          (fn [[terrain-type-name terrain-def]]
            {:db/id (db/next-temp-id)
+            :game/_terrain-types (e game)
             :terrain-type/id (to-terrain-type-id terrain-type-name)
             :terrain-type/description (:description terrain-def)
             :terrain-type/image (:image terrain-def)}))
@@ -972,6 +973,8 @@
         (map
          (fn [[armor-type-name attack-strength]]
            {:db/id (db/next-temp-id)
+            :unit-type/_unit-strengths unit-type-eid
+            ;; TODO: remove redundant reference
             :unit-strength/unit-type unit-type-eid
             :unit-strength/armor-type (to-armor-type armor-type-name)
             :unit-strength/attack attack-strength}))
@@ -985,6 +988,8 @@
                  terrain-type-id (to-terrain-type-id terrain-type-name)
                  terrain-type (find-by db :terrain-type/id terrain-type-id)]
              {:db/id (db/next-temp-id)
+              :terrain-type/_terrain-effects (e terrain-type)
+              ;; TODO: remove redundant reference
               :terrain-effect/terrain-type (e terrain-type)
               :terrain-effect/unit-type unit-type-eid
               :terrain-effect/movement-cost movement-cost
@@ -992,7 +997,7 @@
               :terrain-effect/armor-bonus armor-bonus})))
         terrain-effects-def))
 
-(defn unit-types-tx [db units-def]
+(defn unit-types-tx [db game units-def]
   (into []
         (mapcat
          (fn [[unit-type-name unit-def]]
@@ -1000,6 +1005,7 @@
                  unit-state-map-id (to-unit-state-map-id state-map)
                  unit-type-eid (db/next-temp-id)]
              (-> [{:db/id unit-type-eid
+                   :game/_unit-types (e game)
                    :unit-type/id (to-unit-type-id unit-type-name)
                    :unit-type/description (:description unit-def)
                    :unit-type/cost (:cost unit-def)
@@ -1061,14 +1067,6 @@
                          :unit-state-map/start-state [:unit-state/id start-id]
                          :unit-state-map/built-state [:unit-state/id built-id]}])))))
         state-maps-def))
-
-(defn load-ruleset!
-  ([conn ruleset]
-   (d/transact! conn (terrain-types-tx (:terrains ruleset)))
-   (d/transact! conn (unit-state-map-tx (:unit-state-maps ruleset)))
-   (d/transact! conn (unit-types-tx @conn (:units ruleset))))
-  ([conn]
-   (load-ruleset! conn data/ruleset)))
 
 (defn game-map-tx [game map-def]
   (let [map-eid (db/next-temp-id)]
@@ -1167,13 +1165,22 @@
                units)))
           factions))
 
-(defn load-scenario! [conn map-defs scenario-def]
+(defn load-scenario! [conn rulesets map-defs scenario-def]
   (let [game-id (create-game! conn scenario-def)
         conn-game #(game-by-id @conn game-id)
-        {:keys [map-id credits-per-base factions]} scenario-def
-        starting-faction-color (get-in factions [0 :color])]
+        {:keys [ruleset-id map-id credits-per-base factions]} scenario-def
+        starting-faction-color (get-in factions [0 :color])
+        ruleset (rulesets ruleset-id)]
+    ;; Rules
+    (d/transact! conn (terrain-types-tx (conn-game) (:terrains ruleset)))
+    (d/transact! conn (unit-state-map-tx (:unit-state-maps ruleset)))
+    (d/transact! conn (unit-types-tx @conn (conn-game) (:units ruleset)))
+
+    ;; Map and bases
     (d/transact! conn (game-map-tx (conn-game) (map-defs map-id)))
     (d/transact! conn (bases-tx (conn-game) scenario-def))
+
+    ;; Factions
     (d/transact! conn (factions-tx (conn-game) factions))
     (d/transact! conn (factions-bases-tx @conn (conn-game) factions))
     (d/transact! conn (factions-units-tx @conn (conn-game) factions))
@@ -1200,16 +1207,25 @@
 ;;     - round-built
 ;;     - capturing
 
-(defn load-game-state! [conn map-defs scenario-defs game-state]
+(defn load-game-state! [conn rulesets map-defs scenario-defs game-state]
   (let [{:keys [scenario-id factions]} game-state
         current-faction-color (:current-faction game-state)
         scenario-def (scenario-defs scenario-id)
         starting-faction-color (get-in scenario-def [:factions 0 :color])
         game-id (create-game! conn scenario-def game-state)
         conn-game #(game-by-id @conn game-id)
-        {:keys [map-id credits-per-base]} scenario-def]
+        {:keys [ruleset-id map-id credits-per-base]} scenario-def
+        ruleset (rulesets ruleset-id)]
+    ;; Rules
+    (d/transact! conn (terrain-types-tx (conn-game) (:terrains ruleset)))
+    (d/transact! conn (unit-state-map-tx (:unit-state-maps ruleset)))
+    (d/transact! conn (unit-types-tx @conn (conn-game) (:units ruleset)))
+
+    ;; Map and bases
     (d/transact! conn (game-map-tx (conn-game) (map-defs map-id)))
     (d/transact! conn (bases-tx (conn-game) scenario-def))
+
+    ;; Factions
     (d/transact! conn (factions-tx (conn-game) factions))
     (d/transact! conn (factions-bases-tx @conn (conn-game) factions))
     (d/transact! conn (factions-units-tx @conn (conn-game) factions))

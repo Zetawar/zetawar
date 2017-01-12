@@ -15,7 +15,14 @@
 
    ;; Game
    :game/id                         {:db/unique      :db.unique/identity}
-   :game/map                        {:db/valueType   :db.type/ref}
+   :game/terrain-types              {:db/valueType   :db.type/ref
+                                     :db/cardinality :db.cardinality/many
+                                     :db/isComponent true}
+   :game/unit-types                 {:db/valueType   :db.type/ref
+                                     :db/cardinality :db.cardinality/many
+                                     :db/isComponent true}
+   :game/map                        {:db/valueType   :db.type/ref
+                                     :db/isComponent true}
    :game/factions                   {:db/valueType   :db.type/ref
                                      :db/cardinality :db.cardinality/many
                                      :db/isComponent true}
@@ -41,18 +48,23 @@
    :unit-type/id                    {:db/unique      :db.unique/identity}
    :unit-type/state-map             {:db/valueType   :db.type/ref}
    :unit-type/zoc-armor-types       {:db/cardinality :db.cardinality/many}
+   :unit-type/unit-strengths        {:db/valueType   :db.type/ref
+                                     :db/cardinality :db.cardinality/many
+                                     :db/isComponent true}
 
    ;; Unit State Maps
    :unit-state-map/id               {:db/unique      :db.unique/identity}
    :unit-state-map/states           {:db/valueType   :db.type/ref
-                                     :db/cardinality :db.cardinality/many}
+                                     :db/cardinality :db.cardinality/many
+                                     :db/isComponent true}
    :unit-state-map/built-state      {:db/valueType   :db.type/ref}
    :unit-state-map/start-state      {:db/valueType   :db.type/ref}
 
    ;; Unit State
    :unit-state/id                   {:db/unique      :db.unique/identity}
    :unit-state/transitions          {:db/valueType   :db.type/ref
-                                     :db/cardinality :db.cardinality/many}
+                                     :db/cardinality :db.cardinality/many
+                                     :db/isComponent true}
 
    ;; Unit State Transitions
    :unit-state-transition/new-state {:db/valueType   :db.type/ref}
@@ -82,6 +94,9 @@
 
    ;; Terrain type
    :terrain-type/id                 {:db/unique      :db.unique/identity}
+   :terrain-type/terrain-effects    {:db/valueType   :db.type/ref
+                                     :db/cardinality :db.cardinality/many
+                                     :db/isComponent true}
 
    ;; Unit strength
    :unit-strength/unit-type         {:db/valueType   :db.type/ref}

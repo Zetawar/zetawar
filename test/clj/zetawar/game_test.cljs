@@ -466,19 +466,19 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Setup
 
-(defcard terrain-types-tx
-  (let [terrains-spec (select-keys data/ruleset [:terrains :plains])]
-    {:terrains-spec terrains-spec
-     :terrain-types-tx (game/terrain-types-tx terrains-spec)}))
-
-(defcard units-spec-tx
-  (let [conn (d/create-conn db/schema)
-        units-spec (select-keys data/ruleset [:units :infantry])]
-    (d/transact! conn (game/terrain-types-tx (:terains data/ruleset)))
-    {:units-spec units-spec
-     :unit-types-tx (game/unit-types-tx @conn units-spec)}))
-
 (comment
+
+  (defcard terrain-types-tx
+    (let [terrains-spec (select-keys data/ruleset [:terrains :plains])]
+      {:terrains-spec terrains-spec
+       :terrain-types-tx (game/terrain-types-tx terrains-spec)}))
+
+  (defcard units-spec-tx
+    (let [conn (d/create-conn db/schema)
+          units-spec (select-keys data/ruleset [:units :infantry])]
+      (d/transact! conn (game/terrain-types-tx (:terains data/ruleset)))
+      {:units-spec units-spec
+       :unit-types-tx (game/unit-types-tx @conn units-spec)}))
 
   (deftest test-map-tx
     (let [game-id (random-uuid)]

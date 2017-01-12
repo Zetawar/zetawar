@@ -53,224 +53,225 @@
          "here</a>.")
     }})
 
-(def ruleset
-  {:terrains
-   {:plains        {:description "Plains"
-                    :image "tilesets/elite-command/terrains/plains.png"}
-    :mountains     {:description "Mountains"
-                    :image "tilesets/elite-command/terrains/mountains.png"}
-    :woods         {:description "Woods"
-                    :image "tilesets/elite-command/terrains/woods.png"}
-    :desert        {:description "Desert"
-                    :image "tilesets/elite-command/terrains/desert.png"}
-    :tundra        {:description "Tundra"
-                    :image "tilesets/elite-command/terrains/tundra.png"}
-    :swamp         {:description "Swamp"
-                    :image "tilesets/elite-command/terrains/swamp.png"}
-    :ford          {:description "Ford"
-                    :image "tilesets/elite-command/terrains/ford.png"}
-    :shallow-water {:description "Shallow Water"
-                    :image "tilesets/elite-command/terrains/shallow-water.png"}
-    :deep-water    {:description "Deep Water"
-                    :image "tilesets/elite-command/terrains/deep-water.png"}
-    :base          {:description "Base"
-                    :image "tilesets/elite-command/terrains/base-COLOR.png"}}
+(def rulesets
+  {:zetawar
+   {:terrains
+    {:plains        {:description "Plains"
+                     :image "tilesets/elite-command/terrains/plains.png"}
+     :mountains     {:description "Mountains"
+                     :image "tilesets/elite-command/terrains/mountains.png"}
+     :woods         {:description "Woods"
+                     :image "tilesets/elite-command/terrains/woods.png"}
+     :desert        {:description "Desert"
+                     :image "tilesets/elite-command/terrains/desert.png"}
+     :tundra        {:description "Tundra"
+                     :image "tilesets/elite-command/terrains/tundra.png"}
+     :swamp         {:description "Swamp"
+                     :image "tilesets/elite-command/terrains/swamp.png"}
+     :ford          {:description "Ford"
+                     :image "tilesets/elite-command/terrains/ford.png"}
+     :shallow-water {:description "Shallow Water"
+                     :image "tilesets/elite-command/terrains/shallow-water.png"}
+     :deep-water    {:description "Deep Water"
+                     :image "tilesets/elite-command/terrains/deep-water.png"}
+     :base          {:description "Base"
+                     :image "tilesets/elite-command/terrains/base-COLOR.png"}}
 
-   ;; TODO: add :description for state maps and states (?)
-   :unit-state-maps
-   {:move-attack
-    {:start-state :start
-     :built-state :done
-     :states
-     {:start {:transitions
-              {:move-unit    :moved
-               :attack-unit  :done
-               :repair-unit  :done
-               :capture-base :done}}
-      :moved {:transitions
-              {:attack-unit  :done
-               :capture-base :done}}
-      :done  {}}}
+    ;; TODO: add :description for state maps and states (?)
+    :unit-state-maps
+    {:move-attack
+     {:start-state :start
+      :built-state :done
+      :states
+      {:start {:transitions
+               {:move-unit    :moved
+                :attack-unit  :done
+                :repair-unit  :done
+                :capture-base :done}}
+       :moved {:transitions
+               {:attack-unit  :done
+                :capture-base :done}}
+       :done  {}}}
 
-    :free-attack-twice
-    {:start-state :start
-     :built-state :done
-     :states
-     {:start              {:transitions
-                           {:move-unit    :moved-1-attacked-0
-                            :attack-unit  :moved-0-attacked-1
-                            :repair-unit  :done
-                            :capture-base :done}}
-      :moved-0-attacked-1 {:transitions
-                           {:move-unit    :moved-1-attacked-1
-                            :attack-unit  :moved-0-attacked-2
-                            :capture-base :done}}
-      :moved-0-attacked-2 {:transitions
-                           {:move-unit    :done
-                            :capture-base :done}}
-      :moved-1-attacked-0 {:transitions
-                           {:attack-unit  :moved-1-attacked-1
-                            :capture-base :done}}
-      :moved-1-attacked-1 {:transitions
-                           {:attack-unit  :done
-                            :capture-base :done}}
-      :done               {}}}}
+     :free-attack-twice
+     {:start-state :start
+      :built-state :done
+      :states
+      {:start              {:transitions
+                            {:move-unit    :moved-1-attacked-0
+                             :attack-unit  :moved-0-attacked-1
+                             :repair-unit  :done
+                             :capture-base :done}}
+       :moved-0-attacked-1 {:transitions
+                            {:move-unit    :moved-1-attacked-1
+                             :attack-unit  :moved-0-attacked-2
+                             :capture-base :done}}
+       :moved-0-attacked-2 {:transitions
+                            {:move-unit    :done
+                             :capture-base :done}}
+       :moved-1-attacked-0 {:transitions
+                            {:attack-unit  :moved-1-attacked-1
+                             :capture-base :done}}
+       :moved-1-attacked-1 {:transitions
+                            {:attack-unit  :done
+                             :capture-base :done}}
+       :done               {}}}}
 
-   ;; TODO: check how repair amount works in Elite Command
-   ;; TODO: add :buildable-at (or -by?) => {<terrain type ids>...}
-   :units
-   {:infantry {:description "Infantry"
-               :cost 75
-               :movement 9
-               :can-capture true
-               :min-range 1
-               :max-range 1
-               :armor-type :personnel
-               :armor 6
-               :capturing-armor 4
-               :repair 1
-               :state-map :move-attack
-               :image "tilesets/elite-command/units/infantry-COLOR.png"
-               :terrain-effects
-               {:plains    {:movement-cost 3 :armor-bonus  0 :attack-bonus  0}
-                :mountains {:movement-cost 6 :armor-bonus  5 :attack-bonus  2}
-                :woods     {:movement-cost 4 :armor-bonus  3 :attack-bonus  2}
-                :desert    {:movement-cost 4 :armor-bonus -1 :attack-bonus -1}
-                :tundra    {:movement-cost 4 :armor-bonus -1 :attack-bonus -1}
-                :swamp     {:movement-cost 6 :armor-bonus -2 :attack-bonus -2}
-                :ford      {:movement-cost 5 :armor-bonus -1 :attack-bonus -1}
-                :base      {:movement-cost 2 :armor-bonus  3 :attack-bonus  2}}
-               :attack-strengths
-               {:personnel 6
-                :armored   3}
-               :zoc
-               [:personnel :armored]}
-    :grenadier {:description "Grenadier"
-                :cost 150
+    ;; TODO: check how repair amount works in Elite Command
+    ;; TODO: add :buildable-at (or -by?) => {<terrain type ids>...}
+    :units
+    {:infantry {:description "Infantry"
+                :cost 75
                 :movement 9
                 :can-capture true
                 :min-range 1
-                :max-range 2
+                :max-range 1
                 :armor-type :personnel
-                :armor 8
-                :capturing-armor 6
+                :armor 6
+                :capturing-armor 4
                 :repair 1
                 :state-map :move-attack
-                :image "tilesets/elite-command/units/grenadier-COLOR.png"
+                :image "tilesets/elite-command/units/infantry-COLOR.png"
                 :terrain-effects
-                {:plains    {:movement-cost 4 :armor-bonus  0 :attack-bonus  0}
-                 :mountains {:movement-cost 9 :armor-bonus  5 :attack-bonus  2}
-                 :woods     {:movement-cost 4 :armor-bonus  3 :attack-bonus -1}
-                 :desert    {:movement-cost 5 :armor-bonus -1 :attack-bonus  0}
-                 :tundra    {:movement-cost 5 :armor-bonus -1 :attack-bonus  0}
-                 :swamp     {:movement-cost 9 :armor-bonus -2 :attack-bonus -2}
-                 :ford      {:movement-cost 9 :armor-bonus -1 :attack-bonus -1}
-                 :base      {:movement-cost 3 :armor-bonus  3 :attack-bonus -1}}
+                {:plains    {:movement-cost 3 :armor-bonus  0 :attack-bonus  0}
+                 :mountains {:movement-cost 6 :armor-bonus  5 :attack-bonus  2}
+                 :woods     {:movement-cost 4 :armor-bonus  3 :attack-bonus  2}
+                 :desert    {:movement-cost 4 :armor-bonus -1 :attack-bonus -1}
+                 :tundra    {:movement-cost 4 :armor-bonus -1 :attack-bonus -1}
+                 :swamp     {:movement-cost 6 :armor-bonus -2 :attack-bonus -2}
+                 :ford      {:movement-cost 5 :armor-bonus -1 :attack-bonus -1}
+                 :base      {:movement-cost 2 :armor-bonus  3 :attack-bonus  2}}
                 :attack-strengths
-                {:personnel 8
-                 :armored   9}
+                {:personnel 6
+                 :armored   3}
                 :zoc
                 [:personnel :armored]}
-    :mortar {:description "Mortar"
-             :cost 200
-             :movement 9
-             :can-capture true
-             :min-range 2
-             :max-range 3
-             :armor-type :personnel
-             :armor 6
-             :capturing-armor 4
-             :repair 1
-             :state-map :move-attack
-             :image "tilesets/elite-command/units/mortar-COLOR.png"
-             :terrain-effects
-             {:plains    {:movement-cost 4 :armor-bonus  0 :attack-bonus  0}
-              :mountains {:movement-cost 9 :armor-bonus  5 :attack-bonus  3}
-              :woods     {:movement-cost 4 :armor-bonus  3 :attack-bonus -2}
-              :desert    {:movement-cost 5 :armor-bonus -1 :attack-bonus  0}
-              :tundra    {:movement-cost 5 :armor-bonus -1 :attack-bonus -1}
-              :swamp     {:movement-cost 9 :armor-bonus -2 :attack-bonus -2}
-              :ford      {:movement-cost 9 :armor-bonus -1 :attack-bonus -2}
-              :base      {:movement-cost 3 :armor-bonus  3 :attack-bonus -2}}
-             :attack-strengths
-             {:personnel 10
-              :armored   10}}
-    :ranger {:description "Ranger"
-             :cost 200
-             :movement 9
-             :can-capture true
-             :min-range 1
-             :max-range 1
-             :armor-type :personnel
-             :armor 9
-             :capturing-armor 7
-             :repair 1
-             :state-map :move-attack
-             :image "tilesets/elite-command/units/ranger-COLOR.png"
-             :terrain-effects
-             {:plains        {:movement-cost 3 :armor-bonus  0 :attack-bonus  0}
-              :mountains     {:movement-cost 6 :armor-bonus  5 :attack-bonus  2}
-              :woods         {:movement-cost 3 :armor-bonus  4 :attack-bonus  2}
-              :desert        {:movement-cost 3 :armor-bonus -1 :attack-bonus -1}
-              :tundra        {:movement-cost 3 :armor-bonus -1 :attack-bonus -1}
-              :swamp         {:movement-cost 3 :armor-bonus -2 :attack-bonus -2}
-              :ford          {:movement-cost 3 :armor-bonus  0 :attack-bonus  0}
-              :shallow-water {:movement-cost 6 :armor-bonus -2 :attack-bonus -2}
-              :base          {:movement-cost 2 :armor-bonus  3 :attack-bonus  2}}
-             :attack-strengths
-             {:personnel 9
-              :armored   4}
-             :zoc
-             [:personnel :armored]}
-    ;; Armored
-    :humvee {:description "Humvee"
-             :cost 300
-             :movement 15
-             :can-capture false
-             :min-range 1
-             :max-range 1
-             :armor-type :armored
-             :armor 8
-             :repair 1
-             :state-map :free-attack-twice
-             :image "tilesets/elite-command/units/humvee-COLOR.png"
-             :terrain-effects
-             {:plains {:movement-cost 3  :armor-bonus  0 :attack-bonus  0}
-              :woods  {:movement-cost 6  :armor-bonus -2 :attack-bonus -2}
-              :desert {:movement-cost 3  :armor-bonus  0 :attack-bonus  0}
-              :tundra {:movement-cost 6  :armor-bonus  0 :attack-bonus  0}
-              :swamp  {:movement-cost 12 :armor-bonus -3 :attack-bonus -3}
-              :ford   {:movement-cost 12 :armor-bonus -1 :attack-bonus -1}
-              :base   {:movement-cost 2  :armor-bonus  0 :attack-bonus  0}}
-             :attack-strengths
-             {:personnel 9
-              :armored   3}
-             :zoc
-             [:personnel :armored]}
-    :tank {:description "Tank"
-           :cost 350
-           :movement 12
-           :can-capture false
-           :min-range 1
-           :max-range 1
-           :armor-type :armored
-           :armor 12
-           :repair 1
-           :state-map :move-attack
-           :image "tilesets/elite-command/units/tank-COLOR.png"
-           :terrain-effects
-           {:plains {:movement-cost 3 :armor-bonus  0 :attack-bonus 0}
-            :woods  {:movement-cost 6 :armor-bonus -3 :attack-bonus 0}
-            :desert {:movement-cost 4 :armor-bonus  0 :attack-bonus 0}
-            :tundra {:movement-cost 5 :armor-bonus  0 :attack-bonus 0}
-            :swamp  {:movement-cost 8 :armor-bonus -4 :attack-bonus 0}
-            :ford   {:movement-cost 8 :armor-bonus  0 :attack-bonus 0}
-            :base   {:movement-cost 2 :armor-bonus -2 :attack-bonus 0}}
-           :attack-strengths
-           {:personnel 10
-            :armored   10}
-           :zoc
-           [:personnel :armored]}}})
+     :grenadier {:description "Grenadier"
+                 :cost 150
+                 :movement 9
+                 :can-capture true
+                 :min-range 1
+                 :max-range 2
+                 :armor-type :personnel
+                 :armor 8
+                 :capturing-armor 6
+                 :repair 1
+                 :state-map :move-attack
+                 :image "tilesets/elite-command/units/grenadier-COLOR.png"
+                 :terrain-effects
+                 {:plains    {:movement-cost 4 :armor-bonus  0 :attack-bonus  0}
+                  :mountains {:movement-cost 9 :armor-bonus  5 :attack-bonus  2}
+                  :woods     {:movement-cost 4 :armor-bonus  3 :attack-bonus -1}
+                  :desert    {:movement-cost 5 :armor-bonus -1 :attack-bonus  0}
+                  :tundra    {:movement-cost 5 :armor-bonus -1 :attack-bonus  0}
+                  :swamp     {:movement-cost 9 :armor-bonus -2 :attack-bonus -2}
+                  :ford      {:movement-cost 9 :armor-bonus -1 :attack-bonus -1}
+                  :base      {:movement-cost 3 :armor-bonus  3 :attack-bonus -1}}
+                 :attack-strengths
+                 {:personnel 8
+                  :armored   9}
+                 :zoc
+                 [:personnel :armored]}
+     :mortar {:description "Mortar"
+              :cost 200
+              :movement 9
+              :can-capture true
+              :min-range 2
+              :max-range 3
+              :armor-type :personnel
+              :armor 6
+              :capturing-armor 4
+              :repair 1
+              :state-map :move-attack
+              :image "tilesets/elite-command/units/mortar-COLOR.png"
+              :terrain-effects
+              {:plains    {:movement-cost 4 :armor-bonus  0 :attack-bonus  0}
+               :mountains {:movement-cost 9 :armor-bonus  5 :attack-bonus  3}
+               :woods     {:movement-cost 4 :armor-bonus  3 :attack-bonus -2}
+               :desert    {:movement-cost 5 :armor-bonus -1 :attack-bonus  0}
+               :tundra    {:movement-cost 5 :armor-bonus -1 :attack-bonus -1}
+               :swamp     {:movement-cost 9 :armor-bonus -2 :attack-bonus -2}
+               :ford      {:movement-cost 9 :armor-bonus -1 :attack-bonus -2}
+               :base      {:movement-cost 3 :armor-bonus  3 :attack-bonus -2}}
+              :attack-strengths
+              {:personnel 10
+               :armored   10}}
+     :ranger {:description "Ranger"
+              :cost 200
+              :movement 9
+              :can-capture true
+              :min-range 1
+              :max-range 1
+              :armor-type :personnel
+              :armor 9
+              :capturing-armor 7
+              :repair 1
+              :state-map :move-attack
+              :image "tilesets/elite-command/units/ranger-COLOR.png"
+              :terrain-effects
+              {:plains        {:movement-cost 3 :armor-bonus  0 :attack-bonus  0}
+               :mountains     {:movement-cost 6 :armor-bonus  5 :attack-bonus  2}
+               :woods         {:movement-cost 3 :armor-bonus  4 :attack-bonus  2}
+               :desert        {:movement-cost 3 :armor-bonus -1 :attack-bonus -1}
+               :tundra        {:movement-cost 3 :armor-bonus -1 :attack-bonus -1}
+               :swamp         {:movement-cost 3 :armor-bonus -2 :attack-bonus -2}
+               :ford          {:movement-cost 3 :armor-bonus  0 :attack-bonus  0}
+               :shallow-water {:movement-cost 6 :armor-bonus -2 :attack-bonus -2}
+               :base          {:movement-cost 2 :armor-bonus  3 :attack-bonus  2}}
+              :attack-strengths
+              {:personnel 9
+               :armored   4}
+              :zoc
+              [:personnel :armored]}
+     ;; Armored
+     :humvee {:description "Humvee"
+              :cost 300
+              :movement 15
+              :can-capture false
+              :min-range 1
+              :max-range 1
+              :armor-type :armored
+              :armor 8
+              :repair 1
+              :state-map :free-attack-twice
+              :image "tilesets/elite-command/units/humvee-COLOR.png"
+              :terrain-effects
+              {:plains {:movement-cost 3  :armor-bonus  0 :attack-bonus  0}
+               :woods  {:movement-cost 6  :armor-bonus -2 :attack-bonus -2}
+               :desert {:movement-cost 3  :armor-bonus  0 :attack-bonus  0}
+               :tundra {:movement-cost 6  :armor-bonus  0 :attack-bonus  0}
+               :swamp  {:movement-cost 12 :armor-bonus -3 :attack-bonus -3}
+               :ford   {:movement-cost 12 :armor-bonus -1 :attack-bonus -1}
+               :base   {:movement-cost 2  :armor-bonus  0 :attack-bonus  0}}
+              :attack-strengths
+              {:personnel 9
+               :armored   3}
+              :zoc
+              [:personnel :armored]}
+     :tank {:description "Tank"
+            :cost 350
+            :movement 12
+            :can-capture false
+            :min-range 1
+            :max-range 1
+            :armor-type :armored
+            :armor 12
+            :repair 1
+            :state-map :move-attack
+            :image "tilesets/elite-command/units/tank-COLOR.png"
+            :terrain-effects
+            {:plains {:movement-cost 3 :armor-bonus  0 :attack-bonus 0}
+             :woods  {:movement-cost 6 :armor-bonus -3 :attack-bonus 0}
+             :desert {:movement-cost 4 :armor-bonus  0 :attack-bonus 0}
+             :tundra {:movement-cost 5 :armor-bonus  0 :attack-bonus 0}
+             :swamp  {:movement-cost 8 :armor-bonus -4 :attack-bonus 0}
+             :ford   {:movement-cost 8 :armor-bonus  0 :attack-bonus 0}
+             :base   {:movement-cost 2 :armor-bonus -2 :attack-bonus 0}}
+            :attack-strengths
+            {:personnel 10
+             :armored   10}
+            :zoc
+            [:personnel :armored]}}}})
 
 ;; TODO: remove redundant id keys (?)
 (def maps
@@ -1187,6 +1188,7 @@
   {:sterlings-aruba-multiplayer
    {:id :sterlings-aruba-multiplayer
     :description "Sterling's Aruba Multiplayer"
+    :ruleset-id :zetawar
     :map-id :sterlings-aruba
     :max-count-per-unit 10
     :credits-per-base 100
@@ -1217,6 +1219,7 @@
    :city-sprawl-multiplayer
    {:id :city-sprawl-multiplayer
     :description "City Sprawl Multiplayer"
+    :ruleset-id :zetawar
     :map-id :city-sprawl
     :max-count-per-unit 10
     :credits-per-base 50
