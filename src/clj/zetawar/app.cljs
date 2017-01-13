@@ -34,7 +34,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Game state encoding
 
-;; TODO: move to encoding or serialization ns?
+;; TODO: move to encoding or serialization ns
 ;; TODO: document UTF-8 hack
 
 (defn encode-game-state [game-state]
@@ -87,10 +87,9 @@
                                    :app/game [:game/id game-id]
                                    :app/hide-win-message false}]
                            game (conj [:db.fn/retractEntity (e game)])))
-       ;; TODO: remove test specific code
-       (if players
-         (create-players! app-ctx)
-         (log/warnf "Skipping player creation for tests"))))))
+       ;; Skip player creation for tests
+       (when players
+         (create-players! app-ctx))))))
 
 (defn load-encoded-game-state!
   ([{:as app-ctx :keys [conn players]} encoded-game-state]
@@ -104,10 +103,9 @@
                                         game-state)]
      (d/transact! conn [{:db/id -1
                          :app/game [:game/id game-id]}])
-     ;; TODO: remove test specific code
-     (if players
-       (create-players! app-ctx)
-       (log/warnf "Skipping player creation for tests")))))
+     ;; Skip player creation for tests
+     (when players
+       (create-players! app-ctx)))))
 
 ;; TODO: put URL in paste buffer automatically
 (defn set-url-game-state! [db]

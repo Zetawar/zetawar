@@ -43,8 +43,7 @@
                 :game/round])
 
 (deftrack game [conn]
-  (log/spy
-   @(posh/pull conn game-pull @(game-eid conn))))
+  @(posh/pull conn game-pull @(game-eid conn)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Map

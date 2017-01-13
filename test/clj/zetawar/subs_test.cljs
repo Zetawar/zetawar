@@ -13,7 +13,7 @@
 ;;; App
 
 (deftest test-app-eid
-  (let [conn (helper/create-aruba-conn)
+  (let [conn (helper/create-scenario-conn :sterlings-aruba-multiplayer)
         app-eid (ffirst (d/q '[:find ?a
                                :where
                                [?a :app/game]]
@@ -22,7 +22,7 @@
       (is (= app-eid @(subs/app-eid conn))))))
 
 (deftest test-app
-  (let [conn (helper/create-aruba-conn)]
+  (let [conn (helper/create-scenario-conn :sterlings-aruba-multiplayer)]
     (testing "returned app has expected attributes"
       (is (:app/game @(subs/app conn))))))
 
@@ -32,7 +32,7 @@
 ;;; Game
 
 (deftest test-game-eid
-  (let [conn (helper/create-aruba-conn)
+  (let [conn (helper/create-scenario-conn :sterlings-aruba-multiplayer)
         game-eid (ffirst (d/q '[:find ?g
                                 :where
                                 [_ :app/game ?g]]
@@ -41,7 +41,7 @@
       (is (= game-eid @(subs/game-eid conn))))))
 
 (deftest test-game
-  (let [conn (helper/create-aruba-conn)]
+  (let [conn (helper/create-scenario-conn :sterlings-aruba-multiplayer)]
     (testing "game returned by subscription has expected attributes"
       (is  (= #{:db/id
                 :game/id
@@ -59,7 +59,7 @@
 ;;; Map
 
 (deftest test-game-map-eid
-  (let [conn (helper/create-aruba-conn)
+  (let [conn (helper/create-scenario-conn :sterlings-aruba-multiplayer)
         map-eid (ffirst (d/q '[:find ?m
                                :where
                                [_ :app/game ?g]
@@ -69,26 +69,26 @@
       (is (= map-eid @(subs/game-map-eid conn))))))
 
 (deftest test-game-map
-  (let [conn (helper/create-aruba-conn)]
+  (let [conn (helper/create-scenario-conn :sterlings-aruba-multiplayer)]
     (testing "game map returned by subscription has expected attributes"
       (is (= #{:db/id
                :map/description}
              (into #{} (keys @(subs/game-map conn))))))))
 
 (deftest test-terrains
-  (let [conn (helper/create-aruba-conn)
+  (let [conn (helper/create-scenario-conn :sterlings-aruba-multiplayer)
         terrains @(subs/terrains conn)]
     (testing "returns expected number of terrains"
       (is (= 74 (count terrains))))))
 
 (deftest test-current-base-locations
-  (let [conn (helper/create-aruba-conn)
+  (let [conn (helper/create-scenario-conn :sterlings-aruba-multiplayer)
         terrains @(subs/terrains conn)]
     (testing "returns the locations of all the current faction's bases"
       (is (= #{[1 2]} @(subs/current-base-locations conn))))))
 
 (deftest test-current-base?
-  (let [conn (helper/create-aruba-conn)
+  (let [conn (helper/create-scenario-conn :sterlings-aruba-multiplayer)
         terrains @(subs/terrains conn)]
     (testing "returns true given the coordinates of a base owned by the current faction"
       (is (= true @(subs/current-base? conn 1 2))))
@@ -103,7 +103,7 @@
 ;;; Factions
 
 (deftest test-current-faction-eid
-  (let [conn (helper/create-aruba-conn)
+  (let [conn (helper/create-scenario-conn :sterlings-aruba-multiplayer)
         faction-eid (ffirst (d/q '[:find ?f
                                    :where
                                    [_ :app/game ?g]
@@ -113,7 +113,7 @@
       (is (= faction-eid @(subs/current-faction-eid conn))))))
 
 (deftest test-current-faction
-  (let [conn (helper/create-aruba-conn)]
+  (let [conn (helper/create-scenario-conn :sterlings-aruba-multiplayer)]
     (testing "returned faction has expected attributes"
       (is (= #{:db/id
                :faction/color
@@ -124,7 +124,7 @@
              (into #{} (keys @(subs/current-faction conn))))))))
 
 (deftest test-current-unit-count
-  (let [conn (helper/create-aruba-conn)]
+  (let [conn (helper/create-scenario-conn :sterlings-aruba-multiplayer)]
     (testing "returns the count of units owned by the current faction (blue)"
       (is (= 1 @(subs/current-unit-count conn))))
     (game/end-turn! conn (app/current-game-id @conn))
@@ -132,12 +132,12 @@
       (is (= 2 @(subs/current-unit-count conn))))))
 
 (deftest test-current-base-count
-  (let [conn (helper/create-aruba-conn)]
+  (let [conn (helper/create-scenario-conn :sterlings-aruba-multiplayer)]
     (testing "returns the count of bases owned by the current faction"
       (is (= 1 @(subs/current-unit-count conn))))))
 
 (deftest test-unit-eid-at
-  (let [conn (helper/create-aruba-conn)
+  (let [conn (helper/create-scenario-conn :sterlings-aruba-multiplayer)
         db @conn
         game (app/current-game db)]
     (testing "returns eid for unit at specified coordinates"
@@ -148,7 +148,7 @@
              @(subs/unit-eid-at conn 4 4))))))
 
 (deftest test-current-unit-eid-at
-  (let [conn (helper/create-aruba-conn)
+  (let [conn (helper/create-scenario-conn :sterlings-aruba-multiplayer)
         db @conn
         game (app/current-game db)]
     (testing "returns eid for current unit at specified coordinates"
@@ -160,7 +160,7 @@
       (is (= nil @(subs/current-unit-eid-at conn 4 4))))))
 
 (deftest test-unit-at?
-  (let [conn (helper/create-aruba-conn)
+  (let [conn (helper/create-scenario-conn :sterlings-aruba-multiplayer)
         db @conn
         game (app/current-game db)]
     (testing "returns true if there is a unit at the specified cordinates"
@@ -169,7 +169,7 @@
       (is (= false @(subs/unit-at? conn 4 4))))))
 
 (deftest test-current-unit-at?
-  (let [conn (helper/create-aruba-conn)
+  (let [conn (helper/create-scenario-conn :sterlings-aruba-multiplayer)
         db @conn
         game (app/current-game db)]
     (testing "returns true for current unit at specified coordinates"
@@ -180,7 +180,7 @@
       (is (= false @(subs/current-unit-at? conn 4 4))))))
 
 (deftest test-unit-at
-  (let [conn (helper/create-aruba-conn)
+  (let [conn (helper/create-scenario-conn :sterlings-aruba-multiplayer)
         db @conn
         game (app/current-game db)]
     (testing "returned unit has expected attributes"
@@ -209,28 +209,28 @@
                (into #{} unit-type-keys)))))))
 
 (deftest test-unit-color-at
-  (let [conn (helper/create-aruba-conn)
+  (let [conn (helper/create-scenario-conn :sterlings-aruba-multiplayer)
         db @conn
         game (app/current-game db)]
     (testing "returns the color for unit at the specified coordinates"
       (is (= :faction.color/blue @(subs/unit-color-at conn 2 2))))))
 
 (deftest test-unit-type-at
-  (let [conn (helper/create-aruba-conn)
+  (let [conn (helper/create-scenario-conn :sterlings-aruba-multiplayer)
         db @conn
         game (app/current-game db)]
     (testing "returns the type name for unit at the specified coordinates"
       (is (= :unit-type.id/infantry @(subs/unit-type-at conn 2 2))))))
 
 (deftest test-enemy-locations
-  (let [conn (helper/create-aruba-conn)
+  (let [conn (helper/create-scenario-conn :sterlings-aruba-multiplayer)
         db @conn
         game (app/current-game db)]
     (testing "returns the locations of all enemy units"
       (is (= #{[7 7] [7 8]} @(subs/enemy-locations conn))))))
 
 (deftest test-enemy-at?
-  (let [conn (helper/create-aruba-conn)
+  (let [conn (helper/create-scenario-conn :sterlings-aruba-multiplayer)
         db @conn
         game (app/current-game db)]
     (testing "returns true if there is an enemy at the specified coordinates"
@@ -239,7 +239,7 @@
       (is (= false @(subs/enemy-at? conn 4 4))))))
 
 (deftest test-enemy-locations-in-range-of
-  (let [conn (helper/create-aruba-conn)
+  (let [conn (helper/create-scenario-conn :sterlings-aruba-multiplayer)
         db @conn
         game (app/current-game db)]
     (testing "returns enemy locations in range of unit at specified coordinates"
@@ -248,7 +248,7 @@
       (is (= #{[7 8]} @(subs/enemy-locations-in-range-of conn 6 8))))))
 
 (deftest test-any-enemy-in-range-of?
-  (let [conn (helper/create-aruba-conn)
+  (let [conn (helper/create-scenario-conn :sterlings-aruba-multiplayer)
         db @conn
         game (app/current-game db)]
     (testing "returns false if no enemies are in range of unit at specified coordinates"
@@ -263,7 +263,7 @@
 ;;; Selection
 
 (deftest test-selected?
-  (let [conn (helper/create-aruba-conn)
+  (let [conn (helper/create-scenario-conn :sterlings-aruba-multiplayer)
         db @conn
         game (app/current-game db)
         app (app/root db)]
@@ -276,7 +276,7 @@
       (is (= false @(subs/selected? conn 2 2))))))
 
 (deftest test-targeted?
-  (let [conn (helper/create-aruba-conn)
+  (let [conn (helper/create-scenario-conn :sterlings-aruba-multiplayer)
         db @conn
         game (app/current-game db)
         app (app/root db)]
@@ -289,7 +289,7 @@
       (is (= false @(subs/targeted? conn 2 2))))))
 
 (deftest test-selected-hex
-  (let [conn (helper/create-aruba-conn)
+  (let [conn (helper/create-scenario-conn :sterlings-aruba-multiplayer)
         db @conn
         game (app/current-game db)
         app (app/root db)]
@@ -305,7 +305,7 @@
       (is (= [2 1] @(subs/selected-hex conn))))))
 
 (deftest test-targeted-hex
-  (let [conn (helper/create-aruba-conn)
+  (let [conn (helper/create-scenario-conn :sterlings-aruba-multiplayer)
         db @conn
         game (app/current-game db)
         app (app/root db)]
@@ -327,7 +327,7 @@
     [2 5]})
 
 (deftest test-valid-destinations-for-selected
-  (let [conn (helper/create-aruba-conn)
+  (let [conn (helper/create-scenario-conn :sterlings-aruba-multiplayer)
         db @conn
         game (app/current-game db)
         app (app/root db)]
@@ -341,7 +341,7 @@
 ;; TODO: test valid-destination-for-selected?
 
 (deftest test-selected-can-move-to-targeted?
-  (let [conn (helper/create-aruba-conn)
+  (let [conn (helper/create-scenario-conn :sterlings-aruba-multiplayer)
         db @conn
         game (app/current-game db)
         app (app/root db)]
@@ -361,7 +361,7 @@
       (is (= false @(subs/selected-can-move-to-targeted? conn))))))
 
 (deftest test-enemy-in-range-of-selected?
-  (let [conn (helper/create-aruba-conn)
+  (let [conn (helper/create-scenario-conn :sterlings-aruba-multiplayer)
         db @conn
         game (app/current-game db)
         app (app/root db)]
@@ -378,7 +378,7 @@
       (is (= false @(subs/enemy-in-range-of-selected? conn 7 7))))))
 
 (deftest test-selected-can-attack-targeted?
-  (let [conn (helper/create-aruba-conn)
+  (let [conn (helper/create-scenario-conn :sterlings-aruba-multiplayer)
         db @conn
         game (app/current-game db)
         app (app/root db)]

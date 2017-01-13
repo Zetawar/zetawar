@@ -7,11 +7,8 @@
    [zetawar.db :as db]
    [zetawar.game :as game]))
 
-(defn create-conn [scenario-id]
+(defn create-scenario-conn [scenario-id]
   (let [conn (d/create-conn db/schema)]
     (posh/posh! conn)
     (app/start-new-game! {:conn conn} scenario-id)
     conn))
-
-(defn create-aruba-conn []
-  (create-conn :sterlings-aruba-multiplayer))

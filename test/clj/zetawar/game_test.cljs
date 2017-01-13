@@ -14,7 +14,7 @@
 ;;; Util
 
 (deftest test-game-pos-idx
-  (let [db @(helper/create-aruba-conn)
+  (let [db @(helper/create-scenario-conn :sterlings-aruba-multiplayer)
         game (app/current-game db)]
     (is (integer? (game/game-pos-idx game 1 2)))))
 
@@ -22,7 +22,7 @@
 ;;; Game
 
 (deftest test-game-by-id
-  (let [db @(helper/create-aruba-conn)
+  (let [db @(helper/create-scenario-conn :sterlings-aruba-multiplayer)
         game (app/current-game db)]
     (is (= game (game/game-by-id db (:game/id game))))))
 
@@ -30,7 +30,7 @@
 ;;; Terrain
 
 (deftest test-terrain?
-  (let [db @(helper/create-aruba-conn)
+  (let [db @(helper/create-scenario-conn :sterlings-aruba-multiplayer)
         game (app/current-game db)
         unit (game/unit-at db game 2 2)
         terrain (game/terrain-at db game 1 0)]
@@ -40,37 +40,37 @@
       (is (game/terrain? terrain)))))
 
 (deftest test-terrain-hex
-  (let [db @(helper/create-aruba-conn)
+  (let [db @(helper/create-scenario-conn :sterlings-aruba-multiplayer)
         game (app/current-game db)
         terrain (game/terrain-at db game 1 0)]
     (is (= [1 0] (game/terrain-hex terrain)))))
 
 (deftest test-terrain-at
-  (let [db @(helper/create-aruba-conn)
+  (let [db @(helper/create-scenario-conn :sterlings-aruba-multiplayer)
         game (app/current-game db)]
     (is (nil? (game/base-at db game 99 99)))
     (is (game/terrain? (game/base-at db game 1 2)))))
 
 (deftest test-checked-terrain-at
-  (let [db @(helper/create-aruba-conn)
+  (let [db @(helper/create-scenario-conn :sterlings-aruba-multiplayer)
         game (app/current-game db)]
     (is (thrown? ExceptionInfo (game/checked-terrain-at db game 99 99)))
     (is (game/terrain? (game/checked-terrain-at db game 1 2)))))
 
 (deftest test-base-at
-  (let [db @(helper/create-aruba-conn)
+  (let [db @(helper/create-scenario-conn :sterlings-aruba-multiplayer)
         game (app/current-game db)]
     (is (nil? (game/base-at db game 1 0)))
     (is (game/base? (game/base-at db game 1 2)))))
 
 (deftest test-checked-base-at
-  (let [db @(helper/create-aruba-conn)
+  (let [db @(helper/create-scenario-conn :sterlings-aruba-multiplayer)
         game (app/current-game db)]
     (is (thrown? ExceptionInfo (game/checked-base-at db game 1 0)))
     (is (game/base? (game/checked-base-at db game 1 2)))))
 
 (deftest test-check-base-current
-  (let [db @(helper/create-aruba-conn)
+  (let [db @(helper/create-scenario-conn :sterlings-aruba-multiplayer)
         game (app/current-game db)
         current-base (game/base-at db game 1 2)
         unowned-base (game/base-at db game 2 1)
@@ -80,7 +80,7 @@
     (is (thrown? ExceptionInfo (game/check-base-current db game enemy-base)))))
 
 (deftest test-check-current-base?
-  (let [db @(helper/create-aruba-conn)
+  (let [db @(helper/create-scenario-conn :sterlings-aruba-multiplayer)
         game (app/current-game db)
         current-base (game/base-at db game 1 2)
         unowned-base (game/base-at db game 2 1)
@@ -93,7 +93,7 @@
 ;;; Units
 
 (deftest test-unit?
-  (let [db @(helper/create-aruba-conn)
+  (let [db @(helper/create-scenario-conn :sterlings-aruba-multiplayer)
         game (app/current-game db)
         unit (game/unit-at db game 2 2)
         terrain (game/terrain-at db game 1 0)]
@@ -101,32 +101,32 @@
     (is (game/unit? unit))))
 
 (deftest test-unit-hex
-  (let [db @(helper/create-aruba-conn)
+  (let [db @(helper/create-scenario-conn :sterlings-aruba-multiplayer)
         game (app/current-game db)
         unit (game/unit-at db game 2 2)]
     (is (= [2 2] (game/unit-hex unit)))))
 
 (deftest test-unit-at
-  (let [db @(helper/create-aruba-conn)
+  (let [db @(helper/create-scenario-conn :sterlings-aruba-multiplayer)
         game (app/current-game db)]
     (is (nil? (game/unit-at db game 99 99)))
     (is (game/unit? (game/unit-at db game 2 2)))))
 
 (deftest test-checked-unit-at
-  (let [db @(helper/create-aruba-conn)
+  (let [db @(helper/create-scenario-conn :sterlings-aruba-multiplayer)
         game (app/current-game db)]
     (is (thrown? ExceptionInfo (game/checked-unit-at db game 99 99)))
     (is (game/unit? (game/checked-unit-at db game 2 2)))))
 
 (deftest test-unit-faction
-  (let [db @(helper/create-aruba-conn)
+  (let [db @(helper/create-scenario-conn :sterlings-aruba-multiplayer)
         game (app/current-game db)
         unit (game/unit-at db game 2 2)]
     (is (= :faction.color/blue
            (:faction/color (game/unit-faction db unit))))))
 
 (deftest test-check-unit-current
-  (let [db @(helper/create-aruba-conn)
+  (let [db @(helper/create-scenario-conn :sterlings-aruba-multiplayer)
         game (app/current-game db)
         current-unit (game/unit-at db game 2 2)
         enemy-unit (game/unit-at db game 7 7) ]
@@ -134,7 +134,7 @@
     (is (thrown? ExceptionInfo (game/check-unit-current db game enemy-unit)))))
 
 (deftest test-unit-current?
-  (let [db @(helper/create-aruba-conn)
+  (let [db @(helper/create-scenario-conn :sterlings-aruba-multiplayer)
         game (app/current-game db)
         current-unit (game/unit-at db game 2 2)
         enemy-unit (game/unit-at db game 7 7) ]
@@ -142,7 +142,7 @@
     (is (not (game/unit-current? db game enemy-unit)))))
 
 (deftest test-on-base?
-  (let [conn (helper/create-aruba-conn)
+  (let [conn (helper/create-scenario-conn :sterlings-aruba-multiplayer)
         game (app/current-game @conn) ]
     (d/transact conn (game/teleport-tx @conn game 2 2 1 2))
     (let [db @conn]
@@ -150,7 +150,7 @@
       (is (not (game/on-base? db game (game/unit-at db game 7 7)))))))
 
 (deftest test-on-capturable-base?
-  (let [conn (helper/create-aruba-conn)
+  (let [conn (helper/create-scenario-conn :sterlings-aruba-multiplayer)
         game (app/current-game @conn) ]
     (d/transact conn (game/teleport-tx @conn game 2 2 1 2))
     (is (not (game/on-capturable-base? @conn game (game/unit-at @conn game 1 2))))
@@ -170,7 +170,7 @@
     [2 5]})
 
 (deftest test-valid-moves
-  (let [db @(helper/create-aruba-conn)
+  (let [db @(helper/create-scenario-conn :sterlings-aruba-multiplayer)
         game (app/current-game db)
         unit (game/unit-at db game 2 2)]
     (is (= #{:to :from :cost :path}
@@ -183,7 +183,7 @@
                  (game/valid-moves db game unit))))))
 
 (deftest test-valid-destinations
-  (let [db @(helper/create-aruba-conn)
+  (let [db @(helper/create-scenario-conn :sterlings-aruba-multiplayer)
         game (app/current-game db)
         unit (game/unit-at db game 2 2)]
     (is (= valid-destinations (game/valid-destinations db game unit)))))
@@ -191,7 +191,7 @@
 ;; TODO: add test for check-valid-destination
 
 (deftest test-valid-destination?
-  (let [db @(helper/create-aruba-conn)
+  (let [db @(helper/create-scenario-conn :sterlings-aruba-multiplayer)
         game (app/current-game db)
         unit (game/unit-at db game 2 2)]
     (is (= (count valid-destinations)
@@ -200,7 +200,7 @@
     (is (= false (game/valid-destination? db game unit 6 6)))))
 
 (deftest test-can-move-fns
-  (let [db @(helper/create-aruba-conn)
+  (let [db @(helper/create-scenario-conn :sterlings-aruba-multiplayer)
         game (app/current-game db)
         unit (game/unit-at db game 2 2)]
     ;; TODO: update for state machine changes
@@ -234,7 +234,7 @@
           (is (= false (game/can-move? db' game unit')))))))
 
 (deftest test-teleport-tx
-  (let [db @(helper/create-aruba-conn)
+  (let [db @(helper/create-scenario-conn :sterlings-aruba-multiplayer)
         game (app/current-game db)
         unit (game/unit-at db game 2 2)]
     (let [db' (d/db-with db (game/teleport-tx db game 2 2 4 4))
@@ -247,7 +247,7 @@
     ))
 
 (deftest test-move-tx
-  (let [db @(helper/create-aruba-conn)
+  (let [db @(helper/create-scenario-conn :sterlings-aruba-multiplayer)
         game (app/current-game db)
         unit (game/unit-at db game 2 2)]
     (testing "moving to a valid destination"
@@ -261,7 +261,7 @@
     ))
 
 (deftest test-move!
-  (let [conn (helper/create-aruba-conn)
+  (let [conn (helper/create-scenario-conn :sterlings-aruba-multiplayer)
         db @conn
         game (app/current-game db)
         game-id (app/current-game-id db)
@@ -273,7 +273,7 @@
 ;;; Attack
 
 (deftest test-can-attack-fns
-  (let [db @(helper/create-aruba-conn)
+  (let [db @(helper/create-scenario-conn :sterlings-aruba-multiplayer)
         game (app/current-game db)
         unit (game/unit-at db game 2 2)]
     ;; TODO: update for state machine changes
@@ -307,7 +307,7 @@
           (is (= false (game/can-attack? db' game unit')))))))
 
 (deftest test-in-range-fns
-  (let [db @(helper/create-aruba-conn)
+  (let [db @(helper/create-scenario-conn :sterlings-aruba-multiplayer)
         game (app/current-game db)]
     (testing "can attack units that are in range"
       (let [db' (d/db-with db (game/teleport-tx db game 7 8 3 2))
@@ -322,7 +322,7 @@
         (is (= false (game/in-range? db attacker defender)))))))
 
 (deftest test-attack-tx
-  (let [conn (helper/create-aruba-conn)
+  (let [conn (helper/create-scenario-conn :sterlings-aruba-multiplayer)
         game (app/current-game @conn)
         db (d/db-with @conn (game/teleport-tx @conn game 7 8 3 2))]
     (testing "attacking unit in range"
@@ -340,7 +340,7 @@
 ;;; Repair
 
 (deftest test-repair-checking
-  (let [db @(helper/create-aruba-conn)
+  (let [db @(helper/create-scenario-conn :sterlings-aruba-multiplayer)
         game (app/current-game db)
         unit (game/unit-at db game 2 2)]
     (testing "undamaged units cannot be repaired"
@@ -379,7 +379,7 @@
           (is (= false (game/can-repair? db' game unit')))))))
 
 (deftest test-repair-tx
-  (let [conn (helper/create-aruba-conn)
+  (let [conn (helper/create-scenario-conn :sterlings-aruba-multiplayer)
         db @conn
         game (app/current-game db)
         unit (game/unit-at db game 2 2)
@@ -396,7 +396,7 @@
 ;;; Capture
 
 (deftest test-can-capture-fns
-  (let [db @(helper/create-aruba-conn)
+  (let [db @(helper/create-scenario-conn :sterlings-aruba-multiplayer)
         game (app/current-game db)
         unit (game/unit-at db game 2 2)
         terrain (game/terrain-at db game 2 2)]
@@ -445,7 +445,7 @@
         (is (= false (game/can-capture? db' game unit' terrain')))))))
 
 (deftest test-capture-tx
-  (let [conn (helper/create-aruba-conn)
+  (let [conn (helper/create-scenario-conn :sterlings-aruba-multiplayer)
         db @conn
         game (app/current-game db)
         unit (game/unit-at db game 2 2)
