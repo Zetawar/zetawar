@@ -3,7 +3,6 @@
    [datascript.core :as d]
    [devcards.core :as dc :include-macros true]
    [integrant.core :as ig]
-   [posh.core :as posh]
    [reagent.core :as r]
    [zetawar.app :as app]
    [zetawar.data :as data]

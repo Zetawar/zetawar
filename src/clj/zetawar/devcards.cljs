@@ -1,6 +1,7 @@
 (ns zetawar.devcards
   (:require
    [devcards.core :as devcards :include-macros true]
+   [zetawar.devcards.data-formats]
    [zetawar.devcards.prototype]
    [zetawar.devcards.scenarios]
    [zetawar.devcards.selection-and-target]
