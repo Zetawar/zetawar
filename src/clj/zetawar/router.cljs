@@ -1,6 +1,7 @@
 (ns zetawar.router
   (:require
    [cljs.core.async :refer [chan close! put!]]
+   [cljsjs.raven]
    [datascript.core :as d]
    [taoensso.timbre :as log]
    [zetawar.players :as players])
@@ -14,12 +15,12 @@
   (log/debugf "Unhandled event: %s" (pr-str msg))
   nil)
 
+;; TODO: add spec for dispatch
 (defn dispatch [ch msg]
   (log/debugf "Dispatching event: %s" (pr-str msg))
   (put! ch msg))
 
 ;; TODO: add pause for rendering after fixed interval
-;; TODO: handle exceptions
 (defn handle-event* [{:as router-ctx :keys [conn ev-chan notify-chan]} msg]
   (let [ev-ctx (assoc router-ctx :db @conn)
         {:as ret :keys [tx]} (handle-event ev-ctx msg)]
@@ -36,8 +37,13 @@
 (defn start [{:as router-ctx :keys [ev-chan]}]
   (go-loop [msg (<! ev-chan)]
     (when msg
-      (log/debugf "Handling event: %s" (pr-str msg))
-      ;; TODO: validate event
-      ;; TODO: validate handler return value
-      (handle-event* router-ctx msg)
+      (try
+        (log/debugf "Handling event: %s" (pr-str msg))
+        ;; TODO: validate event
+        ;; TODO: validate handler return value
+        (handle-event* router-ctx msg)
+        (throw (js/Error. "testing"))
+        (catch :default ex
+          (js/Raven.captureException ex)
+          (log/errorf ex "Error handling event: %s" (pr-str msg))))
       (recur (<! ev-chan)))))

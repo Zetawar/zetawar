@@ -22,6 +22,7 @@
 
    ;; App
    [cljsjs/clipboard "1.5.9-0"]
+   [cljsjs/raven "3.9.1-0"]
    [cljsjs/react "15.3.1-0"]
    [cljsjs/react-bootstrap "0.30.6-0"]
    [cljsjs/react-dom "15.3.1-0"]
