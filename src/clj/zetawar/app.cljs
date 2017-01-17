@@ -80,13 +80,14 @@
    (start-new-game! app-ctx data/rulesets data/maps data/scenarios scenario-id))
   ([{:as app-ctx :keys [conn players]} rulesets map-defs scenario-defs scenario-id]
    (let [game (current-game @conn)]
+     (when game
+       (d/transact conn [[:db.fn/retractEntity (e game)]]))
      (let [scenario-def (scenario-defs scenario-id)
            game-id (game/load-scenario! conn rulesets map-defs scenario-def)
            app-eid (or (some-> (root @conn) e) -101)]
-       (d/transact! conn (cond-> [{:db/id app-eid
-                                   :app/game [:game/id game-id]
-                                   :app/hide-win-message false}]
-                           game (conj [:db.fn/retractEntity (e game)])))
+       (d/transact! conn [{:db/id app-eid
+                           :app/game [:game/id game-id]
+                           :app/hide-win-message false}])
        ;; Skip player creation for tests
        (when players
          (create-players! app-ctx))))))

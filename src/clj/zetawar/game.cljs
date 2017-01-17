@@ -1050,7 +1050,7 @@
             transitions)))
         states))
 
-(defn unit-state-map-tx [state-maps-def]
+(defn unit-state-map-tx [game state-maps-def]
   (into []
         (mapcat
          (fn [[state-map-name state-map-def]]
@@ -1060,6 +1060,7 @@
                  built-id (to-unit-state-id state-map-name built-state)
                  temp-eid (db/next-temp-id)]
              (-> [{:db/id temp-eid
+                   :game/_unit-state-maps (e game)
                    :unit-state-map/id map-id}]
                  (into (unit-states-tx state-map-name states))
                  (into (unit-states-transitions-tx state-map-name states))
@@ -1173,7 +1174,7 @@
         ruleset (rulesets ruleset-id)]
     ;; Rules
     (d/transact! conn (terrain-types-tx (conn-game) (:terrains ruleset)))
-    (d/transact! conn (unit-state-map-tx (:unit-state-maps ruleset)))
+    (d/transact! conn (unit-state-map-tx (conn-game) (:unit-state-maps ruleset)))
     (d/transact! conn (unit-types-tx @conn (conn-game) (:units ruleset)))
 
     ;; Map and bases
@@ -1218,7 +1219,7 @@
         ruleset (rulesets ruleset-id)]
     ;; Rules
     (d/transact! conn (terrain-types-tx (conn-game) (:terrains ruleset)))
-    (d/transact! conn (unit-state-map-tx (:unit-state-maps ruleset)))
+    (d/transact! conn (unit-state-map-tx (conn-game) (:unit-state-maps ruleset)))
     (d/transact! conn (unit-types-tx @conn (conn-game) (:units ruleset)))
 
     ;; Map and bases

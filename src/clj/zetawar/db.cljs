@@ -21,6 +21,9 @@
    :game/unit-types                 {:db/valueType   :db.type/ref
                                      :db/cardinality :db.cardinality/many
                                      :db/isComponent true}
+   :game/unit-state-maps            {:db/valueType   :db.type/ref
+                                     :db/cardinality :db.cardinality/many
+                                     :db/isComponent true}
    :game/map                        {:db/valueType   :db.type/ref
                                      :db/isComponent true}
    :game/factions                   {:db/valueType   :db.type/ref
@@ -45,6 +48,7 @@
    :unit/terrain                    {:db/valueType   :db.type/ref}
 
    ;; Unit Type
+   ;; TODO: make unit-type/id non-unique to support per-game types
    :unit-type/id                    {:db/unique      :db.unique/identity}
    :unit-type/state-map             {:db/valueType   :db.type/ref}
    :unit-type/zoc-armor-types       {:db/cardinality :db.cardinality/many}
@@ -53,6 +57,7 @@
                                      :db/isComponent true}
 
    ;; Unit State Maps
+   ;; TODO: make unit-state-map/id non-unique to support per-game state maps
    :unit-state-map/id               {:db/unique      :db.unique/identity}
    :unit-state-map/states           {:db/valueType   :db.type/ref
                                      :db/cardinality :db.cardinality/many
@@ -93,6 +98,7 @@
    :terrain/game-pos-idx            {:db/unique      :db.unique/identity}
 
    ;; Terrain type
+   ;; TODO: make terain-type/id non-unique to support per-game types
    :terrain-type/id                 {:db/unique      :db.unique/identity}
    :terrain-type/terrain-effects    {:db/valueType   :db.type/ref
                                      :db/cardinality :db.cardinality/many

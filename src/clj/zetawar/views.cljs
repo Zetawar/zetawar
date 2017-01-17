@@ -43,9 +43,10 @@
 
 (defn unit-image [unit]
   (let [color-name (-> unit game/unit-color name)]
-    (-> unit
-        (get-in [:unit/type :unit-type/image])
-        (string/replace "COLOR" color-name))))
+    ;; TODO: return placeholder if terrain image is not found
+    (some-> unit
+            (get-in [:unit/type :unit-type/image])
+            (string/replace "COLOR" color-name))))
 
 (defn board-unit [{:as view-ctx :keys [conn dispatch]} q r]
   (when-let [unit @(subs/unit-at conn q r)]
@@ -87,9 +88,10 @@
                        (get-in [:terrain/owner :faction/color])
                        (or :none)
                        name)]
-    (-> terrain
-        (get-in [:terrain/type :terrain-type/image])
-        (string/replace "COLOR" color-name))))
+    ;; TODO: return placeholder if terrain image is not found
+    (some-> terrain
+            (get-in [:terrain/type :terrain-type/image])
+            (string/replace "COLOR" color-name))))
 
 (defn terrain-tile [view-ctx terrain q r]
   (let [[x y] (tiles/offset->pixel q r)
