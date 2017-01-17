@@ -42,7 +42,6 @@
         ;; TODO: validate event
         ;; TODO: validate handler return value
         (handle-event* router-ctx msg)
-        (throw (js/Error. "testing"))
         (catch :default ex
           (js/Raven.captureException ex)
           (log/errorf ex "Error handling event: %s" (pr-str msg))))
