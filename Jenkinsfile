@@ -66,7 +66,6 @@ Check console output at ${env.BUILD_URL} to view the results.
       subject = "A new Zetawar build is available!"
       summary = "${subject} (http://dev.zetawar.com/)"
       urlDetails = "A new Zetawar build is available at http://dev.zetawar.com/."
-      loginDetails = "Login as user:${DEV_SITE_USER} with password:${DEV_SITE_PASSWORD}."
       changeDetails = sh(script: 'git log --pretty="- %s" --since="7 days ago"', returnStdout: true)
       footerDetails = """\
 You're getting this email because you indicated you would like to receive build
@@ -74,7 +73,7 @@ notifications when you filled out the Zetawar Kickstarter survey. If you no
 longer want to receive build notifications, please email builds@zetawar.com.
 """.split("\n").join(" ")
       details = """\
-${urlDetails} ${loginDetails}
+${urlDetails}
 
 Recent changes:
 ${changeDetails}
