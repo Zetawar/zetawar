@@ -27,7 +27,7 @@
                       "release: '" site/build "',"
                       "environment: '" environment "',"
                       "tags: {git_commit: '" site/build "'}"
-                      "}).install()")]])
+                      "}).install();")]])
 
      (defn head [{global-meta :meta :as data} title]
        (into [:head
