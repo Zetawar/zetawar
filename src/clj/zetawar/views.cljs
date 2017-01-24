@@ -290,18 +290,17 @@
 (defn faction-settings [{:as views-ctx :keys [conn dispatch translate]}]
   (with-let [faction (subs/faction-to-configure conn)
              selected-player-type (r/atom nil)
-             hide-settings #(do
-                              (.preventDefault %)
-                              (dispatch [::events.ui/hide-faction-settings]))
+             hide-settings (fn [ev]
+                             (when ev (.preventDefault ev))
+                             (dispatch [::events.ui/hide-faction-settings]))
              select-player-type #(reset! selected-player-type (.-target.value %))
-             set-player-type #(do
-                                (.preventDefault %)
-                                (when-let [player-type-id (->> (or @selected-player-type :human)
-                                                               (keyword 'zetawar.players))]
-                                  (reset! selected-player-type nil)
-                                  (dispatch [::events.ui/set-faction-player-type @faction player-type-id]))
-
-                                (dispatch [::events.ui/hide-faction-settings]))]
+             set-player-type (fn [ev]
+                               (.preventDefault ev)
+                               (when-let [player-type-id (->> (or @selected-player-type :human)
+                                                              (keyword 'zetawar.players))]
+                                 (reset! selected-player-type nil)
+                                 (dispatch [::events.ui/set-faction-player-type @faction player-type-id]))
+                               (dispatch [::events.ui/hide-faction-settings]))]
     [:> js/ReactBootstrap.Modal {:show (some? @faction)
                                  :on-hide hide-settings}
      [:> js/ReactBootstrap.Modal.Header {:close-button true}
