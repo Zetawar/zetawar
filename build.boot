@@ -89,6 +89,13 @@
         (markdown)
         (slug :slug-fn zetawar.site/slug-fn)
         (permalink :permalink-fn zetawar.site/permalink-fn)
+        (collection :renderer 'zetawar.views.site/render-index
+                    :out-dir "."
+                    :page "index.html")
+        (collection :renderer 'zetawar.views.site/render-blog-index
+                    :filterer zetawar.site/post?
+                    :out-dir "."
+                    :page "blog/index.html")
         (render :renderer 'zetawar.views.site/render-page
                 :filterer zetawar.site/page?
                 :out-dir ".")
@@ -97,14 +104,7 @@
                 :out-dir ".")
         (render :renderer 'zetawar.views.site/render-devcards
                 :filterer zetawar.site/devcards?
-                :out-dir ".")
-        (collection :renderer 'zetawar.views.site/render-index
-                    :out-dir "."
-                    :page "index.html")
-        (collection :renderer 'zetawar.views.site/render-blog-index
-                    :filterer zetawar.site/post?
-                    :out-dir "."
-                    :page "blog/index.html")))
+                :out-dir ".")))
 
 (deftask build-cljs
   "Build Zetawar ClojureScript for deployment."
