@@ -32,6 +32,9 @@
 (defn next-faction-color [game]
   (get-in game [:game/current-faction :faction/next-faction :faction/color]))
 
+(defn game-ex [message game]
+  (ex-info message (select-keys game [:game/self-repair])))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Factions
 
@@ -223,9 +226,7 @@
                (unit-faction db unit)))))
 
 (defn unit-ex [message unit]
-  (let [{:keys [unit/q unit/r]} unit]
-    (ex-info message {:q q
-                      :r r})))
+  (ex-info message (select-keys unit [:unit/q :unit/r])))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Unit States
@@ -490,11 +491,14 @@
                                                       ranged-attack-hexes
                                                       adjacent-attack-hexes
                                                       opposite-attack-hexes)
-        ;; TODO: get multipliers from game entity
-        gang-up-bonus (+ (* (count ranged-attack-hexes) 1)
-                         (* (count adjacent-attack-hexes) 1)
-                         (* (count flanking-attack-hexes) 2)
-                         (* (count opposite-attack-hexes) 3))]
+        gang-up-bonus (+ (* (count ranged-attack-hexes)
+                            (:game/ranged-attack-bonus game))
+                         (* (count adjacent-attack-hexes)
+                            (:game/adjacent-attack-bonus game))
+                         (* (count flanking-attack-hexes)
+                            (:game/flanking-attack-bonus game))
+                         (* (count opposite-attack-hexes)
+                            (:game/opposite-attack-bonus game)))]
     ;; TODO: test stochastic-attacks
     (let [p (-> (+ 0.5 (* 0.05 (+ (- (+ attack-strength attack-bonus)
                                      (+ armor armor-bonus))
@@ -502,7 +506,7 @@
                 (max 0)
                 (min 1))]
       (js/Math.round
-       (if (:game/stochastic-attacks game)
+       (if (:game/stochastic-damage game)
          (let [hits (->> (repeatedly #(rand))
                          (take (* 6 (:unit/count attacker)))
                          (filter #(< % p))
@@ -580,6 +584,8 @@
 
 (defn check-can-repair [db game unit]
   (check-unit-current db game unit)
+  (when-not (:game/self-repair game)
+    (throw (game-ex "Unit self repair is not allowed" game)))
   (when (:unit/capturing unit)
     (throw (unit-ex "Unit cannot be repaired while capturing" unit)))
   (when (>= (:unit/count unit) (:game/max-count-per-unit game))
@@ -955,6 +961,15 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Setup
 
+(defn settings-tx [game settings-def]
+  [{:db/id (e game)
+    :game/ranged-attack-bonus (:ranged-attack-bonus settings-def)
+    :game/adjacent-attack-bonus (:adjacent-attack-bonus settings-def)
+    :game/flanking-attack-bonus (:flanking-attack-bonus settings-def)
+    :game/opposite-attack-bonus (:opposite-attack-bonus settings-def)
+    :game/stochastic-damage (:stochastic-damage settings-def)
+    :game/self-repair (:self-repair settings-def)}])
+
 (defn terrain-types-tx [game terrains-def]
   (into []
         (map
@@ -1173,6 +1188,7 @@
         starting-faction-color (get-in factions [0 :color])
         ruleset (rulesets ruleset-id)]
     ;; Rules
+    (d/transact! conn (settings-tx (conn-game) (:settings ruleset)))
     (d/transact! conn (terrain-types-tx (conn-game) (:terrains ruleset)))
     (d/transact! conn (unit-state-map-tx (conn-game) (:unit-state-maps ruleset)))
     (d/transact! conn (unit-types-tx @conn (conn-game) (:units ruleset)))
@@ -1218,6 +1234,7 @@
         {:keys [ruleset-id map-id credits-per-base]} scenario-def
         ruleset (rulesets ruleset-id)]
     ;; Rules
+    (d/transact! conn (settings-tx (conn-game) (:settings ruleset)))
     (d/transact! conn (terrain-types-tx (conn-game) (:terrains ruleset)))
     (d/transact! conn (unit-state-map-tx (conn-game) (:unit-state-maps ruleset)))
     (d/transact! conn (unit-types-tx @conn (conn-game) (:units ruleset)))

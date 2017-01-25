@@ -33,6 +33,7 @@
   (-> @(app conn) :app/game e))
 
 (def game-pull [:game/id
+                :game/self-repair
                 :game/credits-per-base
                 :game/max-count-per-unit
                 :game/scenario-id

@@ -53,9 +53,19 @@
          "here</a>.")
     }})
 
+;; TODO: remove redundant id keys (?)
+;; TODO: add support for :move-through-friendly flag (?)
 (def rulesets
   {:zetawar
-   {:terrains
+   {:settings
+    {:ranged-attack-bonus   1
+     :adjacent-attack-bonus 1
+     :flanking-attack-bonus 2
+     :opposite-attack-bonus 3
+     :stochastic-damage     false
+     :self-repair           true}
+
+    :terrains
     {:plains        {:description "Plains"
                      :image "tilesets/elite-command/terrains/plains.png"}
      :mountains     {:description "Mountains"
@@ -273,6 +283,7 @@
             :zoc
             [:personnel :armored]}}}})
 
+;; TODO: add support for :allowed-unit-types
 ;; TODO: remove redundant id keys (?)
 (def maps
   {:sterlings-aruba
@@ -1175,15 +1186,6 @@
     }
    })
 
-;; TODO: remove redundant id keys (?)
-;; TODO: add adjacent-attack-bonus (default = ?)
-;; TODO: add opposite-attack-bonus (default = ?)
-;; TODO: add flanking-attack-bonus (default = ?)
-;; TODO: add ranged-attack-bonus (default = ?)
-;; TODO: add support for :move-through-friendly flag (?)
-;; TODO: add support for :allowed-unit-types
-;; TODO: add support for :repair-anywhere flag (default = false)
-;; TODO: add support for :stochastic-attack flag (default = true)
 (def scenarios
   {:sterlings-aruba-multiplayer
    {:id :sterlings-aruba-multiplayer

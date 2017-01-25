@@ -46,6 +46,7 @@
       (is  (= #{:db/id
                 :game/id
                 :game/scenario-id
+                :game/self-repair
                 :game/map
                 :game/credits-per-base
                 :game/max-count-per-unit
