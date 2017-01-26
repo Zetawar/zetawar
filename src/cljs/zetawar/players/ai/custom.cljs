@@ -38,7 +38,7 @@
 
       0)))
 
-(defmethod players/new-player ::players/reference-ai
+(defmethod players/new-player ::players/custom-ai
   [{:as app-ctx :keys [ev-chan notify-pub]} player-type faction-color]
   (let [fns {:score-actor #'score-actor
              :score-base-action #'score-base-action
