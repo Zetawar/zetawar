@@ -281,7 +281,7 @@
 (defmethod router/handle-event ::set-faction-player-type
   [{:as handler-ctx :keys [ev-chan conn db players]} [_ faction player-type-id]]
   (let [{:as app :keys [ai-turn-stepping]} (app/root db)
-        {:keys [game/factions]} (app/current-game db)
+        {:keys [game/factions game/current-faction]} (app/current-game db)
         {:keys [faction/color]} faction
         other-factions (remove #(= (e faction) (e %)) factions)
         {:keys [ai]} (players/player-types-by-id player-type-id)
@@ -290,7 +290,8 @@
              :faction/player-type player-type-id}]
         cur-player (color @players)
         new-player (players/new-player handler-ctx player-type-id color)
-        notify (when ai [[:zetawar.players/start-turn color]])]
+        notify (when (and ai (= (e faction) (e current-faction)))
+                 [[:zetawar.players/start-turn color]])]
     (players/stop cur-player)
     (players/start new-player)
     (swap! players assoc color new-player)
