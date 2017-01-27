@@ -54,7 +54,6 @@
     }})
 
 ;; TODO: remove redundant id keys (?)
-;; TODO: add support for :move-through-friendly flag (?)
 (def rulesets
   {:zetawar
    {:settings
@@ -63,7 +62,8 @@
      :flanking-attack-bonus 2
      :opposite-attack-bonus 3
      :stochastic-damage     false
-     :self-repair           true}
+     :self-repair           true
+     :move-through-friendly true}
 
     :terrains
     {:plains        {:description "Plains"

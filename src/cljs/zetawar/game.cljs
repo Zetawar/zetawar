@@ -281,7 +281,6 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Movement
 
-;; TODO: make not being able to walk through your own units a game option
 (defn valid-moves [db game unit]
   (let [start [(:unit/q unit) (:unit/r unit)]
         u-faction-eid (e (unit-faction db unit))
@@ -328,7 +327,9 @@
                                     terrain-costs (adjacent-costs q r)
                                     new-moves (into {}
                                                     (keep (fn [[q r terrain-cost]]
-                                                            (when-not (enemy-at? q r)
+                                                            (when (and (or (:game/move-through-friendly game)
+                                                                           (not (unit-at q r)))
+                                                                       (not (enemy-at? q r)))
                                                               (let [terrain-cost (if (adjacent-zoc-enemy? q r) ; check in zoc
                                                                                    (max terrain-cost remaining-movement)
                                                                                    terrain-cost)
