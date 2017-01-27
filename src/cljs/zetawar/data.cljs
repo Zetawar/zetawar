@@ -87,7 +87,6 @@
      :base          {:description "Base"
                      :image "tilesets/elite-command/terrains/base-COLOR.png"}}
 
-    ;; TODO: add :description for state maps and states (?)
     :unit-state-maps
     {:move-attack
      {:start-state :start

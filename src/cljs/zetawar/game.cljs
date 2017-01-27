@@ -500,7 +500,7 @@
                             (:game/flanking-attack-bonus game))
                          (* (count opposite-attack-hexes)
                             (:game/opposite-attack-bonus game)))]
-    ;; TODO: test stochastic-attacks
+    ;; TODO: test stochastic damage
     (let [p (-> (+ 0.5 (* 0.05 (+ (- (+ attack-strength attack-bonus)
                                      (+ armor armor-bonus))
                                   gang-up-bonus)))
