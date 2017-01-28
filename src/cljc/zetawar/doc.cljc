@@ -12,7 +12,7 @@
   k)
 
 (defn registry
-  "Returns the registry map, prefer 'get-docstring' to lookup a docstring by
+  "Returns the registry map, prefer 'get-doc' to lookup a docstring by
   name."
   []
   @registry-ref)
