@@ -78,7 +78,7 @@ Now that you have a basic understanding of the AI interface, you can start
 implementing your own AI. The easiest way to do this is by customizing the
 placeholder 'Custom AI' included with Zetawar. You can find it
 in
-[src/cljs/zetawar/players/ai/custom.cljs](https://github.com/Zetawar/zetawar/blob/481bfa3e789683b8216c0495babcd2e32aa8e86a/src/clj/zetawar/players/ai/custom.cljs).
+[src/cljs/zetawar/players/ai/custom.cljs](https://github.com/Zetawar/zetawar/blob/481bfa3e789683b8216c0495babcd2e32aa8e86a/src/cljs/zetawar/players/ai/custom.cljs).
 To get started playing with it, clone
 the
 [code](https://github.com/Zetawar/zetawar),
