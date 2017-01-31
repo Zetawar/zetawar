@@ -83,7 +83,7 @@ To get started playing with it, clone
 the
 [code](https://github.com/Zetawar/zetawar),
 [install boot](https://github.com/boot-clj/boot#install), and run 'boot dev'.
-You can now connect to 'http://localhost:3000' to interact with a version of
+You can now connect to <http://localhost:3000> to interact with a version of
 Zetawar running using your local code base. Any changes to the code will be
 immediately (within a few seconds) reflected in the browser. If you want to test
 out your AI in the user interface, click on the "Configure faction" icon next to
