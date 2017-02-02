@@ -3,12 +3,17 @@
    [clojure.spec :as s]
    [clojure.test.check.generators]
    [devcards.core :as dc :include-macros true]
-   [zetawar.system.spec :as system.spec])
+   [zetawar.system.spec :as system.spec]
+   [zetawar.game.spec :as game.spec])
   (:require-macros
    [devcards.core :refer [defcard defcard-rg]]))
 
-(defcard system-spec
-  (s/exercise :zetawar/system 5))
+;; (defcard system-spec
+;;   (s/exercise :zetawar/system 5))
+
+(defcard game-map-spec
+  (first
+   (s/exercise :game/map 1)))
 
 (comment
 

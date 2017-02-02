@@ -1,10 +1,12 @@
 (ns zetawar.devcards.data-formats
   (:require
+   [clojure.spec :as s]
    [devcards.core :as dc :include-macros true]
    [integrant.core :as ig]
    [reagent.core :as r]
    [zetawar.app :as app]
    [zetawar.data :as data]
+   [zetawar.doc :as doc]
    [zetawar.subs :as subs]
    [zetawar.system :as system]
    [zetawar.util :refer [breakpoint inspect]]
@@ -55,13 +57,47 @@
                :r 0
                :unit-type :infantry}]}]}})
 
-(defcard simple-map-data
-  (:simple-map maps))
+(defcard map-data-example
+  (let [{:keys [simple-map]} maps]
+    (if (s/valid? :game/map simple-map)
+      simple-map
+      (s/explain :game/map simple-map))))
 
-(defcard simple-scenario-data
-  (:simple-scenario scenarios))
+(defcard-rg map-attribute-descriptions
+  [:div
+   [:h3 "Map attributes"]
+   [:table.table
+    [:thead
+     [:tr
+      [:th.col-sm-2 "Key"]
+      [:th.col-sm-3 "Description"]
+      [:th.col-sm-5 "Spec"]]]
+    (let [ks [:game.map/description
+              :game.map/terrains]]
+      (into [:tbody]
+            (for [k ks]
+              [:tr
+               [:td.col-sm-2 (name k)]
+               [:td.col-sm-3 (doc/key-descriptions k)]
+               [:td.col-sm-5 (pr-str (s/describe k))]])))]
+   [:h3 "Terrain attributes"]
+   [:table.table
+    [:thead
+     [:tr
+      [:th.col-sm-2 "Key"]
+      [:th.col-sm-3 "Description"]
+      [:th.col-sm-5 "Spec"]]]
+    (let [ks [:game.map.terrain/q
+              :game.map.terrain/r
+              :game.map.terrain/terrain-type]]
+      (into [:tbody]
+            (for [k ks]
+              [:tr
+               [:td.col-sm-2 (name k)]
+               [:td.col-sm-3 (doc/key-descriptions k)]
+               [:td.col-sm-5 (pr-str (s/describe k))]])))]])
 
-(defcard-rg simple-map-and-scenario
+(defcard-rg map-and-scenario-example
   (let [system (ig/init system/game-config)
         game-cfg (:zetawar.system/game system)
         views-cfg (:zetawar.system/game-views system)
@@ -72,3 +108,6 @@
                          scenarios
                          :simple-scenario)
     [views/board views-cfg]))
+
+(defcard simple-scenario-example-data
+  (:simple-scenario scenarios))
