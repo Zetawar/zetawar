@@ -969,7 +969,8 @@
     :game/flanking-attack-bonus (:flanking-attack-bonus settings-def)
     :game/opposite-attack-bonus (:opposite-attack-bonus settings-def)
     :game/stochastic-damage (:stochastic-damage settings-def)
-    :game/self-repair (:self-repair settings-def)}])
+    :game/self-repair (:self-repair settings-def)
+    :game/move-through-friendly (:move-through-friendly settings-def)}])
 
 (defn terrain-types-tx [game terrains-def]
   (into []
