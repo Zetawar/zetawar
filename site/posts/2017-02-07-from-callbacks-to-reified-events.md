@@ -1,5 +1,5 @@
 ---
-description: From Callbacks to Event Messages
+description: From Callbacks to Reified Events
 date-published: 2017-02-07
 ---
 

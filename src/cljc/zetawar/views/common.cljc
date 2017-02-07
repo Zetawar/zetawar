@@ -36,6 +36,9 @@
               [:meta {:name "viewport" :content "width=device-width, initial-scale=1"}]
               [:title title]
               (include-css (site/prefix "/css/main.css"))
+              (include-css (site/prefix "/css/highlight/default.css"))
+              (include-js (site/prefix "/js/highlight.pack.js"))
+              [:script "hljs.initHighlightingOnLoad();"]
               (some-> (:google-analytics-tracking-id global-meta)
                       ga)]
              (some-> (:sentry-url global-meta)
