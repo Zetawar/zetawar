@@ -3,7 +3,7 @@
    [clojure.string :as string])
   #?(:cljs
      (:require-macros
-      [zetawar.site :refer [env-prefix env-build]])))
+      [zetawar.site :refer [env-prefix env-build env-build-timestamp]])))
 
 #?(:clj
    (do
@@ -14,6 +14,9 @@
      (defmacro env-build []
        (or (System/getenv "ZETAWAR_BUILD") ""))
 
+     (defmacro env-build-timestamp []
+       (or (System/getenv "BUILD_TIMESTAMP") ""))
+
      )
    )
 
@@ -23,6 +26,8 @@
   (apply str +prefix+ url-parts))
 
 (def build (env-build))
+
+(def build-timestamp (env-build-timestamp))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Perun

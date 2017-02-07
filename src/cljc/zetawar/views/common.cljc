@@ -109,7 +109,9 @@
      "Build: "
      (if (not-empty site/build)
        [:a {:href (str "/builds/" site/build)} site/build]
-       "DEV")]
+       "DEV")
+     (when (not-empty site/build-timestamp)
+       (str " Built at: " site/build-timestamp))]
     [:p
      "Follow "
      [:a {:href "https://twitter.com/ZetawarGame"} "@ZetawarGame"]
