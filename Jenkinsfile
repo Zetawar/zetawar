@@ -3,13 +3,15 @@
 node {
   currentBuild.result = 'SUCCESS'
 
-  sh 'git rev-parse HEAD > commit'
-  def commitHash = readFile('commit').trim()
-  def permaBuildPrefix = "/builds/${commitHash}"
+  def commitHash
+  def permaBuildPrefix
 
   try {
     stage('Checkout') {
       checkout scm
+      sh 'git rev-parse HEAD > commit'
+      commitHash = readFile('commit').trim()
+      permaBuildPrefix = "/builds/${commitHash}"
     }
 
     stage('Prepare') {
