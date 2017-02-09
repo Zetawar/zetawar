@@ -13,8 +13,8 @@ only at a high level. Here I'm going to dig into them in a bit more detail.
 
 First, let's take a look at the event system.
 
-If you recall, the demo version of Zetawar used simple callback based event
-handlers. With that approach, calling a event handler looked like this:
+If you recall, the demo version of Zetawar used simple callback event handlers.
+With that approach, calling an event handler looked like this:
 
 ```clojure
 [:button {:on-click #(handlers/repair conn %)}
