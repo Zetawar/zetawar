@@ -52,7 +52,7 @@
    :unit-type/id                    {:db/unique      :db.unique/identity}
    :unit-type/state-map             {:db/valueType   :db.type/ref}
    :unit-type/zoc-armor-types       {:db/cardinality :db.cardinality/many}
-   :unit-type/unit-strengths        {:db/valueType   :db.type/ref
+   :unit-type/strengths             {:db/valueType   :db.type/ref
                                      :db/cardinality :db.cardinality/many
                                      :db/isComponent true}
 
@@ -100,18 +100,14 @@
    ;; Terrain type
    ;; TODO: make terain-type/id non-unique to support per-game types
    :terrain-type/id                 {:db/unique      :db.unique/identity}
-   :terrain-type/terrain-effects    {:db/valueType   :db.type/ref
+   :terrain-type/effects            {:db/valueType   :db.type/ref
                                      :db/cardinality :db.cardinality/many
                                      :db/isComponent true}
-
-   ;; Unit strength
-   :unit-strength/unit-type         {:db/valueType   :db.type/ref}
 
    ;; Terrain effects
    :terrain-effect/unit-type        {:db/valueType   :db.type/ref
                                      :db/index       true}
-   :terrain-effect/terrain-type     {:db/valueType   :db.type/ref
-                                     :db/index       true}})
+   })
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Utils

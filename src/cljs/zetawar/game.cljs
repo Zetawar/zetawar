@@ -291,9 +291,9 @@
         terrain-type->cost (into {} (d/q '[:find ?tt ?mc
                                            :in $ ?ut
                                            :where
-                                           [?e :terrain-effect/terrain-type ?tt]
-                                           [?e :terrain-effect/unit-type ?ut]
-                                           [?e :terrain-effect/movement-cost ?mc]]
+                                           [?tt :terrain-type/effects ?e]
+                                           [?e  :terrain-effect/unit-type ?ut]
+                                           [?e  :terrain-effect/movement-cost ?mc]]
                                          db unit-type-eid))
         terrain-cost-at (memoize (fn terrain-cost-at [q r]
                                    (some-> (terrain-at db game q r)
@@ -452,9 +452,9 @@
                                       :in $ ?u ?at
                                       :where
                                       [?u  :unit/type ?ut]
-                                      [?as :unit-strength/unit-type ?ut]
-                                      [?as :unit-strength/armor-type ?at]
-                                      [?as :unit-strength/attack ?s]]
+                                      [?ut :unit-type/strengths ?us]
+                                      [?us :unit-strength/armor-type ?at]
+                                      [?us :unit-strength/attack ?s]]
                                     db (e attacker) defender-armor-type))
         armor (if (:unit/capturing defender)
                 (get-in defender [:unit/type :unit-type/capturing-armor])
@@ -462,20 +462,20 @@
         attack-bonus (oonly (d/q '[:find ?a
                                    :in $ ?u ?t
                                    :where
-                                   [?u :unit/type ?ut]
-                                   [?t :terrain/type ?tt]
-                                   [?e :terrain-effect/terrain-type ?tt]
-                                   [?e :terrain-effect/unit-type ?ut]
-                                   [?e :terrain-effect/attack-bonus ?a]]
+                                   [?u  :unit/type ?ut]
+                                   [?t  :terrain/type ?tt]
+                                   [?tt :terrain-type/effects ?e]
+                                   [?e  :terrain-effect/unit-type ?ut]
+                                   [?e  :terrain-effect/attack-bonus ?a]]
                                  db (e attacker) (e attacker-terrain)))
         armor-bonus (oonly (d/q '[:find ?d
                                   :in $ ?u ?t
                                   :where
-                                  [?u :unit/type ?ut]
-                                  [?t :terrain/type ?tt]
-                                  [?e :terrain-effect/terrain-type ?tt]
-                                  [?e :terrain-effect/unit-type ?ut]
-                                  [?e :terrain-effect/armor-bonus ?d]]
+                                  [?u  :unit/type ?ut]
+                                  [?t  :terrain/type ?tt]
+                                  [?tt :terrain-type/effects ?e ]
+                                  [?e  :terrain-effect/unit-type ?ut]
+                                  [?e  :terrain-effect/armor-bonus ?d]]
                                 db (e defender) (e defender-terrain)))
         attack-hexes (into #{} (map terrain-hex) (:unit/attacked-from defender))
         ranged-attack-hexes (into #{}
@@ -500,7 +500,6 @@
                             (:game/flanking-attack-bonus game))
                          (* (count opposite-attack-hexes)
                             (:game/opposite-attack-bonus game)))]
-    ;; TODO: test stochastic damage
     (let [p (-> (+ 0.5 (* 0.05 (+ (- (+ attack-strength attack-bonus)
                                      (+ armor armor-bonus))
                                   gang-up-bonus)))
@@ -993,9 +992,7 @@
         (map
          (fn [[armor-type-name attack-strength]]
            {:db/id (db/next-temp-id)
-            :unit-type/_unit-strengths unit-type-eid
-            ;; TODO: remove redundant reference
-            :unit-strength/unit-type unit-type-eid
+            :unit-type/_strengths unit-type-eid
             :unit-strength/armor-type (to-armor-type armor-type-name)
             :unit-strength/attack attack-strength}))
         attack-strengths-def))
@@ -1008,9 +1005,7 @@
                  terrain-type-id (to-terrain-type-id terrain-type-name)
                  terrain-type (find-by db :terrain-type/id terrain-type-id)]
              {:db/id (db/next-temp-id)
-              :terrain-type/_terrain-effects (e terrain-type)
-              ;; TODO: remove redundant reference
-              :terrain-effect/terrain-type (e terrain-type)
+              :terrain-type/_effects (e terrain-type)
               :terrain-effect/unit-type unit-type-eid
               :terrain-effect/movement-cost movement-cost
               :terrain-effect/attack-bonus attack-bonus
