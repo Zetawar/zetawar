@@ -257,7 +257,9 @@
   (let [unit-types @(subs/available-unit-types conn)
         cur-faction @(subs/current-faction conn)
         color (name (:faction/color cur-faction))
-        hide-picker #(dispatch [::events.ui/hide-unit-picker])]
+        hide-picker (fn [ev]
+                      (when ev (.preventDefault ev))
+                      (dispatch [::events.ui/hide-unit-picker]))]
     [:> js/ReactBootstrap.Modal {:show @(subs/picking-unit? conn)
                                  :on-hide hide-picker}
      [:> js/ReactBootstrap.Modal.Header {:close-button true}
@@ -328,9 +330,9 @@
 (defn new-game-settings [{:as view-ctx :keys [conn dispatch translate]}]
   (with-let [default-scenario-id :sterlings-aruba-multiplayer
              selected-scenario-id (r/atom default-scenario-id)
-             hide-settings #(do
-                              (.preventDefault %)
-                              (dispatch [::events.ui/hide-new-game-settings]))
+             hide-settings (fn [ev]
+                             (when ev (.preventDefault ev))
+                             (dispatch [::events.ui/hide-new-game-settings]))
              select-scenario #(reset! selected-scenario-id (keyword (.-target.value %)))
              start-new-game #(do
                                (.preventDefault %)
