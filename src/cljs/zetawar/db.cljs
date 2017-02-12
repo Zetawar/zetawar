@@ -24,6 +24,9 @@
    :game/unit-state-maps            {:db/valueType   :db.type/ref
                                      :db/cardinality :db.cardinality/many
                                      :db/isComponent true}
+   :game/unit-states                {:db/valueType   :db.type/ref
+                                     :db/cardinality :db.cardinality/many
+                                     :db/isComponent true}
    :game/map                        {:db/valueType   :db.type/ref
                                      :db/isComponent true}
    :game/factions                   {:db/valueType   :db.type/ref

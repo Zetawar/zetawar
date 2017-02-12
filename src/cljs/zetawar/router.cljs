@@ -12,13 +12,20 @@
 
 (defmethod handle-event :default
   [_ msg]
-  (log/debugf "Unhandled event: %s" (pr-str msg))
+  (let [log-msg (str "Unhandled event: " (pr-str msg))]
+    (js/Raven.captureMessage log-msg)
+    (log/warn log-msg))
   nil)
 
 ;; TODO: add spec for dispatch
 (defn dispatch [ch msg]
-  (log/debugf "Dispatching event: %s" (pr-str msg))
-  (put! ch msg))
+  (if msg
+    (do
+      (log/debugf "Dispatching event: %s" (pr-str msg))
+      (put! ch msg))
+    (let [log-msg "Unable to dispatch 'nil' event message"]
+      (js/Raven.captureMessage log-msg)
+      (log/error log-msg))))
 
 ;; TODO: add pause for rendering after fixed interval
 (defn handle-event* [{:as router-ctx :keys [conn ev-chan notify-chan]} msg]

@@ -109,6 +109,14 @@
        name
        (keyword 'terrain-type.id)))
 
+(defn terrain-type-by-id [db game terrain-type-id]
+  (qe '[:find ?tt
+        :in $ ?g ?tt-id
+        :where
+        [?g  :game/terrain-types ?tt]
+        [?tt :terrain-type/id ?tt-id]]
+      db (e game) terrain-type-id))
+
 (defn terrain? [x]
   (contains? x :terrain/type))
 
@@ -232,15 +240,35 @@
 ;;; Unit States
 
 (defn to-unit-state-map-id [state-map-name]
-  (->> state-map-name name (keyword 'unit-state-map.id)))
+  (->> state-map-name
+       name
+       (keyword 'unit-state-map.id)))
+
+(defn unit-state-map-by-id [db game unit-state-map-id]
+  (qe '[:find ?usm
+        :in $ ?g ?usm-id
+        :where
+        [?g   :game/unit-state-maps ?usm]
+        [?usm :unit-state-map/id ?usm-id]]
+      db (e game) unit-state-map-id))
 
 (defn to-unit-state-id
   ([unit-state-name]
-   (->> unit-state-name name (keyword 'unit-state.id)))
+   (->> unit-state-name
+        name
+        (keyword 'unit-state.id)))
   ([state-map-name state-name]
    (to-unit-state-id (str (name state-map-name)
                           "_"
                           (name state-name)))))
+
+(defn unit-state-by-id [db game unit-state-id]
+  (qe '[:find ?us
+        :in $ ?g ?us-id
+        :where
+        [?g  :game/unit-states ?us]
+        [?us :unit-state-map/id ?us-id]]
+      db (e game) unit-state-id))
 
 (defn to-action-type [action-type-name]
   (->> action-type-name name (keyword 'action.type)))
@@ -964,140 +992,148 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Setup
 
-(defn settings-tx [game settings-def]
-  [{:db/id (e game)
-    :game/ranged-attack-bonus (:ranged-attack-bonus settings-def)
-    :game/adjacent-attack-bonus (:adjacent-attack-bonus settings-def)
-    :game/flanking-attack-bonus (:flanking-attack-bonus settings-def)
-    :game/opposite-attack-bonus (:opposite-attack-bonus settings-def)
-    :game/stochastic-damage (:stochastic-damage settings-def)
-    :game/self-repair (:self-repair settings-def)
-    :game/move-through-friendly (:move-through-friendly settings-def)}])
+(defn settings-tx [db game-id settings-def]
+  (let [game (game-by-id db game-id)]
+    [{:db/id (e game)
+      :game/ranged-attack-bonus (:ranged-attack-bonus settings-def)
+      :game/adjacent-attack-bonus (:adjacent-attack-bonus settings-def)
+      :game/flanking-attack-bonus (:flanking-attack-bonus settings-def)
+      :game/opposite-attack-bonus (:opposite-attack-bonus settings-def)
+      :game/stochastic-damage (:stochastic-damage settings-def)
+      :game/self-repair (:self-repair settings-def)
+      :game/move-through-friendly (:move-through-friendly settings-def)}]))
 
-(defn terrain-types-tx [game terrains-def]
-  (into []
-        (map
-         (fn [[terrain-type-name terrain-def]]
-           {:db/id (db/next-temp-id)
-            :game/_terrain-types (e game)
-            :terrain-type/id (to-terrain-type-id terrain-type-name)
-            :terrain-type/description (:description terrain-def)
-            :terrain-type/image (:image terrain-def)}))
-        terrains-def))
-
-;; TODO: cleanup index passing (how?)
-
-(defn attack-strengths-tx [db unit-type-eid attack-strengths-def]
-  (into []
-        (map
-         (fn [[armor-type-name attack-strength]]
-           {:db/id (db/next-temp-id)
-            :unit-type/_strengths unit-type-eid
-            :unit-strength/armor-type (to-armor-type armor-type-name)
-            :unit-strength/attack attack-strength}))
-        attack-strengths-def))
-
-(defn terrain-effects-tx [db unit-type-eid terrain-effects-def]
-  (into []
-        (map
-         (fn [[terrain-type-name terrain-effect-def]]
-           (let [{:keys [attack-bonus armor-bonus movement-cost]} terrain-effect-def
-                 terrain-type-id (to-terrain-type-id terrain-type-name)
-                 terrain-type (find-by db :terrain-type/id terrain-type-id)]
+(defn terrain-types-tx [db game-id terrains-def]
+  (let [game (game-by-id db game-id)]
+    (into []
+          (map
+           (fn [[terrain-type-name terrain-def]]
              {:db/id (db/next-temp-id)
-              :terrain-type/_effects (e terrain-type)
-              :terrain-effect/unit-type unit-type-eid
-              :terrain-effect/movement-cost movement-cost
-              :terrain-effect/attack-bonus attack-bonus
-              :terrain-effect/armor-bonus armor-bonus})))
-        terrain-effects-def))
+              :game/_terrain-types (e game)
+              :terrain-type/id (to-terrain-type-id terrain-type-name)
+              :terrain-type/description (:description terrain-def)
+              :terrain-type/image (:image terrain-def)}))
+          terrains-def)))
 
-(defn unit-types-tx [db game units-def]
-  (into []
-        (mapcat
-         (fn [[unit-type-name unit-def]]
-           (let [{:keys [armor capturing-armor state-map]} unit-def
-                 unit-state-map-id (to-unit-state-map-id state-map)
-                 unit-type-eid (db/next-temp-id)]
-             (-> [{:db/id unit-type-eid
-                   :game/_unit-types (e game)
-                   :unit-type/id (to-unit-type-id unit-type-name)
-                   :unit-type/description (:description unit-def)
-                   :unit-type/cost (:cost unit-def)
-                   :unit-type/can-capture (:can-capture unit-def)
-                   :unit-type/movement (:movement unit-def)
-                   :unit-type/min-range (:min-range unit-def)
-                   :unit-type/max-range (:max-range unit-def)
-                   :unit-type/armor-type (-> unit-def :armor-type to-armor-type)
-                   :unit-type/armor armor
-                   :unit-type/capturing-armor (or capturing-armor armor)
-                   :unit-type/repair (:repair unit-def)
-                   :unit-type/state-map [:unit-state-map/id unit-state-map-id]
-                   :unit-type/image (:image unit-def)
-                   :unit-type/zoc-armor-types (map #(to-armor-type %) (:zoc unit-def))}]
-                 (into (attack-strengths-tx db unit-type-eid (:attack-strengths unit-def)))
-                 (into (terrain-effects-tx db unit-type-eid (:terrain-effects unit-def)))))))
-        units-def))
-
-(defn unit-states-tx [state-map-name states]
-  (into []
-        (map
-         (fn [[state-name states]]
-           (let [parent-map-id (to-unit-state-map-id state-map-name)
-                 state-id (to-unit-state-id state-map-name state-name)]
+(defn attack-strengths-tx [db game-id unit-type-eid attack-strengths-def]
+  (let [game (game-by-id db game-id)]
+    (into []
+          (map
+           (fn [[armor-type-name attack-strength]]
              {:db/id (db/next-temp-id)
-              :unit-state/id state-id
-              :unit-state-map/_states [:unit-state-map/id parent-map-id]})))
-        states))
+              :unit-type/_strengths unit-type-eid
+              :unit-strength/armor-type (to-armor-type armor-type-name)
+              :unit-strength/attack attack-strength}))
+          attack-strengths-def)))
 
-(defn unit-states-transitions-tx [state-map-name states]
-  (into []
-        (mapcat
-         (fn [[state-name {:keys [transitions]}]]
-           (map
-            (fn [[action new-state]]
-              (let [state-id (to-unit-state-id state-map-name state-name)
-                    new-state-id (to-unit-state-id state-map-name new-state)]
-                {:db/id (db/next-temp-id)
-                 :unit-state-transition/action-type (to-action-type action)
-                 :unit-state-transition/new-state [:unit-state/id new-state-id]
-                 :unit-state/_transitions [:unit-state/id state-id]}))
-            transitions)))
-        states))
+(defn terrain-effects-tx [db game-id unit-type-eid terrain-effects-def]
+  (let [game (game-by-id db game-id)]
+    (into []
+          (map
+           (fn [[terrain-type-name terrain-effect-def]]
+             (let [{:keys [attack-bonus armor-bonus movement-cost]} terrain-effect-def
+                   terrain-type-id (to-terrain-type-id terrain-type-name)]
+               {:db/id (db/next-temp-id)
+                :terrain-type/_effects [:terrain-type/id terrain-type-id]
+                :terrain-effect/unit-type unit-type-eid
+                :terrain-effect/movement-cost movement-cost
+                :terrain-effect/attack-bonus attack-bonus
+                :terrain-effect/armor-bonus armor-bonus})))
+          terrain-effects-def)))
 
-(defn unit-state-map-tx [game state-maps-def]
-  (into []
-        (mapcat
-         (fn [[state-map-name state-map-def]]
-           (let [{:keys [states start-state built-state]} state-map-def
-                 map-id (to-unit-state-map-id state-map-name)
-                 start-id (to-unit-state-id state-map-name start-state)
-                 built-id (to-unit-state-id state-map-name built-state)
-                 temp-eid (db/next-temp-id)]
-             (-> [{:db/id temp-eid
-                   :game/_unit-state-maps (e game)
-                   :unit-state-map/id map-id}]
-                 (into (unit-states-tx state-map-name states))
-                 (into (unit-states-transitions-tx state-map-name states))
-                 (into [{:db/id temp-eid
-                         :unit-state-map/start-state [:unit-state/id start-id]
-                         :unit-state-map/built-state [:unit-state/id built-id]}])))))
-        state-maps-def))
+(defn unit-types-tx [db game-id units-def]
+  (let [game (game-by-id db game-id)]
+    (into []
+          (mapcat
+           (fn [[unit-type-name unit-def]]
+             (let [{:keys [armor capturing-armor state-map]} unit-def
+                   unit-state-map-id (to-unit-state-map-id state-map)
+                   unit-type-eid (db/next-temp-id)]
+               (-> [{:db/id unit-type-eid
+                     :game/_unit-types (e game)
+                     :unit-type/id (to-unit-type-id unit-type-name)
+                     :unit-type/description (:description unit-def)
+                     :unit-type/cost (:cost unit-def)
+                     :unit-type/can-capture (:can-capture unit-def)
+                     :unit-type/movement (:movement unit-def)
+                     :unit-type/min-range (:min-range unit-def)
+                     :unit-type/max-range (:max-range unit-def)
+                     :unit-type/armor-type (-> unit-def :armor-type to-armor-type)
+                     :unit-type/armor armor
+                     :unit-type/capturing-armor (or capturing-armor armor)
+                     :unit-type/repair (:repair unit-def)
+                     :unit-type/state-map [:unit-state-map/id unit-state-map-id]
+                     :unit-type/image (:image unit-def)
+                     :unit-type/zoc-armor-types (map #(to-armor-type %) (:zoc unit-def))}]
+                   (into (attack-strengths-tx db game-id unit-type-eid (:attack-strengths unit-def)))
+                   (into (terrain-effects-tx db game-id unit-type-eid (:terrain-effects unit-def)))))))
+          units-def)))
 
-(defn game-map-tx [game map-def]
-  (let [map-eid (db/next-temp-id)]
+(defn unit-states-tx [db game-id state-map-eid state-map-name states]
+  (let [game (game-by-id db game-id)]
+    (into []
+          (map
+           (fn [[state-name states]]
+             (let [state-id (to-unit-state-id state-map-name state-name)]
+               {:db/id (db/next-temp-id)
+                :game/_unit-states (e game)
+                :unit-state/id state-id
+                :unit-state-map/_states state-map-eid})))
+          states)))
+
+(defn unit-states-transitions-tx [db game-id state-map-name states]
+  (let [game (game-by-id db game-id)]
+    (into []
+          (mapcat
+           (fn [[state-name {:keys [transitions]}]]
+             (map
+              (fn [[action new-state]]
+                (let [state-id (to-unit-state-id state-map-name state-name)
+                      new-state-id (to-unit-state-id state-map-name new-state)]
+                  {:db/id (db/next-temp-id)
+                   :unit-state-transition/action-type (to-action-type action)
+                   :unit-state-transition/new-state [:unit-state/id new-state-id]
+                   :unit-state/_transitions [:unit-state/id state-id]}))
+              transitions)))
+          states)))
+
+(defn unit-state-map-tx [db game-id state-maps-def]
+  (let [game (game-by-id db game-id)]
+    (into []
+          (mapcat
+           (fn [[state-map-name state-map-def]]
+             (let [{:keys [states start-state built-state]} state-map-def
+                   map-id (to-unit-state-map-id state-map-name)
+                   start-id (to-unit-state-id state-map-name start-state)
+                   built-id (to-unit-state-id state-map-name built-state)
+                   state-map-temp-eid (db/next-temp-id)]
+               (-> [{:db/id state-map-temp-eid
+                     :game/_unit-state-maps (e game)
+                     :unit-state-map/id map-id}]
+                   (into (unit-states-tx db game-id state-map-temp-eid state-map-name states))
+                   (into (unit-states-transitions-tx db game-id state-map-name states))
+                   (into [{:db/id state-map-temp-eid
+                           :unit-state-map/start-state [:unit-state/id start-id]
+                           :unit-state-map/built-state [:unit-state/id built-id]}])))))
+          state-maps-def)))
+
+(defn game-map-tx [db game-id map-def]
+  (let [game (game-by-id db game-id)
+        map-eid (db/next-temp-id)]
     (into [{:db/id map-eid
             :map/id (:id map-def)
             :map/description (:description map-def)
             :game/_map (e game)}]
           (map
            (fn [t]
-             (let [{:keys [q r terrain-type]} t]
+             (let [{:keys [q r]} t
+                   terrain-type-id (to-terrain-type-id (:terrain-type t))
+                   terrain-type (terrain-type-by-id db game terrain-type-id)]
                {:db/id (db/next-temp-id)
                 :terrain/game-pos-idx (game-pos-idx game q r)
                 :terrain/q q
                 :terrain/r r
-                :terrain/type [:terrain-type/id (to-terrain-type-id terrain-type)]
+                :terrain/type (e terrain-type)
                 :map/_terrains map-eid}))
            (:terrains map-def)))))
 
@@ -1115,95 +1151,99 @@
                          :game/credits-per-base credits-per-base}])
      game-id)))
 
-(defn bases-tx [game scenario-def]
-  (for [base (:bases scenario-def)]
-    (let [{:keys [q r]} base]
-      {:terrain/game-pos-idx (game-pos-idx game q r)
-       :terrain/q q
-       :terrain/r r
-       :terrain/type [:terrain-type/id :terrain-type.id/base]
-       :map/_terrains (e (:game/map game))})))
+(defn bases-tx [db game-id scenario-def]
+  (let [game (game-by-id db game-id)]
+    (for [base (:bases scenario-def)]
+      (let [{:keys [q r]} base]
+        {:terrain/game-pos-idx (game-pos-idx game q r)
+         :terrain/q q
+         :terrain/r r
+         :terrain/type [:terrain-type/id :terrain-type.id/base]
+         :map/_terrains (e (:game/map game))}))))
 
-(defn factions-tx [game factions]
-  (map-indexed (fn [i faction]
-                 (let [{:keys [color credits ai]} faction
-                       next-id (- -101 (mod (inc i) (count factions)))]
-                   {:db/id (- -101 i)
-                    :faction/color (to-faction-color color)
-                    :faction/credits credits
-                    :faction/ai ai
-                    :faction/order (inc i)
-                    :faction/next-faction next-id
-                    :game/_factions (e game)}))
-               factions))
+(defn factions-tx [db game-id factions]
+  (let [game (game-by-id db game-id)]
+    (map-indexed (fn [i faction]
+                   (let [{:keys [color credits ai]} faction
+                         next-id (- -101 (mod (inc i) (count factions)))]
+                     {:db/id (- -101 i)
+                      :faction/color (to-faction-color color)
+                      :faction/credits credits
+                      :faction/ai ai
+                      :faction/order (inc i)
+                      :faction/next-faction next-id
+                      :game/_factions (e game)}))
+                 factions)))
 
-(defn factions-bases-tx [db game factions]
-  (mapcat (fn [faction]
-            (let [{:keys [bases color]} faction
-                  faction (faction-by-color db game color)]
-              (map (fn [{:keys [q r]}]
-                     {:terrain/game-pos-idx (game-pos-idx game q r)
-                      :terrain/owner (e faction)})
-                   bases)))
-          factions))
+(defn factions-bases-tx [db game-id factions]
+  (let [game (game-by-id db game-id)]
+    (mapcat (fn [faction]
+              (let [{:keys [bases color]} faction
+                    faction (faction-by-color db game color)]
+                (map (fn [{:keys [q r]}]
+                       {:terrain/game-pos-idx (game-pos-idx game q r)
+                        :terrain/owner (e faction)})
+                     bases)))
+            factions)))
 
-(defn factions-units-tx [db game factions]
-  (mapcat (fn [faction]
-            (let [{:keys [game/max-count-per-unit]} game
-                  {:keys [units color]} faction
-                  faction-eid (e (faction-by-color db game color))]
-              (map
-               (fn [{:keys [q r] :as unit}]
-                 (let [unit-type-id (to-unit-type-id (:unit-type unit))
-                       unit-state (:state unit)
-                       unit-type (find-by db :unit-type/id unit-type-id)
-                       capturing (:capturing unit false)
-                       terrain (terrain-at db game q r)]
-                   (cond-> {:db/id (db/next-temp-id)
-                            :unit/game-pos-idx (game-pos-idx game q r)
-                            :unit/q q
-                            :unit/r r
-                            :unit/terrain (e terrain)
-                            :unit/count (:count unit max-count-per-unit)
-                            :unit/round-built (:round-built unit 0)
-                            :unit/move-count (:move-count unit 0)
-                            :unit/attack-count (:attack-count unit 0)
-                            :unit/attacked-count (:attack-count unit 0)
-                            :unit/repaired (:repaired unit false)
-                            :unit/capturing capturing
-                            :unit/type (e unit-type)
-                            :unit/state (if unit-state
-                                          [:unit-state/id (to-unit-state-id unit-state)]
-                                          (-> unit-type start-state e))
-                            :faction/_units faction-eid}
-                     capturing
-                     (assoc :unit/capture-round (:capture-round unit)))))
-               units)))
-          factions))
+(defn factions-units-tx [db game-id factions]
+  (let [game (game-by-id db game-id)]
+    (mapcat (fn [faction]
+              (let [{:keys [game/max-count-per-unit]} game
+                    {:keys [units color]} faction
+                    faction-eid (e (faction-by-color db game color))]
+                (map
+                 (fn [{:keys [q r] :as unit}]
+                   (let [unit-type-id (to-unit-type-id (:unit-type unit))
+                         unit-state (:state unit)
+                         unit-type (find-by db :unit-type/id unit-type-id)
+                         capturing (:capturing unit false)
+                         terrain (terrain-at db game q r)]
+                     (cond-> {:db/id (db/next-temp-id)
+                              :unit/game-pos-idx (game-pos-idx game q r)
+                              :unit/q q
+                              :unit/r r
+                              :unit/terrain (e terrain)
+                              :unit/count (:count unit max-count-per-unit)
+                              :unit/round-built (:round-built unit 0)
+                              :unit/move-count (:move-count unit 0)
+                              :unit/attack-count (:attack-count unit 0)
+                              :unit/attacked-count (:attack-count unit 0)
+                              :unit/repaired (:repaired unit false)
+                              :unit/capturing capturing
+                              :unit/type (e unit-type)
+                              :unit/state (if unit-state
+                                            [:unit-state/id (to-unit-state-id unit-state)]
+                                            (-> unit-type start-state e))
+                              :faction/_units faction-eid}
+                       capturing
+                       (assoc :unit/capture-round (:capture-round unit)))))
+                 units)))
+            factions)))
 
 (defn load-scenario! [conn rulesets map-defs scenario-def]
   (let [game-id (create-game! conn scenario-def)
-        conn-game #(game-by-id @conn game-id)
         {:keys [ruleset-id map-id credits-per-base factions]} scenario-def
         starting-faction-color (get-in factions [0 :color])
         ruleset (rulesets ruleset-id)]
     ;; Rules
-    (d/transact! conn (settings-tx (conn-game) (:settings ruleset)))
-    (d/transact! conn (terrain-types-tx (conn-game) (:terrains ruleset)))
-    (d/transact! conn (unit-state-map-tx (conn-game) (:unit-state-maps ruleset)))
-    (d/transact! conn (unit-types-tx @conn (conn-game) (:units ruleset)))
+    (d/transact! conn (settings-tx @conn game-id (:settings ruleset)))
+    (d/transact! conn (terrain-types-tx @conn game-id (:terrains ruleset)))
+    (d/transact! conn (unit-state-map-tx @conn game-id (:unit-state-maps ruleset)))
+    (d/transact! conn (unit-types-tx @conn game-id (:units ruleset)))
 
     ;; Map and bases
-    (d/transact! conn (game-map-tx (conn-game) (map-defs map-id)))
-    (d/transact! conn (bases-tx (conn-game) scenario-def))
+    (d/transact! conn (game-map-tx @conn game-id (map-defs map-id)))
+    (d/transact! conn (bases-tx @conn game-id scenario-def))
 
     ;; Factions
-    (d/transact! conn (factions-tx (conn-game) factions))
-    (d/transact! conn (factions-bases-tx @conn (conn-game) factions))
-    (d/transact! conn (factions-units-tx @conn (conn-game) factions))
-    (let [game (conn-game)
+    (d/transact! conn (factions-tx @conn game-id factions))
+    (d/transact! conn (factions-bases-tx @conn game-id factions))
+    (d/transact! conn (factions-units-tx @conn game-id factions))
+    (let [db @conn
+          game (game-by-id db game-id)
           starting-faction-eid (->> starting-faction-color
-                                    (faction-by-color @conn game)
+                                    (faction-by-color db game)
                                     e)]
       (d/transact! conn [{:db/id (e game)
                           :game/starting-faction starting-faction-eid
@@ -1230,26 +1270,26 @@
         scenario-def (scenario-defs scenario-id)
         starting-faction-color (get-in scenario-def [:factions 0 :color])
         game-id (create-game! conn scenario-def game-state)
-        conn-game #(game-by-id @conn game-id)
         {:keys [ruleset-id map-id credits-per-base]} scenario-def
         ruleset (rulesets ruleset-id)]
     ;; Rules
-    (d/transact! conn (settings-tx (conn-game) (:settings ruleset)))
-    (d/transact! conn (terrain-types-tx (conn-game) (:terrains ruleset)))
-    (d/transact! conn (unit-state-map-tx (conn-game) (:unit-state-maps ruleset)))
-    (d/transact! conn (unit-types-tx @conn (conn-game) (:units ruleset)))
+    (d/transact! conn (settings-tx @conn game-id (:settings ruleset)))
+    (d/transact! conn (terrain-types-tx @conn game-id (:terrains ruleset)))
+    (d/transact! conn (unit-state-map-tx @conn game-id (:unit-state-maps ruleset)))
+    (d/transact! conn (unit-types-tx @conn game-id (:units ruleset)))
 
     ;; Map and bases
-    (d/transact! conn (game-map-tx (conn-game) (map-defs map-id)))
-    (d/transact! conn (bases-tx (conn-game) scenario-def))
+    (d/transact! conn (game-map-tx @conn game-id (map-defs map-id)))
+    (d/transact! conn (bases-tx @conn game-id scenario-def))
 
     ;; Factions
-    (d/transact! conn (factions-tx (conn-game) factions))
-    (d/transact! conn (factions-bases-tx @conn (conn-game) factions))
-    (d/transact! conn (factions-units-tx @conn (conn-game) factions))
-    (let [game (conn-game)
-          starting-faction-eid (e (faction-by-color @conn game starting-faction-color))
-          current-faction-eid (e (faction-by-color @conn game current-faction-color))]
+    (d/transact! conn (factions-tx @conn game-id factions))
+    (d/transact! conn (factions-bases-tx @conn game-id factions))
+    (d/transact! conn (factions-units-tx @conn game-id factions))
+    (let [db @conn
+          game (game-by-id db game-id)
+          starting-faction-eid (e (faction-by-color db game starting-faction-color))
+          current-faction-eid (e (faction-by-color db game current-faction-color))]
       (d/transact! conn [{:db/id (e game)
                           :game/starting-faction starting-faction-eid
                           :game/current-faction current-faction-eid}]))
