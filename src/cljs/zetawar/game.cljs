@@ -1,5 +1,6 @@
 (ns zetawar.game
   (:require
+   [clojure.string :as string]
    [datascript.core :as d]
    [taoensso.timbre :as log]
    [zetawar.data :as data]
@@ -19,6 +20,17 @@
      (if (and game q r)
        (+ r (* 1000 (+ (* (e game) 1000) q)))
        -1))))
+
+(defn game-id-idx [game-or-game-id id]
+  (let [game-id (if (:db/id game-or-game-id)
+                  (:game/id game-or-game-id)
+                  game-or-game-id)]
+    (-> id
+        str
+        (string/split #":")
+        (nth 1)
+        (str "-" game-id)
+        keyword)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Game
@@ -1008,11 +1020,14 @@
     (into []
           (map
            (fn [[terrain-type-name terrain-def]]
-             {:db/id (db/next-temp-id)
-              :game/_terrain-types (e game)
-              :terrain-type/id (to-terrain-type-id terrain-type-name)
-              :terrain-type/description (:description terrain-def)
-              :terrain-type/image (:image terrain-def)}))
+             (let [terrain-type-id (to-terrain-type-id terrain-type-name)
+                   terrain-type-idx (game-id-idx game-id terrain-type-id)]
+               {:db/id (db/next-temp-id)
+                :game/_terrain-types (e game)
+                :terrain-type/id terrain-type-id
+                :terrain-type/game-id-idx terrain-type-idx
+                :terrain-type/description (:description terrain-def)
+                :terrain-type/image (:image terrain-def)})))
           terrains-def)))
 
 (defn attack-strengths-tx [db game-id unit-type-eid attack-strengths-def]
@@ -1032,9 +1047,9 @@
           (map
            (fn [[terrain-type-name terrain-effect-def]]
              (let [{:keys [attack-bonus armor-bonus movement-cost]} terrain-effect-def
-                   terrain-type-id (to-terrain-type-id terrain-type-name)]
+                   terrain-type-idx (->> terrain-type-name to-terrain-type-id (game-id-idx game-id))]
                {:db/id (db/next-temp-id)
-                :terrain-type/_effects [:terrain-type/id terrain-type-id]
+                :terrain-type/_effects [:terrain-type/game-id-idx terrain-type-idx]
                 :terrain-effect/unit-type unit-type-eid
                 :terrain-effect/movement-cost movement-cost
                 :terrain-effect/attack-bonus attack-bonus
@@ -1047,7 +1062,7 @@
           (mapcat
            (fn [[unit-type-name unit-def]]
              (let [{:keys [armor capturing-armor state-map]} unit-def
-                   unit-state-map-id (to-unit-state-map-id state-map)
+                   unit-state-map-idx (->> state-map to-unit-state-map-id (game-id-idx game-id))
                    unit-type-eid (db/next-temp-id)]
                (-> [{:db/id unit-type-eid
                      :game/_unit-types (e game)
@@ -1062,7 +1077,7 @@
                      :unit-type/armor armor
                      :unit-type/capturing-armor (or capturing-armor armor)
                      :unit-type/repair (:repair unit-def)
-                     :unit-type/state-map [:unit-state-map/id unit-state-map-id]
+                     :unit-type/state-map [:unit-state-map/game-id-idx unit-state-map-idx]
                      :unit-type/image (:image unit-def)
                      :unit-type/zoc-armor-types (map #(to-armor-type %) (:zoc unit-def))}]
                    (into (attack-strengths-tx db game-id unit-type-eid (:attack-strengths unit-def)))
@@ -1074,10 +1089,12 @@
     (into []
           (map
            (fn [[state-name states]]
-             (let [state-id (to-unit-state-id state-map-name state-name)]
+             (let [state-id (to-unit-state-id state-map-name state-name)
+                   state-idx (game-id-idx game-id state-id)]
                {:db/id (db/next-temp-id)
                 :game/_unit-states (e game)
                 :unit-state/id state-id
+                :unit-state/game-id-idx state-idx
                 :unit-state-map/_states state-map-eid})))
           states)))
 
@@ -1088,12 +1105,12 @@
            (fn [[state-name {:keys [transitions]}]]
              (map
               (fn [[action new-state]]
-                (let [state-id (to-unit-state-id state-map-name state-name)
-                      new-state-id (to-unit-state-id state-map-name new-state)]
+                (let [state-idx (->> state-name (to-unit-state-id state-map-name) (game-id-idx game-id))
+                      new-state-idx (->> new-state (to-unit-state-id state-map-name) (game-id-idx game-id))]
                   {:db/id (db/next-temp-id)
                    :unit-state-transition/action-type (to-action-type action)
-                   :unit-state-transition/new-state [:unit-state/id new-state-id]
-                   :unit-state/_transitions [:unit-state/id state-id]}))
+                   :unit-state-transition/new-state [:unit-state/game-id-idx new-state-idx]
+                   :unit-state/_transitions [:unit-state/game-id-idx state-idx]}))
               transitions)))
           states)))
 
@@ -1104,17 +1121,19 @@
            (fn [[state-map-name state-map-def]]
              (let [{:keys [states start-state built-state]} state-map-def
                    map-id (to-unit-state-map-id state-map-name)
-                   start-id (to-unit-state-id state-map-name start-state)
-                   built-id (to-unit-state-id state-map-name built-state)
+                   map-idx (game-id-idx game-id map-id)
+                   start-idx (->> start-state (to-unit-state-id state-map-name) (game-id-idx game-id))
+                   built-idx (->> built-state (to-unit-state-id state-map-name) (game-id-idx game-id))
                    state-map-temp-eid (db/next-temp-id)]
                (-> [{:db/id state-map-temp-eid
                      :game/_unit-state-maps (e game)
-                     :unit-state-map/id map-id}]
+                     :unit-state-map/id map-id
+                     :unit-state-map/game-id-idx map-idx}]
                    (into (unit-states-tx db game-id state-map-temp-eid state-map-name states))
                    (into (unit-states-transitions-tx db game-id state-map-name states))
                    (into [{:db/id state-map-temp-eid
-                           :unit-state-map/start-state [:unit-state/id start-id]
-                           :unit-state-map/built-state [:unit-state/id built-id]}])))))
+                           :unit-state-map/start-state [:unit-state/game-id-idx start-idx]
+                           :unit-state-map/built-state [:unit-state/game-id-idx built-idx]}])))))
           state-maps-def)))
 
 (defn game-map-tx [db game-id map-def]
@@ -1158,7 +1177,7 @@
         {:terrain/game-pos-idx (game-pos-idx game q r)
          :terrain/q q
          :terrain/r r
-         :terrain/type [:terrain-type/id :terrain-type.id/base]
+         :terrain/type [:terrain-type/game-id-idx (game-id-idx game-id :terrain-type.id/base)]
          :map/_terrains (e (:game/map game))}))))
 
 (defn factions-tx [db game-id factions]
@@ -1213,7 +1232,7 @@
                               :unit/capturing capturing
                               :unit/type (e unit-type)
                               :unit/state (if unit-state
-                                            [:unit-state/id (to-unit-state-id unit-state)]
+                                            [:unit-state/game-id-idx (->> unit-state to-unit-state-id (game-id-idx game-id))]
                                             (-> unit-type start-state e))
                               :faction/_units faction-eid}
                        capturing
