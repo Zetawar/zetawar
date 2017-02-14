@@ -89,19 +89,6 @@
       )
    ))
 
-(defn kickstarter-alert []
-  [:div.row
-   [:div.col-md-12
-    [:div.alert.alert-success
-     [:strong
-      "Zetawar is a work in progress. Follow "
-      [:a {:href "https://twitter.com/ZetawarGame"}
-       "@ZetawarGame"]
-      " and check out the "
-      [:a {:href "https://www.kickstarter.com/projects/djwhitt/zetawar/updates"}
-       "Zetawar Kickstarter page"]
-      " for updates."]]]])
-
 (defn footer []
   [:div.container
    [:div#footer

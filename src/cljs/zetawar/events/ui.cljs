@@ -13,11 +13,18 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Global
 
-;; TODO: replace alert with flash
-
 (defmethod router/handle-event ::alert
-  [{:as handler-ctx :keys [ev-chan conn db]} [_ text]]
-  (js/alert text))
+  [{:as handler-ctx :keys [db]} [_ message]]
+  (let [app (app/root db)]
+    {:tx [{:db/id (e app)
+           :app/alert-type :success
+           :app/alert-message message}]}))
+
+(defmethod router/handle-event ::hide-alert
+  [{:as handler-ctx :keys [db]} [_]]
+  (let [app (app/root db)]
+    {:tx [[:db/retract (e app) :app/alert-message (:app/alert-message app)]
+          [:db/retract (e app) :app/alert-type (:app/alert-type app)]]}))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Selection

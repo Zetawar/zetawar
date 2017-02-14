@@ -16,7 +16,7 @@
    [zetawar.subs :as subs]
    [zetawar.tiles :as tiles]
    [zetawar.util :refer [breakpoint inspect only oonly]]
-   [zetawar.views.common :refer [footer kickstarter-alert navbar]]))
+   [zetawar.views.common :refer [footer navbar]]))
 
 (defn tile-border [{:as view-ctx :keys [conn]} q r]
   (let [[x y] (tiles/offset->pixel q r)]
@@ -223,7 +223,6 @@
        [:p.hidden-xs.hidden-sm
         {:dangerouslySetInnerHTML {:__html (translate :multiplayer-tip)}}])]))
 
-
 (defn faction-list [{:as view-ctx :keys [conn dispatch translate]}]
   (into [:ul.list-group]
         (for [faction @(subs/factions conn)]
@@ -362,6 +361,19 @@
          [:button.btn.btn-default {:on-click hide-settings}
           (translate :cancel-button)]]]]]]))
 
+(defn alert [{:as view-ctx :keys [conn dispatch]}]
+  (let [{:keys [app/alert-message app/alert-type]} @(subs/app conn)
+        alert-class (str "alert alert-" (some-> alert-type name))]
+    (when alert-message
+      [:div.row
+       [:div.col-md-12
+        [:div {:class alert-class}
+         [:button.close {:type :button
+                         :aria-label "Close"
+                         :on-click #(dispatch [::events.ui/hide-alert])}
+          [:span {:aria-hidden true} "×"]]
+         alert-message]]])))
+
 ;; TODO: turn entire game interface into it's own component
 
 (defn app-root [{:as view-ctx :keys [conn dispatch translate]}]
@@ -383,7 +395,7 @@
       (translate :close-button)]]]
    (navbar "Game")
    [:div.container
-    (kickstarter-alert)
+    [alert view-ctx]
     [:div.row
      [:div.col-md-2
       [faction-credits view-ctx]
