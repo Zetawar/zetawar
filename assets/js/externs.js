@@ -5,7 +5,7 @@ var lzwEncode = function(s) {};
 var lzwDecode = function(s) {};
 
 var ZetawarAI = function() {};
-ZetawarAI.maxActorContext = function(db, game actor) {};
+ZetawarAI.makeActorContext = function(db, game actor) {};
 ZetawarAI.scoreActor = function(db, game actor, actor_ctx) {};
 ZetawarAI.makeBaseActionContext = function(db, game, actor_ctx, base) {};
 ZetawarAI.scoreBaseAction = function(db, game, actor_ctx, action) {};
