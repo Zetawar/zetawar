@@ -69,9 +69,11 @@
       (doseq [[_ player] @players]
         (when player
           (players/stop player))))
-    (doseq [{:keys [faction/ai faction/color]} factions]
+    (doseq [{:as faction :keys [faction/ai faction/color]} factions]
       (let [player-type (if ai ::players/reference-ai ::players/human)
             player (players/new-player app-ctx player-type color)]
+        (d/transact! conn [{:db/id (e faction)
+                            :faction/player-type player-type}])
         (players/start player)
         (swap! players assoc color player)))))
 
