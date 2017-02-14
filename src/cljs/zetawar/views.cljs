@@ -314,8 +314,9 @@
         [:label {:for "player-type"}
          (translate :player-type-label)]
         (into [:select.form-control {:id "player-type"
-                                     :selected (or @selected-player-type
-                                                   (:faction/player-type @faction))
+                                     :value (or @selected-player-type
+                                                (some-> @faction :faction/player-type name)
+                                                "")
                                      :on-change select-player-type}]
               (for [[player-type-id {:keys [description ai]}] players/player-types]
                 [:option {:value (name player-type-id)}
