@@ -128,7 +128,7 @@
      [:span.text-muted.pull-right (str "+" income)
       [:span.hidden-md "/turn"]]]))
 
-(defn copy-url-link [{:as view-ctx :keys [translate]}]
+(defn copy-url-link [{:as view-ctx :keys [conn translate]}]
   (let [clipboard (atom nil)
         text-fn (fn [] js/window.location)]
     (r/create-class
@@ -145,7 +145,8 @@
          (translate :copy-game-url-link)])})))
 
 (defn faction-status [{:as view-ctx :keys [conn dispatch translate]}]
-  (let [{:keys [game/round]} @(subs/game conn)
+  (let [{:keys [app/show-copy-link]} @(subs/app conn)
+        {:keys [game/round]} @(subs/game conn)
         base-count @(subs/current-base-count conn)]
     [:div#faction-status
      ;; TODO: make link red
@@ -153,8 +154,8 @@
                                 (.preventDefault e)
                                 (dispatch [::events.ui/end-turn]))}
       (translate :end-turn-link)]
-     " · "
-     [copy-url-link view-ctx]
+     (when show-copy-link
+       [:span " · " [copy-url-link view-ctx]])
      [:div.pull-right
       [:a {:href "#"
            :on-click (fn [e]

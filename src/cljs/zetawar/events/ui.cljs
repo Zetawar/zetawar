@@ -249,6 +249,21 @@
   (app/set-url-game-state! @conn))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Copy link
+
+(defmethod router/handle-event ::show-copy-link
+  [{:as handler-ctx :keys [ev-chan db]} _]
+  (let [app (app/root db)]
+    {:tx [[:db/add (e app) :app/show-copy-link true]]}))
+
+(defmethod router/handle-event ::hide-copy-link
+  [{:as handler-ctx :keys [ev-chan db]} _]
+  (let [app (app/root db)
+        {:keys [app/show-copy-link]} app]
+    (when-not (nil? show-copy-link) 
+      {:tx [[:db/retract (e app) :app/show-copy-link show-copy-link]]})))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Unit picker
 
 (defmethod router/handle-event ::show-unit-picker
