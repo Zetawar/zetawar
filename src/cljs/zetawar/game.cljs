@@ -686,6 +686,8 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Capture
 
+;; TODO: add can-capture? that only checks if unit type can capture
+
 ;; TODO: rename to check-can-capture
 (defn check-capturable [db game unit terrain]
   (check-unit-current db game unit)
@@ -702,6 +704,7 @@
                      :r (:terrain/r terrain)})))
   (checked-next-state db unit :action.type/capture-base))
 
+;; TODO: rename to can-capture-terrain? (?)
 (defn can-capture? [db game unit terrain]
   (try
     (check-capturable db game unit terrain)
@@ -905,17 +908,36 @@
         bases (faction-bases db faction)]
     (filter #(base-can-act? db game %) bases)))
 
-(defn enemies-in-range [db game unit]
+;; TODO: rename to enemy-units (?)
+(defn enemies [db game unit]
   (let [u-faction (unit-faction db unit)]
-    (into []
-          (filter #(in-range? db unit %))
-          (qess '[:find ?u
-                  :in $ ?g ?f-arg
-                  :where
-                  [?g :game/factions ?f]
-                  [?f :faction/units ?u]
-                  [(not= ?f ?f-arg)]]
-                db (e game) (e u-faction)))))
+    (qess '[:find ?u
+            :in $ ?g ?f-arg
+            :where
+            [?g :game/factions ?f]
+            [?f :faction/units ?u]
+            [(not= ?f ?f-arg)]]
+          db (e game) (e u-faction))))
+
+(defn enemies-in-range [db game unit]
+  (into []
+        (filter #(in-range? db unit %))
+        (enemies db game unit)))
+
+(defn closest-enemy [db game unit]
+  (let [unit-q (:unit/q unit)
+        unit-r (:unit/r unit)]
+    (reduce
+     (fn [closest enemy]
+       (let [enemy-q (:unit/q enemy)
+             enemy-r (:unit/r enemy)
+             closest-q (:unit/q closest)
+             closest-r (:unit/r closest)]
+         (if (< (hex/distance unit-q unit-r enemy-q enemy-r)
+                (hex/distance unit-q unit-r closest-q closest-r))
+           enemy
+           closest)))
+     (enemies db game unit))))
 
 (defn unit-can-act? [db game unit]
   (let [terrain (:unit/terrain unit)]

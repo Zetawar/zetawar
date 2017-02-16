@@ -19,10 +19,12 @@
   (rand-int 200))
 
 (defn mk-unit-action-ctx [db game actor-ctx unit]
-  (assoc actor-ctx :closest-base (game/closest-capturable-base db game unit)))
+  (assoc actor-ctx
+         :closest-base (game/closest-capturable-base db game unit)
+         :closest-enemy (game/closest-enemy db game unit)))
 
 (defn score-unit-action [db game unit action-ctx action]
-  (let [{:keys [closest-base]} action-ctx]
+  (let [{:keys [closest-base closest-enemy]} action-ctx]
     (case (:action/type action)
       :action.type/capture-base
       200
@@ -31,10 +33,15 @@
       100
 
       :action.type/move-unit
-      (let [[base-q base-r] (game/terrain-hex closest-base)
-            {:keys [action/to-q action/to-r]} action
-            base-distance (hex/distance base-q base-r to-q to-r)]
-        (- 100 base-distance))
+      (if closest-base
+        (let [[base-q base-r] (game/terrain-hex closest-base)
+              {:keys [action/to-q action/to-r]} action
+              base-distance (hex/distance base-q base-r to-q to-r)]
+          (- 100 base-distance))
+        (let [[enemy-q enemy-r] (game/unit-hex closest-enemy)
+              {:keys [action/to-q action/to-r]} action
+              enemy-distance (hex/distance enemy-q enemy-r to-q to-r)]
+          (- 100 enemy-distance)))
 
       0)))
 

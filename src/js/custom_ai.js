@@ -22,11 +22,14 @@ ZetawarAI = (function() {
 
     ZetawarAI.makeUnitActionContext = function(db, game, actor_ctx, unit) {
         actor_ctx['closest_base'] = zetawar.js.game.closest_capturable_base(db, game, unit);
+        actor_ctx['closest_enemy'] = zetawar.js.game.closest_enemy(db, game, unit);
         return actor_ctx;
     };
 
     ZetawarAI.scoreUnitAction = function(db, game, unit, action_ctx, action) {
-        var closest_base = action_ctx.closest_base
+        var closestBase = action_ctx.closest_base;
+        var closestEnemy = action_ctx.closest_enemy;
+        var ret = 0;
 
         switch (action["type"]) {
         case "capture-base":
@@ -34,15 +37,22 @@ ZetawarAI = (function() {
         case "attack-unit":
             return 100;
         case "move-unit":
-            [baseQ, baseR] = zetawar.js.game.terrain_hex(closest_base);
-            toQ = action["to-q"];
-            toR = action["to-r"];
-            distanceFromBase = zetawar.js.hex.distance(baseQ, baseR, toQ, toR);
-
-            return 100 - distanceFromBase;
+            if (closestBase) {
+                [baseQ, baseR] = zetawar.js.game.terrain_hex(closestBase);
+                toQ = action["to-q"];
+                toR = action["to-r"];
+                distanceFromBase = zetawar.js.hex.distance(baseQ, baseR, toQ, toR);
+                ret = 100  - distanceFromBase;
+            } else {
+                [enemyQ, enemyR] = zetawar.js.game.unit_hex(closestEnemy);
+                toQ = action["to-q"];
+                toR = action["to-r"];
+                distanceFromEnemy = zetawar.js.hex.distance(enemyQ, enemyR, toQ, toR);
+                ret = 100  - distanceFromEnemy;
+            }
         }
 
-        return 0;
+        return ret;
     };
 
     return ZetawarAI;
