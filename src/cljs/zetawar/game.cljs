@@ -82,6 +82,10 @@
       ffirst
       (or 0)))
 
+(defn human-faction-count [db game]
+  (- (faction-count db game)
+     (ai-faction-count db game)))
+
 (defn faction-bases [db faction]
   (qess '[:find ?t
           :in $ ?f
