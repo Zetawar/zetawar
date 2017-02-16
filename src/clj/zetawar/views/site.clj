@@ -1,6 +1,6 @@
 (ns zetawar.views.site
   (:require
-   [zetawar.views.common :refer [footer head kickstarter-alert navbar]]
+   [zetawar.views.common :refer [footer head navbar]]
    [hiccup.page :refer [html5 include-js]]
    [zetawar.site :as site])
   (:import
@@ -31,7 +31,6 @@
      [:body#site
       (navbar "Blog")
       [:div.container
-       (kickstarter-alert)
        (into [:div#blog-posts]
              (for [entry entries]
                [:div.blog-post
@@ -50,7 +49,6 @@
      [:body#site
       (navbar "Blog")
       [:div.container
-       (kickstarter-alert)
        [:div.blog-post
         [:div.blog-post-title (:description entry)]
         [:div.blog-post-meta
@@ -66,7 +64,6 @@
      [:body#site
       (navbar (:name entry))
       [:div.container
-       (kickstarter-alert)
        (:content entry)]
       (footer)
       (include-js (site/prefix "/js/main.js"))])))

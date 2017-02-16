@@ -19,16 +19,19 @@
                                                                   defender-q defender-r)
             action (merge action {:action/attacker-damage attacker-damage
                                   :action/defender-damage defender-damage})]
-        {:tx     (game/action-tx db game action)
-         :notify [[:zetawar.players/apply-action :faction.color/all action]]})
+        {:tx       (game/action-tx db game action)
+         :dispatch [[:zetawar.events.ui/hide-copy-link]]
+         :notify   [[:zetawar.players/apply-action :faction.color/all action]]})
 
       :action.type/end-turn
       (let [game (app/current-game db)
             next-faction-color (game/next-faction-color game)]
         {:tx       (game/action-tx db game action)
-         :dispatch [[:zetawar.events.ui/set-url-game-state]]
+         :dispatch [[:zetawar.events.ui/set-url-game-state]
+                    [:zetawar.events.ui/show-copy-link]]
          :notify   [[:zetawar.players/apply-action :faction.color/all action]
                     [:zetawar.players/start-turn next-faction-color]]})
 
-      {:tx     (game/action-tx db game action)
-       :notify [[:zetawar.players/apply-action :faction.color/all action]]})))
+      {:tx       (game/action-tx db game action)
+       :dispatch [[:zetawar.events.ui/hide-copy-link]]
+       :notify   [[:zetawar.players/apply-action :faction.color/all action]]})))

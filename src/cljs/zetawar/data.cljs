@@ -282,7 +282,6 @@
             :zoc
             [:personnel :armored]}}}})
 
-;; TODO: add support for :allowed-unit-types
 ;; TODO: remove redundant id keys (?)
 (def maps
   {:sterlings-aruba
@@ -1185,6 +1184,7 @@
     }
    })
 
+;; TODO: add support for :allowed-unit-types
 (def scenarios
   {:sterlings-aruba-multiplayer
    {:id :sterlings-aruba-multiplayer

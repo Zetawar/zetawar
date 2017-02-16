@@ -24,6 +24,9 @@
    :game/unit-state-maps            {:db/valueType   :db.type/ref
                                      :db/cardinality :db.cardinality/many
                                      :db/isComponent true}
+   :game/unit-states                {:db/valueType   :db.type/ref
+                                     :db/cardinality :db.cardinality/many
+                                     :db/isComponent true}
    :game/map                        {:db/valueType   :db.type/ref
                                      :db/isComponent true}
    :game/factions                   {:db/valueType   :db.type/ref
@@ -40,25 +43,23 @@
                                      :db/index       true}
 
    ;; Unit
-   :unit/type                       {:db/valueType   :db.type/ref}
    :unit/game-pos-idx               {:db/unique      :db.unique/identity}
+   :unit/type                       {:db/valueType   :db.type/ref}
    :unit/attacked-from              {:db/valueType   :db.type/ref
                                      :db/cardinality :db.cardinality/many}
    :unit/state                      {:db/valueType   :db.type/ref}
    :unit/terrain                    {:db/valueType   :db.type/ref}
 
    ;; Unit Type
-   ;; TODO: make unit-type/id non-unique to support per-game types
-   :unit-type/id                    {:db/unique      :db.unique/identity}
+   :unit-type/game-id-idx           {:db/unique      :db.unique/identity}
    :unit-type/state-map             {:db/valueType   :db.type/ref}
    :unit-type/zoc-armor-types       {:db/cardinality :db.cardinality/many}
-   :unit-type/unit-strengths        {:db/valueType   :db.type/ref
+   :unit-type/strengths             {:db/valueType   :db.type/ref
                                      :db/cardinality :db.cardinality/many
                                      :db/isComponent true}
 
    ;; Unit State Maps
-   ;; TODO: make unit-state-map/id non-unique to support per-game state maps
-   :unit-state-map/id               {:db/unique      :db.unique/identity}
+   :unit-state-map/game-id-idx      {:db/unique      :db.unique/identity}
    :unit-state-map/states           {:db/valueType   :db.type/ref
                                      :db/cardinality :db.cardinality/many
                                      :db/isComponent true}
@@ -66,7 +67,7 @@
    :unit-state-map/start-state      {:db/valueType   :db.type/ref}
 
    ;; Unit State
-   :unit-state/id                   {:db/unique      :db.unique/identity}
+   :unit-state/game-id-idx          {:db/unique      :db.unique/identity}
    :unit-state/transitions          {:db/valueType   :db.type/ref
                                      :db/cardinality :db.cardinality/many
                                      :db/isComponent true}
@@ -93,25 +94,20 @@
                                      :db/isComponent true}
 
    ;; Terrain
+   :terrain/game-pos-idx            {:db/unique      :db.unique/identity}
    :terrain/owner                   {:db/valueType   :db.type/ref}
    :terrain/type                    {:db/valueType   :db.type/ref}
-   :terrain/game-pos-idx            {:db/unique      :db.unique/identity}
 
    ;; Terrain type
-   ;; TODO: make terain-type/id non-unique to support per-game types
-   :terrain-type/id                 {:db/unique      :db.unique/identity}
-   :terrain-type/terrain-effects    {:db/valueType   :db.type/ref
+   :terrain-type/game-id-idx        {:db/unique      :db.unique/identity}
+   :terrain-type/effects            {:db/valueType   :db.type/ref
                                      :db/cardinality :db.cardinality/many
                                      :db/isComponent true}
-
-   ;; Unit strength
-   :unit-strength/unit-type         {:db/valueType   :db.type/ref}
 
    ;; Terrain effects
    :terrain-effect/unit-type        {:db/valueType   :db.type/ref
                                      :db/index       true}
-   :terrain-effect/terrain-type     {:db/valueType   :db.type/ref
-                                     :db/index       true}})
+   })
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Utils

@@ -5,14 +5,13 @@
  '[;; Dev
    [adzerk/boot-cljs "1.7.228-2" :scope "test"]
    [adzerk/boot-cljs-repl "0.3.3" :scope "test"]
-   [adzerk/boot-reload "0.4.13" :scope "test"]
-   [binaryage/devtools "0.8.3" :scope "test"]
+   [adzerk/boot-reload "0.5.1" :scope "test"]
+   [binaryage/devtools "0.9.1" :scope "test"]
    [boot-codox "0.10.1" :scope "test"]
    [com.cemerick/piggieback "0.2.1" :scope "test"]
-   [crisptrutski/boot-cljs-test "0.2.2" :scope "test"]
+   [crisptrutski/boot-cljs-test "0.3.0" :scope "test"]
    [deraen/boot-sass "0.3.0" :scope "test"]
    [devcards "0.2.2" :scope "test"]
-   [nightlight "1.3.2" :scope "test"]
    [org.clojure/tools.nrepl "0.2.12" :scope "test"]
    [org.martinklepsch/boot-gzip "0.1.3" :scope "test"]
    [org.slf4j/slf4j-nop "1.7.21" :scope "test"]
@@ -23,17 +22,17 @@
    ;; App
    [cljsjs/clipboard "1.5.9-0"]
    [cljsjs/raven "3.9.1-0"]
-   [cljsjs/react "15.3.1-0"]
+   [cljsjs/react "15.4.2-2"]
    [cljsjs/react-bootstrap "0.30.6-0"]
-   [cljsjs/react-dom "15.3.1-0"]
-   [cljsjs/react-dom-server "15.3.1-0"]
+   [cljsjs/react-dom "15.4.2-2"]
+   [cljsjs/react-dom-server "15.4.2-2"]
    [com.cognitect/transit-cljs "0.8.239"]
    [com.gfredericks/test.chuck "0.2.7"]
-   [com.taoensso/timbre "4.7.4"]
+   [com.taoensso/timbre "4.8.0"]
    [danielsz/boot-autoprefixer "0.0.9"]
-   [datascript "0.15.4"]
+   [datascript "0.15.5"]
    [hiccup "1.0.5"]
-   [integrant "0.1.5"]
+   [integrant "0.2.1"]
    [org.clojure/clojure "1.9.0-alpha14"]
    [org.clojure/clojurescript "1.9.293"]
    [org.clojure/core.async "0.2.395"]
@@ -55,7 +54,6 @@
  '[danielsz.autoprefixer :refer [autoprefixer]]
  '[deraen.boot-sass :refer :all]
  '[io.perun :refer :all]
- '[nightlight.boot :refer [nightlight]]
  '[org.martinklepsch.boot-gzip :refer [gzip]]
  '[pandeiro.boot-http :refer :all]
  '[zetawar.site]
@@ -162,8 +160,7 @@
               :optimizations :none
               :compiler-options {:preloads '[zetawar.dev]
                                  :parallel-build true})
-        (target)
-        (nightlight :port 4000 :url "http://localhost:3000")))
+        (target)))
 
 (deftask run-tests
   "Run Zetawar tests."
