@@ -63,6 +63,25 @@
         [?f :faction/color ?color]]
       db (e game) (to-faction-color color)))
 
+(defn faction-count [db game]
+  (-> (d/q '[:find (count ?f)
+             :in $ ?g
+             :where
+             [?g :game/factions ?f]]
+           db (e game))
+      ffirst
+      (or 0)))
+
+(defn ai-faction-count [db game]
+  (-> (d/q '[:find (count ?f)
+             :in $ ?g
+             :where
+             [?g :game/factions ?f]
+             [?f :faction/ai true]]
+           db (e game))
+      ffirst
+      (or 0)))
+
 (defn faction-bases [db faction]
   (qess '[:find ?t
           :in $ ?f

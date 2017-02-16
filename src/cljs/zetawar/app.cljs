@@ -86,10 +86,15 @@
        (d/transact conn [[:db.fn/retractEntity (e game)]]))
      (let [scenario-def (scenario-defs scenario-id)
            game-id (game/load-scenario! conn rulesets map-defs scenario-def)
-           app-eid (or (some-> (root @conn) e) -101)]
+           db @conn
+           app-eid (or (some-> (root db) e) -101)
+           game (game/game-by-id db game-id)
+           turn-stepping (= (game/faction-count db game)
+                            (game/ai-faction-count db game))]
        (d/transact! conn [{:db/id app-eid
                            :app/game [:game/id game-id]
-                           :app/hide-win-message false}])
+                           :app/hide-win-message false
+                           :app/ai-turn-stepping turn-stepping}])
        ;; Skip player creation for tests
        (when players
          (create-players! app-ctx))))))
@@ -103,9 +108,14 @@
                                         rulesets
                                         map-defs
                                         scenario-defs
-                                        game-state)]
+                                        game-state)
+         db @conn
+         game (game/game-by-id db game-id)
+         turn-stepping (= (game/faction-count db game)
+                          (game/ai-faction-count db game))]
      (d/transact! conn [{:db/id -1
-                         :app/game [:game/id game-id]}])
+                         :app/game [:game/id game-id]
+                         :app/ai-turn-stepping turn-stepping}])
      ;; Skip player creation for tests
      (when players
        (create-players! app-ctx)))))
