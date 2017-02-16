@@ -21,7 +21,7 @@ ZetawarAI = (function() {
     };
 
     ZetawarAI.makeUnitActionContext = function(db, game, actor_ctx, unit) {
-        actor_ctx['actor_ctx'] = zetawar.js.game.closest_capturable_base(db, game, unit);
+        actor_ctx['closest_base'] = zetawar.js.game.closest_capturable_base(db, game, unit);
         return actor_ctx;
     };
 

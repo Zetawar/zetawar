@@ -24,7 +24,7 @@
   (js/ZetawarAI.scoreBaseAction db game base action-ctx (clj->js action)))
 
 (defn mk-unit-action-ctx [db game actor-ctx unit]
-  (js/ZetawarAI.makeBaseActionContext db game actor-ctx unit))
+  (js/ZetawarAI.makeUnitActionContext db game actor-ctx unit))
 
 (defn score-unit-action [db game unit action-ctx action]
   (js/ZetawarAI.scoreUnitAction db game unit action-ctx (clj->js action)))
