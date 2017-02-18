@@ -12,8 +12,8 @@ scenarios.
 The map and scenario data are located in the Clojure maps in the 'maps' and
 'scenarios' vars in [src/cljs/zetawar/data.cljs](https://github.com/Zetawar/zetawar/blob/481bfa3e789683b8216c0495babcd2e32aa8e86a/src/cljs/zetawar/data.cljs).
 To add your own maps and scenarios simply add new entries to those maps. For
-help understanding the data format, check out the map and scenario format dev
-cards.
+help understanding the data format, check out the map and scenario format [dev
+cards](/devcards/#!/zetawar.devcards.data_formats).
 
 While creating maps and and scenarios it's useful to be able to see what they
 look like. To get a live preview while editing, add devcards for your scenarios
