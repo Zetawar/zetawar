@@ -2,6 +2,7 @@
 *.jar
 .m2
 /.cljs_rhino_repl
+/.dir-locals.el
 /.nightlight.edn
 /.nrepl-*
 /TAGS
