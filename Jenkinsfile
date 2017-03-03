@@ -24,7 +24,7 @@ node {
 
     stage('Build') {
       sh "ZETAWAR_BUILD='${commitHash}' nix-shell . --run 'boot --no-colors build-site -e ${ZETAWAR_ENV}'"
-      sh "ZETAWAR_BUILD='${commitHash}' ZETAWAR_PREFIX=${permaBuildPrefix} nix-shell . --run 'boot boot --no-colors build-site -e ${ZETAWAR_ENV} -t target.permabuild'"
+      sh "ZETAWAR_BUILD='${commitHash}' ZETAWAR_PREFIX=${permaBuildPrefix} nix-shell . --run 'boot --no-colors build-site -e ${ZETAWAR_ENV} -t target.permabuild'"
     }
 
     stage('Deploy') {
