@@ -15,21 +15,21 @@ node {
     }
 
     stage('Prepare') {
-      sh "npm install"
+      sh 'nix-shell . --run "npm install"'
     }
 
     stage('Test') {
-      sh "boot --no-colors run-tests"
+      sh "nix-shell . --run 'boot --no-colors run-tests'"
     }
 
     stage('Build') {
-      sh "ZETAWAR_BUILD='${commitHash}' boot --no-colors build-site -e ${ZETAWAR_ENV}"
-      sh "ZETAWAR_BUILD='${commitHash}' ZETAWAR_PREFIX=${permaBuildPrefix} boot --no-colors build-site -e ${ZETAWAR_ENV} -t target.permabuild"
+      sh "ZETAWAR_BUILD='${commitHash}' nix-shell . --run 'boot --no-colors build-site -e ${ZETAWAR_ENV}'"
+      sh "ZETAWAR_BUILD='${commitHash}' ZETAWAR_PREFIX=${permaBuildPrefix} nix-shell . --run 'boot boot --no-colors build-site -e ${ZETAWAR_ENV} -t target.permabuild'"
     }
 
     stage('Deploy') {
-      sh "./bin/deploy -b ${S3_BUCKET} ${PUBLIC_FLAG}"
-      sh "./bin/deploy -s target.permabuild -b ${S3_BUCKET} -p ${permaBuildPrefix} ${PUBLIC_FLAG}"
+      sh "nix-shell . --run './bin/deploy -b ${S3_BUCKET} ${PUBLIC_FLAG}'"
+      sh "nix-shell . --run './bin/deploy -s target.permabuild -b ${S3_BUCKET} -p ${permaBuildPrefix} ${PUBLIC_FLAG}'"
     }
   } catch (err) {
     currentBuild.result = 'FAILURE'
