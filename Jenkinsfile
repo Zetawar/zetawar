@@ -9,6 +9,7 @@ node {
   try {
     stage('Checkout') {
       checkout scm
+      sh 'echo "testing..."'
       sh 'git rev-parse HEAD > commit'
       commitHash = readFile('commit').trim()
       permaBuildPrefix = "/builds/${commitHash}"
