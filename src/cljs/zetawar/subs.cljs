@@ -248,6 +248,7 @@
                         :unit/type [:unit-type/id
                                     :unit-type/description
                                     :unit-type/can-capture
+                                    :unit-type/can-repair
                                     :unit-type/min-range
                                     :unit-type/max-range
                                     :unit-type/image]}]
