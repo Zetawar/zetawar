@@ -625,12 +625,6 @@
          defender (checked-unit-at db game defender-q defender-r)]
      (battle-tx db game attacker defender attacker-damage defender-damage))))
 
-(defn attack! [conn game-id attacker-q attacker-r defender-q defender-r]
-  (let [db @conn
-        game (game-by-id db game-id)
-        tx (attack-tx db game attacker-q attacker-r defender-q defender-r)]
-    (d/transact! conn tx)))
-
 ;; TODO: remove attack-tx (superceded by battle-tx)
 (defn attack-tx
   ([db game attacker defender]
@@ -641,6 +635,12 @@
    (let [attacker (checked-unit-at db game attacker-q attacker-r)
          defender (checked-unit-at db game defender-q defender-r)]
      (attack-tx db game attacker defender))))
+
+(defn attack! [conn game-id attacker-q attacker-r defender-q defender-r]
+  (let [db @conn
+        game (game-by-id db game-id)
+        tx (attack-tx db game attacker-q attacker-r defender-q defender-r)]
+    (d/transact! conn tx)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Repair
