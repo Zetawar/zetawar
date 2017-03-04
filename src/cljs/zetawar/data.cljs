@@ -316,8 +316,7 @@
             {:personnel 10
              :armored   10}
             :zoc
-            [:personnel :armored]}
-      }}})
+            [:personnel :armored]}}}})
 
 ;; TODO: remove redundant id keys (?)
 (def maps
