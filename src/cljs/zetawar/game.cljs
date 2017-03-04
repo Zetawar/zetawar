@@ -8,8 +8,6 @@
    [zetawar.hex :as hex]
    [zetawar.util :refer [breakpoint inspect oonly]]))
 
-(enable-console-print!)
-
 ;; TODO: improve exception data
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

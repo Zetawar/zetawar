@@ -84,8 +84,6 @@
               (and @(subs/unit-selected? conn)
                    (not @(subs/selected? conn q r))
                    (not @(subs/enemy-in-range-of-selected? conn q r))
-                   ;(not (and @(subs/friend-in-range-of-selected? conn q r)
-                   ;         (get-in @(subs/unit-at conn q r) [:unit/type :unit-type/can-repair])))
                    (not @(subs/friend-in-range-of-selected? conn q r))
                    (not @(subs/valid-destination-for-selected? conn q r))))]
     [:image {:visibility (if show "visible" "hidden")

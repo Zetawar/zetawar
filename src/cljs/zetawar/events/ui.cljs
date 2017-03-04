@@ -94,20 +94,14 @@
 
            ;; selecting friendly unit with unit or terrain selected
            (and unit
-                ;(or selected-unit selected-terrain)
+                (or selected-unit selected-terrain)
                 (or selected-unit selected-unit)
                 (or (game/can-move? db game unit)
                     (game/can-attack? db game unit)
                     (game/can-repair-other? db game unit)))
-           ;(cond-> [{:db/id (e app)
-            ;         :app/selected-q ev-q
-            ;         :app/selected-r ev-r}]
              [{:db/id (e app)
                :app/targeted-q ev-q
                :app/targeted-r ev-r}]
-             ;(and targeted-q targeted-r)
-             ;(conj [:db/retract (e app) :app/targeted-q targeted-q]
-              ;     [:db/retract (e app) :app/targeted-r targeted-r]))
 
            ;; selecting owned base with no unit selected
            (and terrain
