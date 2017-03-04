@@ -31,6 +31,7 @@
     :build-unit-button "Build"
     :attack-unit-button "Attack"
     :repair-unit-button "Repair"
+    :repair-other-button "Repair Other"
     :capture-base-button "Capture"
 
     ;; Building units
@@ -46,7 +47,7 @@
 
     ;; Gameplay tips
     :select-unit-or-base-tip "Select a unit or base."
-    :select-target-or-destination-tip "Select a destination or target to move or attack."
+    :select-target-or-destination-tip "Select a destination or target to move, attack, or repair."
     :multiplayer-tip
     (str "To play multiplayer follow the instructions "
          "<a href=\"https://www.kickstarter.com/projects/311016908/zetawar/posts/1608417\">"
@@ -93,13 +94,15 @@
       :built-state :done
       :states
       {:start {:transitions
-               {:move-unit    :moved
-                :attack-unit  :done
-                :repair-unit  :done
-                :capture-base :done}}
+               {:move-unit         :moved
+                :attack-unit       :done
+                :repair-unit       :done
+                :repair-other-unit :done
+                :capture-base      :done}}
        :moved {:transitions
-               {:attack-unit  :done
-                :capture-base :done}}
+               {:attack-unit       :done
+                :capture-base      :done
+                :repair-other-unit :done}}
        :done  {}}}
 
      :free-attack-twice
@@ -133,6 +136,7 @@
                 :cost 75
                 :movement 9
                 :can-capture true
+                :can-repair false
                 :min-range 1
                 :max-range 1
                 :armor-type :personnel
@@ -159,6 +163,7 @@
                  :cost 150
                  :movement 9
                  :can-capture true
+                 :can-repair false
                  :min-range 1
                  :max-range 2
                  :armor-type :personnel
@@ -185,6 +190,7 @@
               :cost 200
               :movement 9
               :can-capture true
+              :can-repair false
               :min-range 2
               :max-range 3
               :armor-type :personnel
@@ -209,6 +215,7 @@
               :cost 200
               :movement 9
               :can-capture true
+              :can-repair false
               :min-range 1
               :max-range 1
               :armor-type :personnel
@@ -232,11 +239,39 @@
                :armored   4}
               :zoc
               [:personnel :armored]}
+     :medic {:description "Medic"
+             :cost 100
+             :movement 9
+             :can-capture true
+             :can-repair true
+             :min-range 1
+             :max-range 1
+             :armor-type :personnel
+             :armor 6
+             :capturing-armor 4
+             :repair 1
+             :state-map :move-attack
+             :image "tilesets/elite-command/units/medic-COLOR.png"
+             :terrain-effects
+             {:plains    {:movement-cost 3 :armor-bonus  0 :attack-bonus  0}
+              :mountains {:movement-cost 6 :armor-bonus  5 :attack-bonus  2}
+              :woods     {:movement-cost 4 :armor-bonus  3 :attack-bonus  2}
+              :desert    {:movement-cost 4 :armor-bonus -1 :attack-bonus -1}
+              :tundra    {:movement-cost 4 :armor-bonus -1 :attack-bonus -1}
+              :swamp     {:movement-cost 6 :armor-bonus -2 :attack-bonus -2}
+              :ford      {:movement-cost 5 :armor-bonus -1 :attack-bonus -1}
+              :base      {:movement-cost 2 :armor-bonus  3 :attack-bonus  2}}
+            :attack-strengths
+            {:personnel 5
+             :armored   2}
+            :zoc
+            [:personnel :armored]}
      ;; Armored
      :humvee {:description "Humvee"
               :cost 300
               :movement 15
               :can-capture false
+              :can-repair false
               :min-range 1
               :max-range 1
               :armor-type :armored
@@ -261,6 +296,7 @@
             :cost 350
             :movement 12
             :can-capture false
+            :can-repair false
             :min-range 1
             :max-range 1
             :armor-type :armored
@@ -280,7 +316,8 @@
             {:personnel 10
              :armored   10}
             :zoc
-            [:personnel :armored]}}}})
+            [:personnel :armored]}
+      }}})
 
 ;; TODO: remove redundant id keys (?)
 (def maps

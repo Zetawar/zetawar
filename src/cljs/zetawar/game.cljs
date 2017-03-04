@@ -8,6 +8,8 @@
    [zetawar.hex :as hex]
    [zetawar.util :refer [breakpoint inspect oonly]]))
 
+(enable-console-print!)
+
 ;; TODO: improve exception data
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -636,12 +638,6 @@
          defender (checked-unit-at db game defender-q defender-r)]
      (attack-tx db game attacker defender))))
 
-(defn attack! [conn game-id attacker-q attacker-r defender-q defender-r]
-  (let [db @conn
-        game (game-by-id db game-id)
-        tx (attack-tx db game attacker-q attacker-r defender-q defender-r)]
-    (d/transact! conn tx)))
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Repair
 
@@ -650,7 +646,21 @@
   (when-not (:game/self-repair game)
     (throw (game-ex "Unit self repair is not allowed" game)))
   (when (:unit/capturing unit)
-    (throw (unit-ex "Unit cannot be repaired while capturing" unit)))
+    (throw (unit-ex "Unit cannot make repairs while capturing" unit)))
+  (when (>= (:unit/count unit) (:game/max-count-per-unit game))
+    (throw (unit-ex "Unit is already fully repaired" unit)))
+  (checked-next-state db unit :action.type/repair-unit))
+
+(defn check-can-repair-other [db game unit]
+  (check-unit-current db game unit)
+  (when (:unit/capturing unit)
+    (throw (unit-ex "Unit cannot make repairs while capturing" unit)))
+  (when-not (get-in unit [:unit/type :unit-type/can-repair])
+    (throw (unit-ex "Unit cannot repair other units" unit)))
+  (checked-next-state db unit :action.type/repair-other-unit))
+
+(defn check-can-be-repaired [db game unit]
+  (check-unit-current db game unit)
   (when (>= (:unit/count unit) (:game/max-count-per-unit game))
     (throw (unit-ex "Unit is already fully repaired" unit)))
   (checked-next-state db unit :action.type/repair-unit))
@@ -658,6 +668,21 @@
 (defn can-repair? [db game unit]
   (try
     (check-can-repair db game unit)
+    true
+    (catch :default ex
+      false)))
+
+(defn can-repair-other? [db game unit]
+  true)
+  ;(try
+  ;  (check-can-repair-other db game unit)
+  ;  true
+  ;  (catch :default ex
+  ;    false)))
+
+(defn can-be-repaired? [db game unit]
+  (try
+    (check-can-be-repaired db game unit)
     true
     (catch :default ex
       false)))
@@ -677,11 +702,38 @@
    (let [unit (checked-unit-at db game q r)]
      (repair-tx db game unit))))
 
+(defn repair-other-tx
+  ([db game repairer wounded]
+   (let [new-state (check-can-repair-other db game repairer)]
+     ;(check-in-range db repairer wounded)
+     (let [wounded-count (:unit/count wounded)]
+       [{:db/id (e wounded)
+         :unit/count (min (:game/max-count-per-unit game)
+                          (+ (:unit/count wounded)
+                             (get-in repairer [:unit/type :unit-type/repair])))}
+        {:db/id (e repairer)
+         :unit/repaired true
+         :unit/state (e new-state)}])))
+  ([db game q1 r1 q2 r2]
+   (let [repairer (checked-unit-at db game q1 r1)
+         wounded  (checked-unit-at db game q2 r2)]
+     (repair-other-tx db game repairer wounded))))
+
 (defn repair! [conn game-id q r]
   (let [db @conn
         game (game-by-id db game-id)
         tx (repair-tx db game q r)]
     (d/transact! conn tx)))
+
+(defn repair-value
+  ([db game repairer wounded]
+    (min (:game/max-count-per-unit game)
+         (+ (:unit/count wounded)
+            (get-in repairer [:unit/type :unit-type/repair]))))
+  ([db game q1 r1 q2 r2]
+    (let [repairer (checked-unit-at db game q1 r1)
+          wounded  (checked-unit-at db game q2 r2)]
+      (repair-value db game repairer wounded))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Capture
@@ -868,6 +920,13 @@
     :action.type/repair-unit
     (let [{:keys [action/q action/r]} action]
       (repair-tx db game q r))
+
+    :action.type/repair-other-unit
+    (let [{:keys [action/repairer-q action/repairer-r
+                  action/wounded-q  action/wounded-r]} action]
+      (repair-other-tx db game
+                       repairer-q repairer-r
+                       wounded-q  wounded-r))
 
     :action.type/capture-base
     (let [{:keys [action/q action/r]} action]
@@ -1115,6 +1174,7 @@
                      :unit-type/description (:description unit-def)
                      :unit-type/cost (:cost unit-def)
                      :unit-type/can-capture (:can-capture unit-def)
+                     :unit-type/can-repair (:can-repair unit-def)
                      :unit-type/movement (:movement unit-def)
                      :unit-type/min-range (:min-range unit-def)
                      :unit-type/max-range (:max-range unit-def)

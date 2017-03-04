@@ -35,6 +35,13 @@
                 :width tiles/width :height tiles/height
                 :xlink-href (site/prefix "/images/game/borders/targeted-enemy.png")}]
 
+       ;; Friend unit targeted (for repair)
+       (and @(subs/targeted? conn q r)
+            @(subs/friend-at? conn q r))
+       [:image {:x x :y y
+                :width tiles/width :height tiles/height
+                :xlink-href (site/prefix "/images/game/borders/targeted-friend.png")}]
+
        ;; Terrain targeted
        @(subs/targeted? conn q r)
        [:image {:x x :y y
@@ -73,10 +80,13 @@
                    @(subs/current-unit-at? conn q r)
                    (not @(subs/unit-can-act? conn q r)))
 
-              ;; Unit selected and tile is a valid attack or move target
+              ;; Unit selected and tile is a valid attack, repair, or move target
               (and @(subs/unit-selected? conn)
                    (not @(subs/selected? conn q r))
                    (not @(subs/enemy-in-range-of-selected? conn q r))
+                   ;(not (and @(subs/friend-in-range-of-selected? conn q r)
+                   ;         (get-in @(subs/unit-at conn q r) [:unit/type :unit-type/can-repair])))
+                   (not @(subs/friend-in-range-of-selected? conn q r))
                    (not @(subs/valid-destination-for-selected? conn q r))))]
     [:image {:visibility (if show "visible" "hidden")
              :x x :y y
@@ -196,6 +206,11 @@
         [:button.btn.btn-success.btn-block
          {:on-click #(dispatch [::events.ui/repair-selected])}
          (translate :repair-unit-button)]])
+     (when @(subs/selected-can-repair-targeted? conn)
+       [:p
+        [:button.btn.btn-success.btn-block
+         {:on-click #(dispatch [::events.ui/repair-targeted])}
+         (translate :repair-other-button)]])
      (when @(subs/selected-can-capture? conn)
        [:p
         [:button.btn.btn-primary.btn-block
@@ -212,10 +227,12 @@
         (translate :select-unit-or-base-tip)])
      (when (and
             (or @(subs/selected-can-move? conn)
-                @(subs/selected-can-attack? conn))
+                @(subs/selected-can-attack? conn)
+                @(subs/selected-can-repair? conn))
             (not
              (or @(subs/selected-can-move-to-targeted? conn)
-                 @(subs/selected-can-attack-targeted? conn))))
+                 @(subs/selected-can-attack-targeted? conn)
+                 @(subs/selected-can-repair-targeted? conn))))
        [:p.hidden-xs.hidden-sm
         (translate :select-target-or-destination-tip)])
      ;; TODO: only display when starting faction is active

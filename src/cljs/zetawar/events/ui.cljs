@@ -94,15 +94,20 @@
 
            ;; selecting friendly unit with unit or terrain selected
            (and unit
-                (or selected-unit selected-terrain)
+                ;(or selected-unit selected-terrain)
+                (or selected-unit selected-unit)
                 (or (game/can-move? db game unit)
-                    (game/can-attack? db game unit)))
-           (cond-> [{:db/id (e app)
-                     :app/selected-q ev-q
-                     :app/selected-r ev-r}]
-             (and targeted-q targeted-r)
-             (conj [:db/retract (e app) :app/targeted-q targeted-q]
-                   [:db/retract (e app) :app/targeted-r targeted-r]))
+                    (game/can-attack? db game unit)
+                    (game/can-repair-other? db game unit)))
+           ;(cond-> [{:db/id (e app)
+            ;         :app/selected-q ev-q
+            ;         :app/selected-r ev-r}]
+             [{:db/id (e app)
+               :app/targeted-q ev-q
+               :app/targeted-r ev-r}]
+             ;(and targeted-q targeted-r)
+             ;(conj [:db/retract (e app) :app/targeted-q targeted-q]
+              ;     [:db/retract (e app) :app/targeted-r targeted-r]))
 
            ;; selecting owned base with no unit selected
            (and terrain
@@ -210,6 +215,21 @@
                   :action/r r}]
                 [::clear-selection]]}))
 
+(defmethod router/handle-event ::repair-targeted
+  [{:as handler-ctx :keys [db]} _]
+  (let [game (app/current-game db)
+        cur-faction-color (game/current-faction-color game)
+        [repairer-q repairer-r] (app/selected-hex db)
+        [wounded-q  wounded-r]  (app/targeted-hex db)]
+    {:dispatch [[:zetawar.events.game/execute-action
+                 {:action/type :action.type/repair-other-unit
+                  :action/faction-color cur-faction-color
+                  :action/repairer-q repairer-q
+                  :action/repairer-r repairer-r
+                  :action/wounded-q wounded-q
+                  :action/wounded-r wounded-r}]
+                [::clear-selection]]}))
+
 (defmethod router/handle-event ::capture-selected
   [{:as handler-ctx :keys [db]} _]
   (let [game (app/current-game db)
@@ -260,7 +280,7 @@
   [{:as handler-ctx :keys [ev-chan db]} _]
   (let [app (app/root db)
         {:keys [app/show-copy-link]} app]
-    (when-not (nil? show-copy-link) 
+    (when-not (nil? show-copy-link)
       {:tx [[:db/retract (e app) :app/show-copy-link show-copy-link]]})))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

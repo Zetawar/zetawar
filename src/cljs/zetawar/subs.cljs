@@ -302,6 +302,37 @@
 (deftrack in-range-of-enemy-at? [conn unit-q unit-r enemy-q enemy-r]
   (contains? @(enemy-locations-in-range-of conn unit-q unit-r) [enemy-q enemy-r]))
 
+(deftrack friend-locations [conn]
+  @(posh/q '[:find ?q ?r
+             :in $ ?g ?cf
+             :where
+             [_  :app/game ?g]
+             [?g :game/factions ?f]
+             [?f :faction/units ?u]
+             [?u :unit/q ?q]
+             [?u :unit/r ?r]
+             [(= ?f ?cf)]]
+           conn @(game-eid conn) @(current-faction-eid conn)
+           {:cache :forever}))
+
+(deftrack friend-at? [conn q r]
+  (contains? @(friend-locations conn) [q r]))
+
+(deftrack friend-locations-in-range-of [conn q r]
+  (let [unit @(unit-at conn q r)
+        min-range (get-in unit [:unit/type :unit-type/min-range])
+        max-range (get-in unit [:unit/type :unit-type/max-range])]
+    (into #{}
+          (filter #(let [distance (apply hex/distance q r %)]
+                     (and (>= distance min-range) (<= distance max-range))))
+          @(friend-locations conn))))
+
+(deftrack any-friend-in-range-of? [conn q r]
+  (not (empty? @(friend-locations-in-range-of conn q r))))
+
+(deftrack in-range-of-friend-at? [conn unit-q unit-r friend-q friend-r]
+  (contains? @(friend-locations-in-range-of conn unit-q unit-r) [friend-q friend-r]))
+
 (deftrack can-move? [conn q r]
   (when-let [unit @(unit-at conn q r)]
     (game/can-move? @conn @(game conn) unit)))
@@ -315,6 +346,14 @@
   (when-let [unit @(unit-at conn q r)]
     (game/can-repair? @conn @(game conn) unit)))
 
+(deftrack can-be-repaired? [conn q r]
+  (when-let [unit @(unit-at conn q r)]
+    (game/can-be-repaired? @conn @(game conn) unit)))
+
+(deftrack can-repair-other? [conn q r]
+  (when-let [unit @(unit-at conn q r)]
+    (game/can-repair-other? @conn @(game conn) unit)))
+
 (deftrack can-capture? [conn q r]
   (let [unit @(unit-at conn q r)
         terrain @(terrain-at conn q r)]
@@ -326,6 +365,7 @@
   (or @(can-move? conn q r)
       @(can-attack? conn q r)
       @(can-repair? conn q r)
+      @(can-repair-other? conn q r)
       @(can-capture? conn q r)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -401,6 +441,10 @@
   (when-let [[q r] @(selected-hex conn)]
     @(can-repair? conn q r)))
 
+(deftrack selected-can-repair-other? [conn]
+  (when-let [[q r] @(selected-hex conn)]
+    @(can-repair-other? conn q r)))
+
 (deftrack selected-can-capture? [conn]
   (when-let [[q r] @(selected-hex conn)]
     @(can-capture? conn q r)))
@@ -431,10 +475,23 @@
   (when-let [[selected-q selected-r] @(selected-hex conn)]
     @(in-range-of-enemy-at? conn selected-q selected-r q r)))
 
+(deftrack friend-in-range-of-selected? [conn q r]
+  (when-let [[selected-q selected-r] @(selected-hex conn)]
+    @(in-range-of-friend-at? conn selected-q selected-r q r)))
+
 (deftrack selected-can-attack-targeted? [conn]
   (when-let [[q r] @(targeted-hex conn)]
     (and @(selected-can-attack? conn)
          @(enemy-in-range-of-selected? conn q r))))
+
+(deftrack selected-can-repair-targeted? [conn]
+  ;;Is the selected able to repair others?
+  ;;Is the targeted in range?
+  ;;Is the targeted able to be repaired?
+  (when-let [[targeted-q targeted-r] @(targeted-hex conn)]
+    (and @(selected-can-repair-other? conn)
+         @(friend-in-range-of-selected? conn targeted-q targeted-r)
+         @(can-be-repaired? conn targeted-q targeted-r))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Unit picker
