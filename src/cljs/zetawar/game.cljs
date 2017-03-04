@@ -673,12 +673,7 @@
       false)))
 
 (defn can-repair-other? [db game unit]
-  true)
-  ;(try
-  ;  (check-can-repair-other db game unit)
-  ;  true
-  ;  (catch :default ex
-  ;    false)))
+  (get-in unit [:unit/type :unit-type/can-repair]))
 
 (defn can-be-repaired? [db game unit]
   (try
@@ -705,7 +700,7 @@
 (defn repair-other-tx
   ([db game repairer wounded]
    (let [new-state (check-can-repair-other db game repairer)]
-     ;(check-in-range db repairer wounded)
+     (check-in-range db repairer wounded)
      (let [wounded-count (:unit/count wounded)]
        [{:db/id (e wounded)
          :unit/count (min (:game/max-count-per-unit game)
@@ -724,16 +719,6 @@
         game (game-by-id db game-id)
         tx (repair-tx db game q r)]
     (d/transact! conn tx)))
-
-(defn repair-value
-  ([db game repairer wounded]
-    (min (:game/max-count-per-unit game)
-         (+ (:unit/count wounded)
-            (get-in repairer [:unit/type :unit-type/repair]))))
-  ([db game q1 r1 q2 r2]
-    (let [repairer (checked-unit-at db game q1 r1)
-          wounded  (checked-unit-at db game q2 r2)]
-      (repair-value db game repairer wounded))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Capture
