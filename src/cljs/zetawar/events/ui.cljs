@@ -98,8 +98,7 @@
                 (or selected-unit selected-unit)
                 (game/can-repair-other? db game selected-unit)
                 (game/can-be-repaired? db game unit)
-                (or (game/can-move? db game unit)
-                    (game/can-attack? db game unit)))
+                (game/in-range? db selected-unit unit))
              [{:db/id (e app)
                :app/targeted-q ev-q
                :app/targeted-r ev-r}]

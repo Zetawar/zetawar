@@ -91,6 +91,7 @@
               ;; Same as previous code block, but unit CAN repair others
               (and @(subs/unit-selected? conn)
                    @(subs/selected-can-repair-other? conn)
+                   (not @(subs/can-be-repaired? conn q r))
                    (not @(subs/selected? conn q r))
                    (not @(subs/enemy-in-range-of-selected? conn q r))
                    (not @(subs/friend-in-range-of-selected? conn q r))
