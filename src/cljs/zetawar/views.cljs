@@ -80,9 +80,17 @@
                    @(subs/current-unit-at? conn q r)
                    (not @(subs/unit-can-act? conn q r)))
 
-              ;; Unit selected and tile is a valid attack, repair, or move target
+              ;; Unit selected and tile is a valid attack or move target
+              ;; However, selected cannot repair others
               (and @(subs/unit-selected? conn)
                    (not @(subs/selected? conn q r))
+                   (not @(subs/selected-can-repair-other? conn))
+                   (not @(subs/enemy-in-range-of-selected? conn q r))
+                   (not @(subs/valid-destination-for-selected? conn q r)))
+
+              ;; Same as previous code block, but unit CAN repair others
+              (and @(subs/unit-selected? conn)
+                   @(subs/selected-can-repair-other? conn)
                    (not @(subs/enemy-in-range-of-selected? conn q r))
                    (not @(subs/friend-in-range-of-selected? conn q r))
                    (not @(subs/valid-destination-for-selected? conn q r))))]
