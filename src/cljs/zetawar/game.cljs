@@ -680,11 +680,7 @@
   (get-in unit [:unit/type :unit-type/can-repair]))
 
 (defn can-be-repaired? [db game unit]
-  (try
-    (check-can-be-repaired db game unit)
-    true
-    (catch :default ex
-      false)))
+  (< (:unit/count unit) (:game/max-count-per-unit game)))
 
 (defn repair-tx
   "Returns a transaction that increments unit count and sets the unit repaired
@@ -711,7 +707,6 @@
                           (+ (:unit/count wounded)
                              (get-in repairer [:unit/type :unit-type/repair])))}
         {:db/id (e repairer)
-         :unit/repaired true
          :unit/state (e new-state)}])))
   ([db game q1 r1 q2 r2]
    (let [repairer (checked-unit-at db game q1 r1)

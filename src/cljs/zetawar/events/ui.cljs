@@ -96,9 +96,10 @@
            (and unit
                 (or selected-unit selected-terrain)
                 (or selected-unit selected-unit)
+                (game/can-repair-other? db game selected-unit)
+                (game/can-be-repaired? db game unit)
                 (or (game/can-move? db game unit)
-                    (game/can-attack? db game unit)
-                    (game/can-repair-other? db game unit)))
+                    (game/can-attack? db game unit)))
              [{:db/id (e app)
                :app/targeted-q ev-q
                :app/targeted-r ev-r}]
