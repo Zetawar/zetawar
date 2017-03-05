@@ -95,7 +95,6 @@
            ;; selecting friendly unit with unit or terrain selected
            (and unit
                 (or selected-unit selected-terrain)
-                (or selected-unit selected-unit)
                 (game/can-repair-other? db game selected-unit)
                 (game/can-be-repaired? db game unit)
                 (game/in-range? db selected-unit unit))
@@ -121,6 +120,9 @@
                     (and
                      (game/can-attack? db game unit)
                      (not= 0 (count (game/enemies-in-range db game unit))))
+                    (and
+                      (game/can-repair-other? db game unit)
+                      (not= 0 (count (game/friends-in-range db game unit))))
                     (game/can-capture? db game unit terrain)))
            (cond-> [{:db/id (e app)
                      :app/selected-q ev-q
