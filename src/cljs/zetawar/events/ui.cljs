@@ -218,7 +218,7 @@
   (let [game (app/current-game db)
         cur-faction-color (game/current-faction-color game)
         [repairer-q repairer-r] (app/selected-hex db)
-        [wounded-q  wounded-r]  (app/targeted-hex db)]
+        [wounded-q wounded-r] (app/targeted-hex db)]
     {:dispatch [[:zetawar.events.game/execute-action
                  {:action/type :action.type/repair-other-unit
                   :action/faction-color cur-faction-color
