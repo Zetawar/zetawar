@@ -486,9 +486,6 @@
          @(enemy-in-range-of-selected? conn q r))))
 
 (deftrack selected-can-repair-targeted? [conn]
-  ;;Is the selected able to repair others?
-  ;;Is the targeted in range?
-  ;;Is the targeted able to be repaired?
   (when-let [[targeted-q targeted-r] @(targeted-hex conn)]
     (and @(selected-can-repair-other? conn)
          @(friend-in-range-of-selected? conn targeted-q targeted-r)
