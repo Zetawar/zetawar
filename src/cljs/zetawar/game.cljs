@@ -1001,6 +1001,11 @@
         (filter #(in-range? db unit %))
         (friends db game unit)))
 
+(defn repairable-friends-in-range [db game unit]
+  (into []
+        (filter #(can-be-repaired? db game %))
+        (friends-in-range db game unit)))
+
 (defn closest-friend [db game unit]
   (let [unit-q (:unit/q unit)
         unit-r (:unit/r unit)]

@@ -172,6 +172,8 @@
         terrain (game/base-at db game to-q to-r)]
     (if (or (and (game/can-attack? db game unit)
                  (not-empty (game/enemies-in-range db game unit)))
+            (and (game/can-repair-other? db game unit)
+                 (not-empty (game/repairable-friends-in-range db game unit)))
             (game/can-capture? db game unit terrain))
       {:tx       [[:db/add (e app) :app/selected-q to-q]
                   [:db/add (e app) :app/selected-r to-r]
