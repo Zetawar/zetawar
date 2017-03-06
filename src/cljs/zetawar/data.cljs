@@ -31,7 +31,7 @@
     :build-unit-button "Build"
     :attack-unit-button "Attack"
     :repair-unit-button "Repair"
-    :repair-other-button "Repair Other"
+    :repair-other-button "Repair"
     :capture-base-button "Capture"
 
     ;; Building units
