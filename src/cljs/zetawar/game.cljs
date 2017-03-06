@@ -677,7 +677,11 @@
       false)))
 
 (defn can-repair-other? [db game unit]
-  (get-in unit [:unit/type :unit-type/can-repair]))
+  (try
+    (check-can-repair-other db game unit)
+    true
+    (catch :default ex
+      false)))
 
 (defn can-be-repaired? [db game unit]
   (< (:unit/count unit) (:game/max-count-per-unit game)))
@@ -982,6 +986,36 @@
            closest)))
      (enemies db game unit))))
 
+(defn friends [db game unit]
+  (let [u-faction (unit-faction db unit)]
+    (qess '[:find ?u
+            :in $ ?g ?f-arg
+            :where
+            [?g :game/factions ?f]
+            [?f :faction/units ?u]
+            [(= ?f ?f-arg)]]
+          db (e game) (e u-faction))))
+
+(defn friends-in-range [db game unit]
+  (into []
+        (filter #(in-range? db unit %))
+        (friends db game unit)))
+
+(defn closest-friend [db game unit]
+  (let [unit-q (:unit/q unit)
+        unit-r (:unit/r unit)]
+    (reduce
+     (fn [closest friend]
+       (let [friend-q (:unit/q friend)
+             friend-r (:unit/r friend)
+             closest-q (:unit/q closest)
+             closest-r (:unit/r closest)]
+         (if (< (hex/distance unit-q unit-r friend-q friend-r)
+                (hex/distance unit-q unit-r closest-q closest-r))
+           friend
+           closest)))
+     (friends db game unit))))
+
 (defn unit-can-act? [db game unit]
   (let [terrain (:unit/terrain unit)]
     (or (can-move? db game unit)
@@ -1023,6 +1057,17 @@
       :action/r (:unit/r unit)}]
     []))
 
+(defn repair-other-actions [db game unit]
+  (if (can-repair-other? db game unit)
+    (map (fn [wounded]
+           {:action/type :action.type/repair-other-unit
+            :action/repairer-q (:unit/q unit)
+            :action/repairer-r (:unit/r unit)
+            :action/wounded-q (:unit/q wounded)
+            :action/wounded-r (:unit/r wounded)})
+         (friends-in-range db game unit))
+    []))
+
 (defn capture-actions [db game unit]
   (let [{:keys [unit/q unit/r unit/terrain]} unit]
     (if (can-capture? db game unit terrain)
@@ -1035,6 +1080,7 @@
   (concat (move-actions db game unit)
           (attack-actions db game unit)
           (repair-actions db game unit)
+          (repair-other-actions db game unit)
           (capture-actions db game unit)))
 
 (defn actionable-units [db game]
