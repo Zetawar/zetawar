@@ -480,6 +480,11 @@
   (when-let [[selected-q selected-r] @(selected-hex conn)]
     @(in-range-of-friend-at? conn selected-q selected-r q r)))
 
+(deftrack repairable-friend-in-range-of-selected? [conn q r]
+  (when-let [[selected-q selected-r] @(selected-hex conn)]
+    (and @(in-range-of-friend-at? conn selected-q selected-r q r)
+         @(can-be-repaired? conn q r))))
+
 (deftrack selected-can-attack-targeted? [conn]
   (when-let [[q r] @(targeted-hex conn)]
     (and @(selected-can-attack? conn)
