@@ -23,13 +23,6 @@
          :dispatch [[:zetawar.events.ui/hide-copy-link]]
          :notify   [[:zetawar.players/apply-action :faction.color/all action]]})
 
-      :action.type/repair-other-unit
-      (let [{:keys [action/repairer-q action/repairer-r
-                    action/wounded-q  action/wounded-r]} action]
-        {:tx       (game/action-tx db game action)
-         :dispatch [[:zetawar.events.ui/hide-copy-link]]
-         :notify   [[:zetawar.players/apply-action :faction.color/all action]]})
-
       :action.type/end-turn
       (let [game (app/current-game db)
             next-faction-color (game/next-faction-color game)]
