@@ -136,7 +136,7 @@
                 :cost 75
                 :movement 9
                 :can-capture true
-                :can-repair false
+                :can-repair #{}
                 :min-range 1
                 :max-range 1
                 :armor-type :personnel
@@ -163,7 +163,7 @@
                  :cost 150
                  :movement 9
                  :can-capture true
-                 :can-repair false
+                 :can-repair #{}
                  :min-range 1
                  :max-range 2
                  :armor-type :personnel
@@ -190,7 +190,7 @@
               :cost 200
               :movement 9
               :can-capture true
-              :can-repair false
+              :can-repair #{}
               :min-range 2
               :max-range 3
               :armor-type :personnel
@@ -215,7 +215,7 @@
               :cost 200
               :movement 9
               :can-capture true
-              :can-repair false
+              :can-repair #{}
               :min-range 1
               :max-range 1
               :armor-type :personnel
@@ -243,7 +243,7 @@
              :cost 100
              :movement 9
              :can-capture true
-             :can-repair true
+             :can-repair #{:personnel}
              :min-range 1
              :max-range 1
              :armor-type :personnel
@@ -266,12 +266,39 @@
              :armored   2}
             :zoc
             [:personnel :armored]}
+    :engineer {:description "Engineer"
+               :cost 200
+               :movement 9
+               :can-capture true
+               :can-repair #{:armored}
+               :min-range 1
+               :max-range 1
+               :armor-type :personnel
+               :armor 6
+               :capturing-armor 4
+               :repair 1
+               :state-map :move-attack
+               :image "tilesets/elite-command/units/engineer-COLOR.png"
+               :terrain-effects
+               {:plains    {:movement-cost 3 :armor-bonus  0 :attack-bonus  0}
+                :mountains {:movement-cost 6 :armor-bonus  5 :attack-bonus  2}
+                :woods     {:movement-cost 4 :armor-bonus  3 :attack-bonus  2}
+                :desert    {:movement-cost 4 :armor-bonus -1 :attack-bonus -1}
+                :tundra    {:movement-cost 4 :armor-bonus -1 :attack-bonus -1}
+                :swamp     {:movement-cost 6 :armor-bonus -2 :attack-bonus -2}
+                :ford      {:movement-cost 5 :armor-bonus -1 :attack-bonus -1}
+                :base      {:movement-cost 2 :armor-bonus  3 :attack-bonus  2}}
+              :attack-strengths
+              {:personnel 5
+               :armored   2}
+              :zoc
+              [:personnel :armored]}
      ;; Armored
      :humvee {:description "Humvee"
               :cost 300
               :movement 15
               :can-capture false
-              :can-repair false
+              :can-repair #{}
               :min-range 1
               :max-range 1
               :armor-type :armored
@@ -296,7 +323,7 @@
             :cost 350
             :movement 12
             :can-capture false
-            :can-repair false
+            :can-repair #{}
             :min-range 1
             :max-range 1
             :armor-type :armored
