@@ -508,7 +508,7 @@
       false)))
 
 (defn attack-damage [db game attacker defender attacker-terrain defender-terrain]
-  (let [defender-armor-type (get-in defender [:unit/type :unit-type/armor-type])
+  (let [defender-armor-type (to-armor-type (get-in defender [:unit/type :unit-type/armor-type]))
         [attacker-q attacker-r] (unit-hex attacker)
         [defender-q defender-r] (unit-hex defender)
         attack-strength (oonly (d/q '[:find ?s
@@ -659,7 +659,7 @@
   (check-unit-current db game unit)
   (when (:unit/capturing unit)
     (throw (unit-ex "Unit cannot make repairs while capturing" unit)))
-  (when-not (get-in unit [:unit/type :unit-type/can-repair])
+  (when (empty? (get-in unit [:unit/type :unit-type/can-repair]))
     (throw (unit-ex "Unit cannot repair other units" unit)))
   (checked-next-state db unit :action.type/repair-other-unit))
 
@@ -685,6 +685,12 @@
 
 (defn can-be-repaired? [db game unit]
   (< (:unit/count unit) (:game/max-count-per-unit game)))
+
+(defn compatible-armor-types-for-repair?
+  ([db game repairer wounded]
+   (let [possible-repair-types (get-in repairer [:unit/type :unit-type/can-repair])
+         goal-repair-type (get-in wounded [:unit/type :unit-type/armor-type])]
+     (contains? possible-repair-types goal-repair-type))))
 
 (defn repair-tx
   "Returns a transaction that increments unit count and sets the unit repaired
@@ -714,7 +720,7 @@
          :unit/state (e new-state)}])))
   ([db game q1 r1 q2 r2]
    (let [repairer (checked-unit-at db game q1 r1)
-         wounded  (checked-unit-at db game q2 r2)]
+         wounded (checked-unit-at db game q2 r2)]
      (repair-other-tx db game repairer wounded))))
 
 (defn repair! [conn game-id q r]
@@ -1213,7 +1219,7 @@
                      :unit-type/movement (:movement unit-def)
                      :unit-type/min-range (:min-range unit-def)
                      :unit-type/max-range (:max-range unit-def)
-                     :unit-type/armor-type (-> unit-def :armor-type to-armor-type)
+                     :unit-type/armor-type (:armor-type unit-def)
                      :unit-type/armor armor
                      :unit-type/capturing-armor (or capturing-armor armor)
                      :unit-type/repair (:repair unit-def)
