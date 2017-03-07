@@ -97,7 +97,8 @@
                 (or selected-unit selected-terrain)
                 (game/can-repair-other? db game selected-unit)
                 (game/can-be-repaired? db game unit)
-                (game/in-range? db selected-unit unit))
+                (game/in-range? db selected-unit unit)
+                (game/compatible-armor-types-for-repair? db game selected-unit unit))
              [{:db/id (e app)
                :app/targeted-q ev-q
                :app/targeted-r ev-r}]
