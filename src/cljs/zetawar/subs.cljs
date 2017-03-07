@@ -249,6 +249,7 @@
                                     :unit-type/description
                                     :unit-type/can-capture
                                     :unit-type/can-repair
+                                    :unit-type/armor-type
                                     :unit-type/min-range
                                     :unit-type/max-range
                                     :unit-type/image]}]
@@ -422,6 +423,14 @@
                       :app/targeted-r])
       not-empty))
 
+(deftrack selected-and-targeted-hex [conn]
+  (-> @(app conn)
+      (select-values [:app/selected-q
+                      :app/selected-r
+                      :app/targeted-q
+                      :app/targeted-r])
+      not-empty))
+
 (deftrack selected-unit [conn]
   (when-let [[q r] @(selected-hex conn)]
     @(unit-at conn q r)))
@@ -445,6 +454,11 @@
 (deftrack selected-can-repair-other? [conn]
   (when-let [[q r] @(selected-hex conn)]
     @(can-repair-other? conn q r)))
+
+(deftrack compatible-armor-types-for-repair? [conn]
+  (when-let [[selected-q selected-r targeted-q targeted-r] @(selected-and-targeted-hex conn)]
+    (game/compatible-armor-types-for-repair? @conn @(game conn) @(unit-at conn selected-q selected-r)
+                                                                @(unit-at conn targeted-q targeted-r))))
 
 (deftrack selected-can-capture? [conn]
   (when-let [[q r] @(selected-hex conn)]
@@ -494,7 +508,8 @@
   (when-let [[targeted-q targeted-r] @(targeted-hex conn)]
     (and @(selected-can-repair-other? conn)
          @(friend-in-range-of-selected? conn targeted-q targeted-r)
-         @(can-be-repaired? conn targeted-q targeted-r))))
+         @(can-be-repaired? conn targeted-q targeted-r)
+         @(compatible-armor-types-for-repair? conn))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Unit picker
