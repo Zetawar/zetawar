@@ -85,7 +85,8 @@
                    (not @(subs/selected? conn q r))
                    (not @(subs/enemy-in-range-of-selected? conn q r))
                    (not (and @(subs/repairable-friend-in-range-of-selected? conn q r)
-                             @(subs/selected-can-repair-other? conn)))
+                             @(subs/selected-can-repair-other? conn)
+                             @(subs/compatible-armor-types-for-repair? conn q r)))
                    (not @(subs/valid-destination-for-selected? conn q r))))]
     [:image {:visibility (if show "visible" "hidden")
              :x x :y y
