@@ -689,9 +689,6 @@
 (defn compatible-armor-types-for-repair? [db game repairer wounded]
    (let [possible-repair-types (set (get-in repairer [:unit/type :unit-type/can-repair]))
          goal-repair-type (get-in wounded [:unit/type :unit-type/armor-type])]
-         (println possible-repair-types)
-         (println goal-repair-type)
-         (println (contains? possible-repair-types goal-repair-type))
      (contains? possible-repair-types goal-repair-type)))
 
 (defn repair-tx
