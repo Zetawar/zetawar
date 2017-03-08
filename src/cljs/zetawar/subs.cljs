@@ -11,7 +11,6 @@
    [zetawar.util :refer [breakpoint inspect select-values]])
   (:require-macros
    [zetawar.subs :refer [deftrack]]))
-(enable-console-print!)
 ;; TODO: add asserts to check params for better error messages?
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
