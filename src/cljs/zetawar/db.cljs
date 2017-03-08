@@ -54,7 +54,7 @@
    :unit-type/game-id-idx           {:db/unique      :db.unique/identity}
    :unit-type/state-map             {:db/valueType   :db.type/ref}
    :unit-type/zoc-armor-types       {:db/cardinality :db.cardinality/many}
-   :unit-type/can-capture           {:db/cardinality :db.cardinality/many}
+   :unit-type/can-repair            {:db/cardinality :db.cardinality/many}
    :unit-type/strengths             {:db/valueType   :db.type/ref
                                      :db/cardinality :db.cardinality/many
                                      :db/isComponent true}
