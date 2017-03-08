@@ -687,7 +687,7 @@
   (< (:unit/count unit) (:game/max-count-per-unit game)))
 
 (defn compatible-armor-types-for-repair? [db game repairer wounded]
-   (let [possible-repair-types (set (get-in repairer [:unit/type :unit-type/can-repair]))
+   (let [possible-repair-types (get-in repairer [:unit/type :unit-type/can-repair])
          goal-repair-type (get-in wounded [:unit/type :unit-type/armor-type])]
      (contains? possible-repair-types goal-repair-type)))
 
@@ -1214,7 +1214,7 @@
                      :unit-type/description (:description unit-def)
                      :unit-type/cost (:cost unit-def)
                      :unit-type/can-capture (:can-capture unit-def)
-                     :unit-type/can-repair (map #(to-armor-type %) (:can-repair unit-def))
+                     :unit-type/can-repair (set (map #(to-armor-type %) (:can-repair unit-def)))
                      :unit-type/movement (:movement unit-def)
                      :unit-type/min-range (:min-range unit-def)
                      :unit-type/max-range (:max-range unit-def)
