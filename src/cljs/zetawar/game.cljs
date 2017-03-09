@@ -664,10 +664,16 @@
   (checked-next-state db unit :action.type/repair-other-unit))
 
 (defn check-can-be-repaired [db game unit]
-  (check-unit-current db game unit)
   (when (>= (:unit/count unit) (:game/max-count-per-unit game))
     (throw (unit-ex "Unit is already fully repaired" unit)))
-  (checked-next-state db unit :action.type/repair-unit))
+  unit)
+
+(defn check-compatible-armor-types-for-repair [db game repairer wounded]
+  (let [possible-repair-types (get-in repairer [:unit/type :unit-type/can-repair])
+        goal-repair-type (get-in wounded [:unit/type :unit-type/armor-type])]
+    (when-not (some #{goal-repair-type} possible-repair-types)
+      (throw (unit-ex "Armor types are not compatible" repairer)))
+    repairer))
 
 (defn can-repair? [db game unit]
   (try
@@ -684,12 +690,18 @@
       false)))
 
 (defn can-be-repaired? [db game unit]
-  (< (:unit/count unit) (:game/max-count-per-unit game)))
+  (try
+    (check-can-be-repaired db game unit)
+    true
+    (catch :default ex
+      false)))
 
 (defn compatible-armor-types-for-repair? [db game repairer wounded]
-   (let [possible-repair-types (get-in repairer [:unit/type :unit-type/can-repair])
-         goal-repair-type (get-in wounded [:unit/type :unit-type/armor-type])]
-     (some #{goal-repair-type} possible-repair-types)))
+  (try
+    (check-compatible-armor-types-for-repair db game repairer wounded)
+    true
+    (catch :default ex
+      false)))
 
 (defn repair-tx
   "Returns a transaction that increments unit count and sets the unit repaired
@@ -710,6 +722,8 @@
   ([db game repairer wounded]
    (let [new-state (check-can-repair-other db game repairer)]
      (check-in-range db repairer wounded)
+     (check-can-be-repaired db game wounded)
+     (check-compatible-armor-types-for-repair db game repairer wounded)
      (let [wounded-count (:unit/count wounded)]
        [{:db/id (e wounded)
          :unit/count (min (:game/max-count-per-unit game)
