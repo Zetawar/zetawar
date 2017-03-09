@@ -6,15 +6,21 @@ Listed below are the [Zetawar Kickstarter](https://www.kickstarter.com/projects/
 backers who chose to have their names listed and backed the project at or above the
 "Virtual Fame" level.
 
-### Sponsors
+## Sponsors
+
+<br>
 
 [![Awesome Forms](https://awesomeforms.com/assets/logotype-0e39fee9805478f7769f0e25cb16b6e2.png)](https://awesomeforms.com)
 
+<br>
+
 [![Bendyworks](../images/sponsors/bendyworks-logo.png)](http://www.bendyworks.com/)
+
+<br>
 
 [Rowdy Labs](http://www.rowdylabs.com)
 
-### Backers
+## Backers
 
 - -Toni-
 - Alex Eberts
