@@ -206,6 +206,7 @@
                  :unit-type/min-range
                  :unit-type/max-range
                  :unit-type/can-capture
+                 :unit-type/armor-type
                  :unit-type/image}
                (into #{} unit-type-keys)))))))
 

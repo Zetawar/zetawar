@@ -248,6 +248,7 @@
                                     :unit-type/description
                                     :unit-type/can-capture
                                     :unit-type/can-repair
+                                    :unit-type/armor-type
                                     :unit-type/min-range
                                     :unit-type/max-range
                                     :unit-type/image]}]
@@ -456,8 +457,10 @@
 (deftrack compatible-armor-types-for-repair? [conn targeted-q targeted-r]
   (when-let [[selected-q selected-r] @(selected-hex conn)]
     (game/compatible-armor-types-for-repair? @conn @(game conn)
-                                             (game/unit-at @conn @(game conn) selected-q selected-r)
-                                             (game/unit-at @conn @(game conn) targeted-q targeted-r))))
+                                             ;(game/unit-at @conn @(game conn) selected-q selected-r)
+                                             ;(game/unit-at @conn @(game conn) targeted-q targeted-r))))
+                                             @(unit-at conn selected-q selected-r)
+                                             @(unit-at conn targeted-q targeted-r))))
 
 (deftrack selected-can-capture? [conn]
   (when-let [[q r] @(selected-hex conn)]
