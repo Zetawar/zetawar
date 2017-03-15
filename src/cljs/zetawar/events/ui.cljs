@@ -95,14 +95,13 @@
            ;; selecting friendly unit with unit or terrain selected
            (and unit
                 (or selected-unit selected-terrain)
-                (or (game/can-move? db game unit)
-                    (game/can-attack? db game unit)))
-           (cond-> [{:db/id (e app)
-                     :app/selected-q ev-q
-                     :app/selected-r ev-r}]
-             (and targeted-q targeted-r)
-             (conj [:db/retract (e app) :app/targeted-q targeted-q]
-                   [:db/retract (e app) :app/targeted-r targeted-r]))
+                (game/can-repair-other? db game selected-unit)
+                (game/can-be-repaired? db game unit)
+                (game/in-range? db selected-unit unit)
+                (game/compatible-armor-types-for-repair? db game selected-unit unit))
+             [{:db/id (e app)
+               :app/targeted-q ev-q
+               :app/targeted-r ev-r}]
 
            ;; selecting owned base with no unit selected
            (and terrain
@@ -122,6 +121,9 @@
                     (and
                      (game/can-attack? db game unit)
                      (not= 0 (count (game/enemies-in-range db game unit))))
+                    (and
+                      (game/can-repair-other? db game unit)
+                      (not= 0 (count (game/friends-in-range db game unit))))
                     (game/can-capture? db game unit terrain)))
            (cond-> [{:db/id (e app)
                      :app/selected-q ev-q
@@ -171,6 +173,8 @@
         terrain (game/base-at db game to-q to-r)]
     (if (or (and (game/can-attack? db game unit)
                  (not-empty (game/enemies-in-range db game unit)))
+            (and (game/can-repair-other? db game unit)
+                 (not-empty (game/repairable-friends-in-range db game unit)))
             (game/can-capture? db game unit terrain))
       {:tx       [[:db/add (e app) :app/selected-q to-q]
                   [:db/add (e app) :app/selected-r to-r]
@@ -208,6 +212,21 @@
                   :action/faction-color cur-faction-color
                   :action/q q
                   :action/r r}]
+                [::clear-selection]]}))
+
+(defmethod router/handle-event ::repair-targeted
+  [{:as handler-ctx :keys [db]} _]
+  (let [game (app/current-game db)
+        cur-faction-color (game/current-faction-color game)
+        [repairer-q repairer-r] (app/selected-hex db)
+        [wounded-q wounded-r] (app/targeted-hex db)]
+    {:dispatch [[:zetawar.events.game/execute-action
+                 {:action/type :action.type/repair-other-unit
+                  :action/faction-color cur-faction-color
+                  :action/repairer-q repairer-q
+                  :action/repairer-r repairer-r
+                  :action/wounded-q wounded-q
+                  :action/wounded-r wounded-r}]
                 [::clear-selection]]}))
 
 (defmethod router/handle-event ::capture-selected
@@ -260,7 +279,7 @@
   [{:as handler-ctx :keys [ev-chan db]} _]
   (let [app (app/root db)
         {:keys [app/show-copy-link]} app]
-    (when-not (nil? show-copy-link) 
+    (when-not (nil? show-copy-link)
       {:tx [[:db/retract (e app) :app/show-copy-link show-copy-link]]})))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
