@@ -457,8 +457,6 @@
 (deftrack compatible-armor-types-for-repair? [conn targeted-q targeted-r]
   (when-let [[selected-q selected-r] @(selected-hex conn)]
     (game/compatible-armor-types-for-repair? @conn @(game conn)
-                                             ;(game/unit-at @conn @(game conn) selected-q selected-r)
-                                             ;(game/unit-at @conn @(game conn) targeted-q targeted-r))))
                                              @(unit-at conn selected-q selected-r)
                                              @(unit-at conn targeted-q targeted-r))))
 
