@@ -18,7 +18,6 @@
 
     ;; Faction configuration
     :configure-faction-tip"Configure faction"
-    :configure-faction-title "Configure faction"
     :player-type-label "Player type"
 
     ;; New game settings
