@@ -282,6 +282,7 @@
      [:> js/ReactBootstrap.Modal.Header {:close-button true}
       [:> js/ReactBootstrap.Modal.Title
        (translate :build-title)]]
+     (comment
      [:> js/ReactBootstrap.Modal.Body
       (into [:div.unit-picker]
             (for [{:keys [unit-type/id] :as unit-type} unit-types]
@@ -301,7 +302,48 @@
                  [:div.media-body
                   [:h4.media-heading
                    (:unit-type/description unit-type)]
-                  (str "Cost: " (:unit-type/cost unit-type))]])))]
+                  (str "Cost: " (:unit-type/cost unit-type))]])))])
+     [:> js/ReactBootstrap.Table
+      {:bordered "isRequired"
+       :striped "isRequired"}
+       ;:condensed "isRequired"}
+      ;(into [:div.unit-picker]
+            [:thead
+             [:tr
+              [:th ""]
+              [:th "Movement"]
+              [:th "Armor (When Capturing)"]
+              [:th "Repair"]
+              [:th "Attack Range"]]]
+            (for [{:keys [unit-type/id] :as unit-type} unit-types]
+              (let [;; TODO: replace with unit-type-image
+                    image (->> (string/replace (:unit-type/image unit-type)
+                                               "COLOR" color)
+                               (str "/images/game/"))
+                    media-class (if (:affordable unit-type)
+                                  "media clickable"
+                                  "media clickable text-muted")]
+               [:tbody
+                [:tr
+                 [:td [:div {:class media-class ;:on-mouse-enter, :on-mouse-leave, :style
+                             :on-click #(when (:affordable unit-type)
+                                    (dispatch [::events.ui/hide-unit-picker])
+                                    (dispatch [::events.ui/build-unit id]))}
+                       [:div.media-left.media-middle
+                        [:img {:src image}]]
+                       [:div.media-body
+                        [:h4.media-heading
+                         (:unit-type/description unit-type)]
+                        (str "Cost: " (:unit-type/cost unit-type))]]]
+                 [:td (:unit-type/movement unit-type)]
+                 [:td (str
+                       (:unit-type/armor unit-type) "\n"
+                       (when (:unit-type/can-capture unit-type)
+                         (str "(" (:unit-type/capturing-armor unit-type) ")")))]
+                 [:td (:unit-type/repair unit-type)]
+                 [:td (str
+                       "Min: " (:unit-type/min-range unit-type) "\n"
+                       "Max: " (:unit-type/max-range unit-type))]]]))]
      [:> js/ReactBootstrap.Modal.Footer
       [:button.btn.btn-default {:on-click hide-picker}
        "Cancel"]]]))
