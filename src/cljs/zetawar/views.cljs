@@ -303,18 +303,24 @@
                   [:h4.media-heading
                    (:unit-type/description unit-type)]
                   (str "Cost: " (:unit-type/cost unit-type))]])))])
+     ;Currently table; maybe accordions?
      [:> js/ReactBootstrap.Table
-      {:bordered "isRequired"
-       :striped "isRequired"}
-       ;:condensed "isRequired"}
+      {:bordered true
+       ;:striped true
+       :hover true
+       :responsive true
+       :style {:text-align "center"}} ; :vertical-align "text-middle"
       ;(into [:div.unit-picker]
             [:thead
              [:tr
               [:th ""]
-              [:th "Movement"]
-              [:th "Armor (When Capturing)"]
+              [:th "Movement [1]"]
+              [:th "Armor [2]"]
               [:th "Repair"]
-              [:th "Attack Range"]]]
+              [:th [:div {:style {:text-align "center"}}
+                    "Range"]]]]
+              ;[:th "Repair fellow units"]
+            [:tbody
             (for [{:keys [unit-type/id] :as unit-type} unit-types]
               (let [;; TODO: replace with unit-type-image
                     image (->> (string/replace (:unit-type/image unit-type)
@@ -323,12 +329,12 @@
                     media-class (if (:affordable unit-type)
                                   "media clickable"
                                   "media clickable text-muted")]
-               [:tbody
                 [:tr
-                 [:td [:div {:class media-class ;:on-mouse-enter, :on-mouse-leave, :style
+                 [:td [:div {:class media-class ;:on-mouse-enter, :on-mouse-leave
                              :on-click #(when (:affordable unit-type)
                                     (dispatch [::events.ui/hide-unit-picker])
                                     (dispatch [::events.ui/build-unit id]))}
+                             ;:style {:text-align "left"}}
                        [:div.media-left.media-middle
                         [:img {:src image}]]
                        [:div.media-body
@@ -341,9 +347,10 @@
                        (when (:unit-type/can-capture unit-type)
                          (str "(" (:unit-type/capturing-armor unit-type) ")")))]
                  [:td (:unit-type/repair unit-type)]
-                 [:td (str
-                       "Min: " (:unit-type/min-range unit-type) "\n"
-                       "Max: " (:unit-type/max-range unit-type))]]]))]
+                 [:td (:unit-type/min-range unit-type) "-" (:unit-type/max-range unit-type)]
+                 ]))]]
+     [:p "[1] Hover over movement value to see terrain effects."]
+     [:p "[2] Armor while capturing is in parenthesis. If there is no such value, unit cannot capture bases."]
      [:> js/ReactBootstrap.Modal.Footer
       [:button.btn.btn-default {:on-click hide-picker}
        "Cancel"]]]))
