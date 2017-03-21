@@ -159,7 +159,8 @@
         (cljs :ids ["js/main"]
               :optimizations :none
               :compiler-options {:preloads '[zetawar.dev]
-                                 :parallel-build true})
+                                 :parallel-build true
+                                 :recompile-dependents false})
         (target)))
 
 (deftask run-tests
