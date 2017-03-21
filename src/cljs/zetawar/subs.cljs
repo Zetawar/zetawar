@@ -424,6 +424,7 @@
                       :app/targeted-r])
       not-empty))
 
+;; TODO: this should be removed; you can't treat selected + targeted as a unit
 (deftrack selected-and-targeted-hex [conn]
   (-> @(app conn)
       (select-values [:app/selected-q
