@@ -135,8 +135,8 @@
         income @(subs/current-income conn)]
     [:p#faction-credits
      [:strong (str credits " " (translate :credits-label))]
-     [:span.text-muted.pull-right (str "+" income)
-      [:span.hidden-md "/turn"]]]))
+     [:span.text-muted.pull-right
+      (str "+" income)]]))
 
 (defn copy-url-link [{:as view-ctx :keys [conn translate]}]
   (let [clipboard (atom nil)
@@ -392,7 +392,15 @@
           [:span {:aria-hidden true} "×"]]
          alert-message]]])))
 
-;; TODO: turn entire game interface into it's own component
+(defn game-interface [view-ctx]
+  [:div.row
+   [:div.col-md-2
+    [faction-credits view-ctx]
+    [faction-list view-ctx]
+    [faction-actions view-ctx]]
+   [:div.col-md-10
+    [faction-status view-ctx]
+    [board view-ctx]]])
 
 (defn app-root [{:as view-ctx :keys [conn dispatch translate]}]
   [:div
@@ -400,7 +408,7 @@
    [faction-settings view-ctx]
    [unit-picker view-ctx]
    ;; TODO: break win dialog out into it's own component
-   ;; TODO: add continue + start new game buttons
+   ;; TODO: add continue + start new game buttons to win dialog
    [:> js/ReactBootstrap.Modal {:show @(subs/show-win-message? conn)
                                 :on-hide #(dispatch [::events.ui/hide-win-message])}
     [:> js/ReactBootstrap.Modal.Header
@@ -414,12 +422,5 @@
    (navbar "Game")
    [:div.container
     [alert view-ctx]
-    [:div.row
-     [:div.col-md-2
-      [faction-credits view-ctx]
-      [faction-list view-ctx]
-      [faction-actions view-ctx]]
-     [:div.col-md-10
-      [faction-status view-ctx]
-      [board view-ctx]]]]
+    [game-interface view-ctx]]
    (footer)])
