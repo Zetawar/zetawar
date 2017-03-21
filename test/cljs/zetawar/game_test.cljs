@@ -4,8 +4,8 @@
    [datascript.core :as d]
    [devcards.core :as dc :refer-macros [defcard deftest]]
    [zetawar.app :as app]
-   [zetawar.db :as db :refer [e qe]]
    [zetawar.data :as data]
+   [zetawar.db :as db :refer [e qe]]
    [zetawar.game :as game]
    [zetawar.test-helper :as helper]
    [zetawar.util :refer [breakpoint inspect]]))
@@ -159,8 +159,6 @@
     (d/transact conn (game/teleport-tx @conn game 2 1 7 6))
     (is (game/on-capturable-base? @conn game (game/unit-at @conn game 7 6)))))
 
-;; TODO: test unit-ex (?)
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Movement
 
@@ -203,7 +201,9 @@
   (let [db @(helper/create-scenario-conn :sterlings-aruba-multiplayer)
         game (app/current-game db)
         unit (game/unit-at db game 2 2)]
+
     ;; TODO: update for state machine changes
+
     #_(testing "units that have not yet performed any actions can move"
         (is (= nil (game/check-can-move db game unit)))
         (is (= true (game/can-move? db game unit))))
@@ -231,7 +231,9 @@
         (let [db' (d/db-with db [[:db/add (e unit) :unit/repaired true]])
               unit' (game/unit-at db' game 2 2)]
           (is (thrown? ExceptionInfo (game/check-can-move db' game unit')))
-          (is (= false (game/can-move? db' game unit')))))))
+          (is (= false (game/can-move? db' game unit')))))
+
+    ))
 
 (deftest test-teleport-tx
   (let [db @(helper/create-scenario-conn :sterlings-aruba-multiplayer)
@@ -276,7 +278,9 @@
   (let [db @(helper/create-scenario-conn :sterlings-aruba-multiplayer)
         game (app/current-game db)
         unit (game/unit-at db game 2 2)]
+
     ;; TODO: update for state machine changes
+
     #_(testing "units that have not yet performed any actions can attack"
         (is (= nil (game/check-can-attack db game unit)))
         (is (= true (game/can-attack? db game unit))))
@@ -304,7 +308,9 @@
         (let [db' (d/db-with db [[:db/add (e unit) :unit/repaired true]])
               unit' (game/unit-at db' game 2 2)]
           (is (thrown? ExceptionInfo (game/check-can-attack db' game unit')))
-          (is (= false (game/can-attack? db' game unit')))))))
+          (is (= false (game/can-attack? db' game unit')))))
+
+    ))
 
 (deftest test-in-range-fns
   (let [db @(helper/create-scenario-conn :sterlings-aruba-multiplayer)
@@ -346,7 +352,9 @@
     (testing "undamaged units cannot be repaired"
       (is (thrown? ExceptionInfo (game/check-can-repair db game unit)))
       (is (= false (game/can-repair? db game unit))))
+
     ;; TODO: update for state machine changes
+
     #_(testing "damaged units that have not performed any actions can be repaired"
         (let [db' (d/db-with db [[:db/add (e unit) :unit/count 9]])
               unit' (game/unit-at db' game 2 2)]
@@ -376,7 +384,9 @@
         (let [db' (d/db-with db [[:db/add (e unit) :unit/repaired true]])
               unit' (game/unit-at db' game 2 2)]
           (is (thrown? ExceptionInfo (game/check-can-repair db' game unit')))
-          (is (= false (game/can-repair? db' game unit')))))))
+          (is (= false (game/can-repair? db' game unit')))))
+
+    ))
 
 (deftest test-repair-tx
   (let [conn (helper/create-scenario-conn :sterlings-aruba-multiplayer)
@@ -409,7 +419,9 @@
             terrain' (game/terrain-at db game 1 2)]
         (is (thrown? ExceptionInfo (game/check-capturable db' game unit' terrain')))
         (is (= false (game/can-capture? db' game unit' terrain')))))
+
     ;; TODO: update for state machine changes
+
     #_(testing "unit on unowned base can capture"
         (let [db' (d/db-with db (game/teleport-tx db game 2 2 2 1))
               unit' (game/unit-at db' game 2 1)
@@ -436,6 +448,7 @@
               terrain' (game/terrain-at db' game 2 1)]
           (is (thrown? ExceptionInfo (game/check-capturable db' game unit' terrain')))
           (is (= false (game/can-capture? db' game unit' terrain')))))
+
     (testing "already capturing units cannot capture"
       (let [db' (d/db-with db (concat (game/teleport-tx db game 2 2 2 1)
                                       [[:db/add (e unit) :unit/capturing true]]))
