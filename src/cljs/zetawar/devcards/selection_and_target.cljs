@@ -38,12 +38,16 @@
         views-cfg (:zetawar.system/game-views system)
         conn (:conn views-cfg)]
     (app/start-new-game! game-cfg :sterlings-aruba-multiplayer)
-    (let [game (app/current-game @conn)
-          unit (game/unit-at @conn game 2 2)]
-      (d/transact! conn [{:db/id (-> @conn app/root e)
+    (let [db @conn
+          game (app/current-game db)
+          unit (game/unit-at db game 2 2)
+          done-state (game/unit-state-by-id db game :unit-state.id/move-attack_moved)]
+      (d/transact! conn [{:db/id (-> db app/root e)
                           :app/selected-q 2
                           :app/selected-r 2}
-                         [:db/add (e unit) :unit/move-count 1]]))
+                         {:db/id (e unit)
+                          :unit/move-count 1
+                          :unit/state (e done-state)}]))
     [:div.row
      [:div.col-md-2
       [views/faction-list views-cfg]
@@ -58,13 +62,17 @@
         views-cfg (:zetawar.system/game-views system)
         conn (:conn views-cfg)]
     (app/start-new-game! game-cfg :sterlings-aruba-multiplayer)
-    (let [game (app/current-game @conn)
-          unit (game/unit-at @conn game 2 2)]
-      (d/transact! conn (into (game/teleport-tx @conn game 2 2 6 8)
-                              [{:db/id (-> @conn app/root e)
+    (let [db @conn
+          game (app/current-game db)
+          unit (game/unit-at db game 2 2)
+          done-state (game/unit-state-by-id db game :unit-state.id/move-attack_moved)]
+      (d/transact! conn (into (game/teleport-tx db game 2 2 6 8)
+                              [{:db/id (-> db app/root e)
                                 :app/selected-q 6
                                 :app/selected-r 8}
-                               [:db/add (e unit) :unit/move-count 1]])))
+                               {:db/id (e unit)
+                                :unit/move-count 1
+                                :unit/state (e done-state)}])))
     [:div.row
      [:div.col-md-2
       [views/faction-list views-cfg]
@@ -86,8 +94,7 @@
                                 :app/selected-q 6
                                 :app/selected-r 8
                                 :app/targeted-q 7
-                                :app/targeted-r 8}
-                               [:db/add (e unit) :unit/move-count 1]])))
+                                :app/targeted-r 8}])))
     [:div.row
      [:div.col-md-2
       [views/faction-list views-cfg]
@@ -95,6 +102,8 @@
      [:div.col-md-10
       [views/faction-status views-cfg]
       [views/board views-cfg]]]))
+
+;; TODO: add targeted-friend
 
 (defcard-rg base-selected
   (let [system (ig/init system/game-config)

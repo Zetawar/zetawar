@@ -302,7 +302,7 @@
         :in $ ?g ?us-id
         :where
         [?g  :game/unit-states ?us]
-        [?us :unit-state-map/id ?us-id]]
+        [?us :unit-state/id ?us-id]]
       db (e game) unit-state-id))
 
 (defn to-action-type [action-type-name]
