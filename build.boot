@@ -142,6 +142,7 @@
   (comp (serve)
         (repl)
         (watch)
+        (notify :visual true)
         (build-html :metadata-file "perun.base.dev.edn")
         (build-css)
         (reload :on-jsload 'zetawar.core/run
