@@ -40,7 +40,7 @@
    [org.webjars/bootstrap-sass "3.3.7"]
    [org.webjars/font-awesome "4.7.0"]
    [posh "0.5.5"]
-   [reagent "0.6.0"]
+   [reagent "0.6.1"]
    [tongue "0.2.0"]])
 
 (require
