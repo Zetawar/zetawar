@@ -269,8 +269,11 @@
       (into [:div.unit-picker]
             (for [{:keys [unit-type/id] :as unit-type} unit-types]
               (let [;; TODO: replace with unit-type-image
+                    color-or-grey (if (:affordable unit-type)
+                                    color
+                                    "unavailable")
                     image (->> (string/replace (:unit-type/image unit-type)
-                                               "COLOR" color)
+                                               "COLOR" color-or-grey)
                                (str "/images/game/"))
                     media-class (if (:affordable unit-type)
                                   "media clickable"
