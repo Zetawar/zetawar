@@ -35,6 +35,13 @@
                 :width tiles/width :height tiles/height
                 :xlink-href (site/prefix "/images/game/borders/targeted-enemy.png")}]
 
+       ;; Friend unit targeted (for repair)
+       (and @(subs/targeted? conn q r)
+            @(subs/friend-at? conn q r))
+       [:image {:x x :y y
+                :width tiles/width :height tiles/height
+                :xlink-href (site/prefix "/images/game/borders/targeted-friend.png")}]
+
        ;; Terrain targeted
        @(subs/targeted? conn q r)
        [:image {:x x :y y
@@ -73,10 +80,13 @@
                    @(subs/current-unit-at? conn q r)
                    (not @(subs/unit-can-act? conn q r)))
 
-              ;; Unit selected and tile is a valid attack or move target
+              ;; Unit selected and tile is a valid attack, repair, or move target
               (and @(subs/unit-selected? conn)
                    (not @(subs/selected? conn q r))
                    (not @(subs/enemy-in-range-of-selected? conn q r))
+                   (not (and @(subs/repairable-friend-in-range-of-selected? conn q r)
+                             @(subs/selected-can-repair-other? conn)
+                             @(subs/compatible-armor-types-for-repair? conn q r)))
                    (not @(subs/valid-destination-for-selected? conn q r))))]
     [:image {:visibility (if show "visible" "hidden")
              :x x :y y
@@ -125,8 +135,8 @@
         income @(subs/current-income conn)]
     [:p#faction-credits
      [:strong (str credits " " (translate :credits-label))]
-     [:span.text-muted.pull-right (str "+" income)
-      [:span.hidden-md "/turn"]]]))
+     [:span.text-muted.pull-right
+      (str "+" income)]]))
 
 (defn copy-url-link [{:as view-ctx :keys [conn translate]}]
   (let [clipboard (atom nil)
@@ -196,6 +206,11 @@
         [:button.btn.btn-success.btn-block
          {:on-click #(dispatch [::events.ui/repair-selected])}
          (translate :repair-unit-button)]])
+     (when @(subs/selected-can-repair-targeted? conn)
+       [:p
+        [:button.btn.btn-success.btn-block
+         {:on-click #(dispatch [::events.ui/repair-targeted])}
+         (translate :repair-other-button)]])
      (when @(subs/selected-can-capture? conn)
        [:p
         [:button.btn.btn-primary.btn-block
@@ -212,10 +227,12 @@
         (translate :select-unit-or-base-tip)])
      (when (and
             (or @(subs/selected-can-move? conn)
-                @(subs/selected-can-attack? conn))
+                @(subs/selected-can-attack? conn)
+                @(subs/selected-can-repair? conn))
             (not
              (or @(subs/selected-can-move-to-targeted? conn)
-                 @(subs/selected-can-attack-targeted? conn))))
+                 @(subs/selected-can-attack-targeted? conn)
+                 @(subs/selected-can-repair-targeted? conn))))
        [:p.hidden-xs.hidden-sm
         (translate :select-target-or-destination-tip)])
      ;; TODO: only display when starting faction is active
@@ -378,7 +395,15 @@
           [:span {:aria-hidden true} "×"]]
          alert-message]]])))
 
-;; TODO: turn entire game interface into it's own component
+(defn game-interface [view-ctx]
+  [:div.row
+   [:div.col-md-2
+    [faction-credits view-ctx]
+    [faction-list view-ctx]
+    [faction-actions view-ctx]]
+   [:div.col-md-10
+    [faction-status view-ctx]
+    [board view-ctx]]])
 
 (defn app-root [{:as view-ctx :keys [conn dispatch translate]}]
   [:div
@@ -386,7 +411,7 @@
    [faction-settings view-ctx]
    [unit-picker view-ctx]
    ;; TODO: break win dialog out into it's own component
-   ;; TODO: add continue + start new game buttons
+   ;; TODO: add continue + start new game buttons to win dialog
    [:> js/ReactBootstrap.Modal {:show @(subs/show-win-message? conn)
                                 :on-hide #(dispatch [::events.ui/hide-win-message])}
     [:> js/ReactBootstrap.Modal.Header
@@ -400,12 +425,5 @@
    (navbar "Game")
    [:div.container
     [alert view-ctx]
-    [:div.row
-     [:div.col-md-2
-      [faction-credits view-ctx]
-      [faction-list view-ctx]
-      [faction-actions view-ctx]]
-     [:div.col-md-10
-      [faction-status view-ctx]
-      [board view-ctx]]]]
+    [game-interface view-ctx]]
    (footer)])
