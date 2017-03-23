@@ -46,17 +46,17 @@
         last-render-ts (atom 0)
         render-chan (chan (sliding-buffer 1))]
     (go-loop [msg (<! ev-chan)]
-      (when (< @start-ts @last-render-ts)
-        (let [current-ts (.getTime (js/Date.))]
-          (log/tracef "Setting start-ts to %d" current-ts)
-          (reset! start-ts current-ts)))
-      (r/next-tick #(let [current-ts (.getTime (js/Date.))]
-                      (log/trace "Rendering...")
-                      (put! render-chan :rendered)
-                      (when (> current-ts @last-render-ts)
-                        (log/tracef "Setting last-render-ts to %d" current-ts)
-                        (reset! last-render-ts current-ts))))
       (when msg
+        (when (< @start-ts @last-render-ts)
+          (let [current-ts (.getTime (js/Date.))]
+            (log/tracef "Setting start-ts to %d" current-ts)
+            (reset! start-ts current-ts)))
+        (r/next-tick #(let [current-ts (.getTime (js/Date.))]
+                        (log/trace "Rendering...")
+                        (put! render-chan :rendered)
+                        (when (> current-ts @last-render-ts)
+                          (log/tracef "Setting last-render-ts to %d" current-ts)
+                          (reset! last-render-ts current-ts))))
         (try
           (log/debugf "Handling event: %s" (pr-str msg))
           ;; TODO: validate event
