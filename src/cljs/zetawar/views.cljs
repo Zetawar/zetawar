@@ -282,89 +282,52 @@
      [:> js/ReactBootstrap.Modal.Header {:close-button true}
       [:> js/ReactBootstrap.Modal.Title
        (translate :build-title)]]
-     (comment
-     [:> js/ReactBootstrap.Modal.Body
-      (into [:div.unit-picker]
-            (for [{:keys [unit-type/id] :as unit-type} unit-types]
-              (let [;; TODO: replace with unit-type-image
-                    image (->> (string/replace (:unit-type/image unit-type)
-                                               "COLOR" color)
-                               (str "/images/game/"))
-                    media-class (if (:affordable unit-type)
-                                  "media clickable"
-                                  "media clickable text-muted")
-                    popthing [:> js/ReactBootstrap.Popover
-                              {:title "Hi"
-                               :id (:unit-type/description unit-type)}
-                              "Hi"]]
-                [:div {:class media-class
-                       :on-click #(when (:affordable unit-type)
-                                    (dispatch [::events.ui/hide-unit-picker])
-                                    (dispatch [::events.ui/build-unit id]))}
-                 [:div.media-left.media-middle
-                  [:img {:src image}]]
-                 [:div.media-body
-                  [:h4.media-heading
-                   (:unit-type/description unit-type)]
-                  (str "Cost: " (:unit-type/cost unit-type))
-                  [:> js/ReactBootstrap.OverlayTrigger
-                   {:trigger "click"
-                    :placement "right"
-                    :overlay [:> js/ReactBootstrap.Popover
-                              {:title "Hi"
-                               :id (:unit-type/description unit-type)}
-                              "Hi"]}
-                    [:button.btn.btn-default "Hello"]]
-                  ]])))])
-     ;(into [:div.unit-picker]
-     ;(comment
      [:> js/ReactBootstrap.Modal.Body
       [:> js/ReactBootstrap.Grid
        {:fluid true}
-        (for [{:keys [unit-type/id] :as unit-type} unit-types]
-          (let [;; TODO: replace with unit-type-image
-                image (->> (string/replace (:unit-type/image unit-type)
-                                            "COLOR" color)
-                            (str "/images/game/"))
-                media-class (if (:affordable unit-type)
-                              "media clickable"
-                              "media clickable text-muted")]
+       (for [{:keys [unit-type/id] :as unit-type} unit-types]
+         (let [;; TODO: replace with unit-type-image
+               image (->> (string/replace (:unit-type/image unit-type)
+                                          "COLOR" color)
+                           (str "/images/game/"))
+               media-class (if (:affordable unit-type)
+                             "media clickable"
+                             "media clickable text-muted")]
            ^{:key unit-type}
            [:> js/ReactBootstrap.Row
             [:> js/ReactBootstrap.Col
-               {:lg 5}
-               [:div {:class media-class
-                      :on-click #(when (:affordable unit-type)
-                                   (dispatch [::events.ui/hide-unit-picker])
-                                   (dispatch [::events.ui/build-unit id]))}
-                [:div.media-left.media-middle
-                 [:img {:src image}]]
-                [:div.media-body
-                 [:h4.media-heading
-                  (:unit-type/description unit-type)]
-                 (str "Cost: " (:unit-type/cost unit-type))]]]
+             {:lg 5}
+             [:div {:class media-class
+                    :on-click #(when (:affordable unit-type)
+                               (dispatch [::events.ui/hide-unit-picker])
+                               (dispatch [::events.ui/build-unit id]))}
+              [:div.media-left.media-middle
+               [:img {:src image}]]
+              [:div.media-body
+               [:h4.media-heading
+                (:unit-type/description unit-type)]
+               (str "Cost: " (:unit-type/cost unit-type))]]]
             [:> js/ReactBootstrap.Col
-               {:lg 7
-                :style {:text-align "center"}}
-               [:> js/ReactBootstrap.Panel
-                {:header "Stats"
-                 :eventKey (:unit-type/description unit-type)
-                 :collapsible true}
-                [:> js/ReactBootstrap.Table
-                 {:bordered true
-                  :striped true
-                  :condensed true
-                  :fill true}
-                 [:thead
-                  [:tr
-                   [:th [:div {:style {:text-align "center"}} [:strong "Movement"]]]
-                   [:th [:div {:style {:text-align "center"}} [:strong "Armor"]]]
-                   [:th [:div {:style {:text-align "center"}} [:strong "Range"]]]]]
-                 [:tbody
-                  [:tr
-                   [:td (:unit-type/movement unit-type)]
-                   [:td (:unit-type/armor unit-type)]
-                   [:td (:unit-type/min-range unit-type) "-" (:unit-type/max-range unit-type)]]]]]]]))]]
+             {:lg 7
+              :style {:text-align "center"}}
+             [:> js/ReactBootstrap.Panel
+              {:header "Stats"
+               :collapsible true}
+             [:> js/ReactBootstrap.Table
+              {:bordered true
+               :striped true
+               :condensed true
+               :fill true}
+              [:thead>tr
+               [:th>div {:style {:text-align "center"}} "Movement"]
+               [:th>div {:style {:text-align "center"}} "Armor"]
+               [:th>div {:style {:text-align "center"}} "Range"]]
+              [:tbody>tr
+               [:td (:unit-type/movement unit-type)]
+               [:td (:unit-type/armor unit-type)]
+               [:td (:unit-type/min-range unit-type)
+                    "-"
+                    (:unit-type/max-range unit-type)]]]]]]))]]
      [:> js/ReactBootstrap.Modal.Footer
       [:button.btn.btn-default {:on-click hide-picker}
        "Cancel"]]]))
