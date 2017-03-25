@@ -33,7 +33,7 @@
    [datascript "0.15.5"]
    [hiccup "1.0.5"]
    [integrant "0.2.1"]
-   [org.clojure/clojure "1.9.0-alpha14"]
+   [org.clojure/clojure "1.9.0-alpha15"]
    [org.clojure/clojurescript "1.9.293"]
    [org.clojure/core.async "0.2.395"]
    [org.clojure/test.check "0.9.0"]
