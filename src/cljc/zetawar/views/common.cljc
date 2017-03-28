@@ -107,7 +107,9 @@
      [:a {:href "http://goo.gl/forms/RgTpkCYDBk"} "feedback"]
      "."]
     [:p
-     "Copyright 2016 Arugaba LLC, All Rights Reserved."]
+     "Copyright 2016 Arugaba LLC under the "
+     [:a {:href "https://github.com/Zetawar/zetawar/blob/master/LICENSE.txt"}
+      "MIT license"]]
     [:p
      "Artwork from "
      [:a {:href "https://github.com/cvincent/elite-command"} "Elite Command"]

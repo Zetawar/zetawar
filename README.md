@@ -4,15 +4,10 @@ Source code for [Zetawar](http://www.zetawar.com/). Zetawar is funded by the
 generous support of the [Zetawar
 Kickstarter](https://www.kickstarter.com/projects/djwhitt/zetawar) backers.
 
-## WARNING
+## Licenses
 
-Code cleanup is still in progress. Function names, namespaces, and architecture
-are still evolving.
-
----
-
-Zetawar is Copyright 2016 Arugaba LLC licensed under the terms of the MIT
-license.
+Zetawar is Copyright 2016 Arugaba LLC licensed under the terms of the [MIT
+license](LICENSE.txt).
 
 Tiles and unit sprites are from Elite Command Copyright 2015 Chris Vincent
 under the [Creative Commons Attribution 4.0 International
