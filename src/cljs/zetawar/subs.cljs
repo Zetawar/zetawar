@@ -353,9 +353,9 @@
   (when-let [unit @(unit-at conn q r)]
     (game/can-be-repaired? @conn @(game conn) unit)))
 
-(deftrack can-repair-other? [conn q r]
+(deftrack can-field-repair? [conn q r]
   (when-let [unit @(unit-at conn q r)]
-    (game/can-repair-other? @conn @(game conn) unit)))
+    (game/can-field-repair? @conn @(game conn) unit)))
 
 (deftrack can-capture? [conn q r]
   (let [unit @(unit-at conn q r)
@@ -368,7 +368,7 @@
   (or @(can-move? conn q r)
       @(can-attack? conn q r)
       @(can-repair? conn q r)
-      @(can-repair-other? conn q r)
+      @(can-field-repair? conn q r)
       @(can-capture? conn q r)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -444,9 +444,9 @@
   (when-let [[q r] @(selected-hex conn)]
     @(can-repair? conn q r)))
 
-(deftrack selected-can-repair-other? [conn]
+(deftrack selected-can-field-repair? [conn]
   (when-let [[q r] @(selected-hex conn)]
-    @(can-repair-other? conn q r)))
+    @(can-field-repair? conn q r)))
 
 (deftrack compatible-armor-types-for-repair? [conn targeted-q targeted-r]
   (when-let [[selected-q selected-r] @(selected-hex conn)]
@@ -500,7 +500,7 @@
 
 (deftrack selected-can-repair-targeted? [conn]
   (when-let [[targeted-q targeted-r] @(targeted-hex conn)]
-    (and @(selected-can-repair-other? conn)
+    (and @(selected-can-field-repair? conn)
          @(friend-in-range-of-selected? conn targeted-q targeted-r)
          @(can-be-repaired? conn targeted-q targeted-r)
          @(compatible-armor-types-for-repair? conn targeted-q targeted-r))))
