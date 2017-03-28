@@ -6,6 +6,7 @@
 (defmethod ig/init-key :zetawar.system/players [_ opts]
   (atom {}))
 
-(defmethod ig/halt-key! :zetawar.system/players [_ players]
-  (doseq [player players]
-    (players/stop player)))
+;; TODO: re-enable once game setup is part of Integrant system
+#_(defmethod ig/halt-key! :zetawar.system/players [_ players]
+    (doseq [player players]
+      (players/stop player)))
