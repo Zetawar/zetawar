@@ -283,7 +283,6 @@
       [:> js/ReactBootstrap.Modal.Title
        (translate :build-title)]]
      [:> js/ReactBootstrap.Modal.Body
-<<<<<<< HEAD
       [:> js/ReactBootstrap.Grid
        {:fluid true}
        (for [{:keys [unit-type/id] :as unit-type} unit-types]
@@ -343,30 +342,6 @@
                ]]]]]))]
       [:p "P = Personnel"]
       [:p "A = Armored"]]
-=======
-      (into [:div.unit-picker]
-            (for [{:keys [unit-type/id] :as unit-type} unit-types]
-              (let [;; TODO: replace with unit-type-image
-                    color-or-grey (if (:affordable unit-type)
-                                    color
-                                    "unavailable")
-                    image (->> (string/replace (:unit-type/image unit-type)
-                                               "COLOR" color-or-grey)
-                               (str "/images/game/"))
-                    media-class (if (:affordable unit-type)
-                                  "media clickable"
-                                  "media clickable text-muted")]
-                [:div {:class media-class
-                       :on-click #(when (:affordable unit-type)
-                                    (dispatch [::events.ui/hide-unit-picker])
-                                    (dispatch [::events.ui/build-unit id]))}
-                 [:div.media-left.media-middle
-                  [:img {:src image}]]
-                 [:div.media-body
-                  [:h4.media-heading
-                   (:unit-type/description unit-type)]
-                  (str "Cost: " (:unit-type/cost unit-type))]])))]
->>>>>>> master
      [:> js/ReactBootstrap.Modal.Footer
       [:button.btn.btn-default {:on-click hide-picker}
        "Cancel"]]]))
