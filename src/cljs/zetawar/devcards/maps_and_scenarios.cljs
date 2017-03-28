@@ -1,4 +1,4 @@
-(ns zetawar.devcards.scenarios
+(ns zetawar.devcards.maps-and-scenarios
   (:require
    [devcards.core :as dc :include-macros true]
    [integrant.core :as ig]

@@ -33,14 +33,14 @@
    [datascript "0.15.5"]
    [hiccup "1.0.5"]
    [integrant "0.2.1"]
-   [org.clojure/clojure "1.9.0-alpha14"]
+   [org.clojure/clojure "1.9.0-alpha15"]
    [org.clojure/clojurescript "1.9.293"]
    [org.clojure/core.async "0.2.395"]
    [org.clojure/test.check "0.9.0"]
    [org.webjars/bootstrap-sass "3.3.7"]
    [org.webjars/font-awesome "4.7.0"]
    [posh "0.5.5"]
-   [reagent "0.6.0"]
+   [reagent "0.6.1"]
    [tongue "0.2.0"]])
 
 (require
@@ -142,6 +142,7 @@
   (comp (serve)
         (repl)
         (watch)
+        (notify :visual true)
         (build-html :metadata-file "perun.base.dev.edn")
         (build-css)
         (reload :on-jsload 'zetawar.core/run

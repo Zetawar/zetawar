@@ -135,8 +135,8 @@
         income @(subs/current-income conn)]
     [:p#faction-credits
      [:strong (str credits " " (translate :credits-label))]
-     [:span.text-muted.pull-right (str "+" income)
-      [:span.hidden-md "/turn"]]]))
+     [:span.text-muted.pull-right
+      (str "+" income)]]))
 
 (defn copy-url-link [{:as view-ctx :keys [conn translate]}]
   (let [clipboard (atom nil)
@@ -283,12 +283,16 @@
       [:> js/ReactBootstrap.Modal.Title
        (translate :build-title)]]
      [:> js/ReactBootstrap.Modal.Body
+<<<<<<< HEAD
       [:> js/ReactBootstrap.Grid
        {:fluid true}
        (for [{:keys [unit-type/id] :as unit-type} unit-types]
          (let [;; TODO: replace with unit-type-image
+               color-or-grey (if (:affordable unit-type)
+                               color
+                               "unavailable")
                image (->> (string/replace (:unit-type/image unit-type)
-                                          "COLOR" color)
+                                          "COLOR" color-or-grey)
                            (str "/images/game/"))
                media-class (if (:affordable unit-type)
                              "media clickable"
@@ -339,6 +343,30 @@
                ]]]]]))]
       [:p "P = Personnel"]
       [:p "A = Armored"]]
+=======
+      (into [:div.unit-picker]
+            (for [{:keys [unit-type/id] :as unit-type} unit-types]
+              (let [;; TODO: replace with unit-type-image
+                    color-or-grey (if (:affordable unit-type)
+                                    color
+                                    "unavailable")
+                    image (->> (string/replace (:unit-type/image unit-type)
+                                               "COLOR" color-or-grey)
+                               (str "/images/game/"))
+                    media-class (if (:affordable unit-type)
+                                  "media clickable"
+                                  "media clickable text-muted")]
+                [:div {:class media-class
+                       :on-click #(when (:affordable unit-type)
+                                    (dispatch [::events.ui/hide-unit-picker])
+                                    (dispatch [::events.ui/build-unit id]))}
+                 [:div.media-left.media-middle
+                  [:img {:src image}]]
+                 [:div.media-body
+                  [:h4.media-heading
+                   (:unit-type/description unit-type)]
+                  (str "Cost: " (:unit-type/cost unit-type))]])))]
+>>>>>>> master
      [:> js/ReactBootstrap.Modal.Footer
       [:button.btn.btn-default {:on-click hide-picker}
        "Cancel"]]]))
@@ -429,7 +457,15 @@
           [:span {:aria-hidden true} "×"]]
          alert-message]]])))
 
-;; TODO: turn entire game interface into it's own component
+(defn game-interface [view-ctx]
+  [:div.row
+   [:div.col-md-2
+    [faction-credits view-ctx]
+    [faction-list view-ctx]
+    [faction-actions view-ctx]]
+   [:div.col-md-10
+    [faction-status view-ctx]
+    [board view-ctx]]])
 
 (defn app-root [{:as view-ctx :keys [conn dispatch translate]}]
   [:div
@@ -437,7 +473,7 @@
    [faction-settings view-ctx]
    [unit-picker view-ctx]
    ;; TODO: break win dialog out into it's own component
-   ;; TODO: add continue + start new game buttons
+   ;; TODO: add continue + start new game buttons to win dialog
    [:> js/ReactBootstrap.Modal {:show @(subs/show-win-message? conn)
                                 :on-hide #(dispatch [::events.ui/hide-win-message])}
     [:> js/ReactBootstrap.Modal.Header
@@ -451,12 +487,5 @@
    (navbar "Game")
    [:div.container
     [alert view-ctx]
-    [:div.row
-     [:div.col-md-2
-      [faction-credits view-ctx]
-      [faction-list view-ctx]
-      [faction-actions view-ctx]]
-     [:div.col-md-10
-      [faction-status view-ctx]
-      [board view-ctx]]]]
+    [game-interface view-ctx]]
    (footer)])

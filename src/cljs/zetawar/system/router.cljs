@@ -7,11 +7,11 @@
 (defmethod ig/init-key :zetawar.system/router [_ opts]
   (let [{:keys [datascript players]} opts
         {:keys [conn]} datascript
-        ;; TODO: figure out correct size for buffer
-        ev-chan (async/chan (async/dropping-buffer 10))
+        ev-chan (async/chan 100)
         notify-chan (async/chan)
         notify-pub (async/pub notify-chan #(nth % 1))]
     (router/start {:ev-chan ev-chan
+                   :max-render-interval 200
                    :notify-chan notify-chan
                    :notify-pub notify-pub
                    :conn conn

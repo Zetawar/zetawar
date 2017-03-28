@@ -11,7 +11,8 @@
    [zetawar.util :refer [breakpoint inspect select-values]])
   (:require-macros
    [zetawar.subs :refer [deftrack]]))
-;; TODO: add asserts to check params for better error messages?
+
+;; TODO: add param asserts to check params for better error messages?
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; App
@@ -56,6 +57,7 @@
               '[:map/description]
               @(game-map-eid conn)))
 
+;; TODO: use terrains output instead of running a separate query
 (deftrack terrain-eid-at [conn q r]
   (let [game-eid' @(game-eid conn)
         idx (game/game-pos-idx game-eid' q r)]
@@ -422,6 +424,7 @@
                       :app/targeted-r])
       not-empty))
 
+;; TODO: this should be removed; you can't treat selected + targeted as a unit
 (deftrack selected-and-targeted-hex [conn]
   (-> @(app conn)
       (select-values [:app/selected-q
