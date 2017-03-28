@@ -46,6 +46,7 @@
 (defn start [{:as router-ctx :keys [ev-chan max-render-interval]}]
   (let [timer-start (atom -1)
         last-render (atom 0)
+        render-queued? (atom false)
         render-chan (chan 1)]
     (go-loop []
       (when-let [msg (<! ev-chan)]
@@ -56,12 +57,14 @@
             (reset! timer-start now)))
 
         ;; Queue notification of render
-        (r/next-tick #(let [now (.getTime (js/Date.))]
-                        (log/trace "Rendering...")
-                        (offer! render-chan :rendered)
-                        (when (> now @last-render)
-                          (log/tracef "Setting last-render to %d" now)
-                          (reset! last-render now))))
+        (when-not @render-queued?
+          (r/next-tick #(let [now (.getTime (js/Date.))]
+                          (log/trace "Rendering...")
+                          (offer! render-chan :rendered)
+                          (when (> now @last-render)
+                            (log/tracef "Setting last-render to %d" now)
+                            (reset! last-render now)
+                            (reset! render-queued? false)))))
 
         ;; Handle event
         (try
