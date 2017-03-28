@@ -296,7 +296,7 @@
            ^{:key unit-type}
            [:> js/ReactBootstrap.Row
             [:> js/ReactBootstrap.Col
-             {:lg 5}
+             {:lg 4}
              [:div {:class media-class
                     :on-click #(when (:affordable unit-type)
                                (dispatch [::events.ui/hide-unit-picker])
@@ -308,7 +308,7 @@
                 (:unit-type/description unit-type)]
                (str "Cost: " (:unit-type/cost unit-type))]]]
             [:> js/ReactBootstrap.Col
-             {:lg 7
+             {:lg 8
               :style {:text-align "center"}}
              [:> js/ReactBootstrap.Panel
               {:header "Stats"
@@ -316,18 +316,29 @@
              [:> js/ReactBootstrap.Table
               {:bordered true
                :striped true
-               :condensed true
+               ;:condensed true
                :fill true}
               [:thead>tr
-               [:th>div {:style {:text-align "center"}} "Movement"]
-               [:th>div {:style {:text-align "center"}} "Armor"]
-               [:th>div {:style {:text-align "center"}} "Range"]]
+               [:th {:style {:text-align "center"}} "Type"]
+               [:th {:style {:text-align "center"}} "Movement"]
+               [:th {:style {:text-align "center"}} "Armor"]
+               [:th {:style {:text-align "center"}} "Range"]
+               [:th {:style {:text-align "center"}} "Strength"]]
               [:tbody>tr
+               [:td ({:unit-type.armor-type/personnel "P"
+                      :unit-type.armor-type/armored "A"}
+                     (get-in unit-type [:unit-type/armor-type]))]
                [:td (:unit-type/movement unit-type)]
                [:td (:unit-type/armor unit-type)]
                [:td (:unit-type/min-range unit-type)
                     "-"
-                    (:unit-type/max-range unit-type)]]]]]]))]]
+                    (:unit-type/max-range unit-type)]
+               [:td (interleave [[:strong "P: "] [:strong " A: "]]
+                          (map #(str (get-in % [:unit-strength/attack]))
+                                     (get-in unit-type [:unit-type/strengths])))]
+               ]]]]]))]
+      [:p "P = Personnel"]
+      [:p "A = Armored"]]
      [:> js/ReactBootstrap.Modal.Footer
       [:button.btn.btn-default {:on-click hide-picker}
        "Cancel"]]]))
