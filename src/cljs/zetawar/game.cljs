@@ -645,14 +645,25 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Repair
 
+(defn check-repairable [db game unit]
+  (when (>= (:unit/count unit) (:game/max-count-per-unit game))
+    (throw (unit-ex "Unit is already fully repaired" unit)))
+  unit)
+
+(defn repairable? [db game unit]
+  (try
+    (check-repairable db game unit)
+    true
+    (catch :default ex
+      false)))
+
 (defn check-can-repair [db game unit]
   (check-unit-current db game unit)
   (when-not (:game/self-repair game)
     (throw (game-ex "Unit self repair is not allowed" game)))
   (when (:unit/capturing unit)
     (throw (unit-ex "Unit cannot make repairs while capturing" unit)))
-  (when (>= (:unit/count unit) (:game/max-count-per-unit game))
-    (throw (unit-ex "Unit is already fully repaired" unit)))
+  (check-repairable db game unit)
   (checked-next-state db unit :action.type/repair-unit))
 
 (defn can-repair? [db game unit]
@@ -701,18 +712,6 @@
     (catch :default ex
       false)))
 
-(defn check-can-be-repaired [db game unit]
-  (when (>= (:unit/count unit) (:game/max-count-per-unit game))
-    (throw (unit-ex "Unit is already fully repaired" unit)))
-  unit)
-
-(defn can-be-repaired? [db game unit]
-  (try
-    (check-can-be-repaired db game unit)
-    true
-    (catch :default ex
-      false)))
-
 (defn check-compatible-armor-types-for-repair [db game repairer patient]
   (let [possible-repair-types (get-in repairer [:unit/type :unit-type/can-repair])
         goal-repair-type (get-in patient [:unit/type :unit-type/armor-type])]
@@ -731,7 +730,7 @@
   ([db game repairer patient]
    (let [new-state (check-can-field-repair db game patient)]
      (check-in-range db repairer patient)
-     (check-can-be-repaired db game patient)
+     (check-repairable db game patient)
      (check-compatible-armor-types-for-repair db game repairer patient)
      (let [patient-count (:unit/count patient)]
        [{:db/id (e patient)
@@ -1025,7 +1024,7 @@
 
 (defn repairable-friends-in-range [db game unit]
   (into []
-        (filter #(can-be-repaired? db game %))
+        (filter #(repairable? db game %))
         (friends-in-range db game unit)))
 
 (defn closest-friend [db game unit]
