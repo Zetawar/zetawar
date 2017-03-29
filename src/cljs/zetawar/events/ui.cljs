@@ -219,14 +219,14 @@
   (let [game (app/current-game db)
         cur-faction-color (game/current-faction-color game)
         [repairer-q repairer-r] (app/selected-hex db)
-        [wounded-q wounded-r] (app/targeted-hex db)]
+        [patient-q patient-r] (app/targeted-hex db)]
     {:dispatch [[:zetawar.events.game/execute-action
                  {:action/type :action.type/field-repair-unit
                   :action/faction-color cur-faction-color
                   :action/repairer-q repairer-q
                   :action/repairer-r repairer-r
-                  :action/wounded-q wounded-q
-                  :action/wounded-r wounded-r}]
+                  :action/patient-q patient-q
+                  :action/patient-r patient-r}]
                 [::clear-selection]]}))
 
 (defmethod router/handle-event ::capture-selected
