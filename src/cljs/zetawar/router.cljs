@@ -53,8 +53,8 @@
         ;; Reset render timer if a render just occurred
         (when (< @timer-start @last-render)
           (let [now (.getTime (js/Date.))]
-            (log/tracef "Setting timer-start to %d" now)
-            (reset! timer-start now)))
+            (reset! timer-start now)
+            (log/spy :trace @timer-start)))
 
         ;; Queue notification of render
         (when-not @render-queued?
@@ -62,8 +62,8 @@
                           (log/trace "Rendering...")
                           (offer! render-chan :rendered)
                           (when (> now @last-render)
-                            (log/tracef "Setting last-render to %d" now)
                             (reset! last-render now)
+                            (log/spy :trace @last-render)
                             (reset! render-queued? false)))))
 
         ;; Handle event
@@ -76,7 +76,7 @@
 
         ;; Block till render if max-render-interval has been exceeded
         (let [since-last-render (- (.getTime (js/Date.)) @timer-start)]
-          (log/tracef "Milliseconds since render timer started: %d" since-last-render)
+          (log/spy :trace since-last-render)
           (when (> since-last-render max-render-interval)
             (log/trace "Blocking till next render...")
             (<! render-chan)
