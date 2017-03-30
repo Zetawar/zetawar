@@ -328,8 +328,8 @@
                [:th {:style {:text-align "center"}} "Range"]
                [:th {:style {:text-align "center"}} "Strength"]]
               [:tbody>tr
-               [:td ({:unit-type.armor-type/personnel "P"
-                      :unit-type.armor-type/armored "A"}
+               [:td ({:unit-type.armor-type/personnel [:abbr {:title "Personnel" :style {:cursor "inherit"}} "P"]
+                      :unit-type.armor-type/armored [:abbr {:title "Armored" :style {:cursor "inherit"}} "A"]}
                      (get-in unit-type [:unit-type/armor-type]))]
                [:td (:unit-type/movement unit-type)]
                [:td (:unit-type/armor unit-type)]
@@ -339,9 +339,7 @@
                [:td (interleave [[:strong "P: "] [:strong " A: "]]
                           (map #(str (get-in % [:unit-strength/attack]))
                                      (get-in unit-type [:unit-type/strengths])))]
-               ]]]]]))]
-      [:p "P = Personnel"]
-      [:p "A = Armored"]]
+               ]]]]]))]]
      [:> js/ReactBootstrap.Modal.Footer
       [:button.btn.btn-default {:on-click hide-picker}
        "Cancel"]]]))
