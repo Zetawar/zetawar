@@ -283,8 +283,25 @@
       [:> js/ReactBootstrap.Modal.Title
        (translate :build-title)]]
      [:> js/ReactBootstrap.Modal.Body
-      [:> js/ReactBootstrap.Grid
-       {:fluid true}
+      [:> js/ReactBootstrap.Table
+       {:bordered true
+        :striped true
+        :condensed true
+        :hover true}
+       [:thead>tr
+        [:th ""]
+        [:th {:style {:text-align "center" :width "12%"}}
+             "Type"]
+        [:th {:style {:text-align "center" :width "12%"}}
+             "Move- ment"]
+        [:th {:style {:text-align "center" :width "12%"}}
+             "Armor"]
+        [:th {:style {:text-align "center" :width "12%"}}
+             "Range"]
+        [:th {:style {:text-align "center" :width "12%"}}
+             "Attack"]
+        [:th {:style {:text-align "center" :width "12%"}}
+             "Can Repair?"]]
        (for [{:keys [unit-type/id] :as unit-type} unit-types]
          (let [;; TODO: replace with unit-type-image
                color-or-grey (if (:affordable unit-type)
@@ -296,50 +313,43 @@
                media-class (if (:affordable unit-type)
                              "media clickable"
                              "media clickable text-muted")]
-           ^{:key unit-type}
-           [:> js/ReactBootstrap.Row
-            [:> js/ReactBootstrap.Col
-             {:lg 4}
-             [:div {:class media-class
-                    :on-click #(when (:affordable unit-type)
-                               (dispatch [::events.ui/hide-unit-picker])
-                               (dispatch [::events.ui/build-unit id]))}
-              [:div.media-left.media-middle
-               [:img {:src image}]]
-              [:div.media-body
-               [:h4.media-heading
-                (:unit-type/description unit-type)]
-               (str "Cost: " (:unit-type/cost unit-type))]]]
-            [:> js/ReactBootstrap.Col
-             {:lg 8
-              :style {:text-align "center"}}
-             [:> js/ReactBootstrap.Panel
-              {:header "Stats"
-               :collapsible true}
-             [:> js/ReactBootstrap.Table
-              {:bordered true
-               :striped true
-               ;:condensed true
-               :fill true}
-              [:thead>tr
-               [:th {:style {:text-align "center"}} "Type"]
-               [:th {:style {:text-align "center"}} "Movement"]
-               [:th {:style {:text-align "center"}} "Armor"]
-               [:th {:style {:text-align "center"}} "Range"]
-               [:th {:style {:text-align "center"}} "Strength"]]
-              [:tbody>tr
-               [:td ({:unit-type.armor-type/personnel [:abbr {:title "Personnel" :style {:cursor "inherit"}} "P"]
-                      :unit-type.armor-type/armored [:abbr {:title "Armored" :style {:cursor "inherit"}} "A"]}
-                     (get-in unit-type [:unit-type/armor-type]))]
-               [:td (:unit-type/movement unit-type)]
-               [:td (:unit-type/armor unit-type)]
-               [:td (:unit-type/min-range unit-type)
-                    "-"
-                    (:unit-type/max-range unit-type)]
-               [:td (interleave [[:strong "P: "] [:strong " A: "]]
-                          (map #(str (get-in % [:unit-strength/attack]))
-                                     (get-in unit-type [:unit-type/strengths])))]
-               ]]]]]))]]
+          ^{:key unit-type}
+          [:tbody>tr
+           {:style {:text-align "center"}}
+           [:td>div {:style {:text-align "left"}
+                     :class media-class
+                     :on-click #(when (:affordable unit-type)
+                                (dispatch [::events.ui/hide-unit-picker])
+                                (dispatch [::events.ui/build-unit id]))}
+            [:div.media-left.media-middle
+             [:img {:src image}]]
+            [:div.media-body
+             [:h4.media-heading
+              (:unit-type/description unit-type)]
+             (str "Cost: " (:unit-type/cost unit-type))]]
+           [:td ({:unit-type.armor-type/personnel [:abbr {:title "Personnel" :style {:cursor "inherit"}} "P"]
+                  :unit-type.armor-type/armored [:abbr {:title "Armored" :style {:cursor "inherit"}} "A"]}
+                 (get-in unit-type [:unit-type/armor-type]))]
+           [:td (:unit-type/movement unit-type)]
+           [:td (if (:unit-type/can-capture unit-type)
+                  [:abbr {:title (str "While capturing: " (:unit-type/capturing-armor unit-type))
+                          :style {:cursor "inherit"}}
+                   (:unit-type/armor unit-type)]
+                  [:abbr {:title "Unit cannot capture bases"
+                          :style {:cursor "inherit"}}
+                   (:unit-type/armor unit-type)])]
+           [:td (:unit-type/min-range unit-type)
+                "-"
+                (:unit-type/max-range unit-type)]
+           [:td (for [strength-info (:unit-type/strengths unit-type)
+                      :let [atype ({"personnel" "P: " "armored" "A: "}
+                                   (name (:unit-strength/armor-type strength-info)))
+                            attackstrength (:unit-strength/attack strength-info)]]
+                  ^{:key strength-info}
+                  [:div (str atype attackstrength)])]
+           [:td (interpose ", "
+                  (for [can-repair-set (:unit-type/can-repair unit-type)]
+                    ({"personnel" "P" "armored" "A"} (name can-repair-set))))]]))]]
      [:> js/ReactBootstrap.Modal.Footer
       [:button.btn.btn-default {:on-click hide-picker}
        "Cancel"]]]))
