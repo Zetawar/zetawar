@@ -301,7 +301,7 @@
         [:th {:style {:text-align "center" :width "12%"}}
              "Attack"]
         [:th {:style {:text-align "center" :width "12%"}}
-             "Can Repair?"]]
+             "Field Repair?"]]
        (for [{:keys [unit-type/id] :as unit-type} unit-types]
          (let [;; TODO: replace with unit-type-image
                color-or-grey (if (:affordable unit-type)
