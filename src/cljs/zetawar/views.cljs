@@ -327,8 +327,12 @@
              [:h4.media-heading
               (:unit-type/description unit-type)]
              (str "Cost: " (:unit-type/cost unit-type))]]
-           [:td ({:unit-type.armor-type/personnel [:abbr {:title "Personnel" :style {:cursor "inherit"}} "P"]
-                  :unit-type.armor-type/armored [:abbr {:title "Armored" :style {:cursor "inherit"}} "A"]}
+           [:td ({:unit-type.armor-type/personnel [:abbr {:title "Personnel"
+                                                          :style {:cursor "inherit"}}
+                                                          "P"]
+                  :unit-type.armor-type/armored [:abbr {:title "Armored"
+                                                        :style {:cursor "inherit"}}
+                                                        "A"]}
                  (get-in unit-type [:unit-type/armor-type]))]
            [:td (:unit-type/movement unit-type)]
            [:td (if (:unit-type/can-capture unit-type)
