@@ -291,7 +291,7 @@
        [:thead>tr
         [:th ""]
         [:th {:style {:text-align "center" :width "12%"}}
-             "Type"]
+             "Armor Type"]
         [:th {:style {:text-align "center" :width "12%"}}
              "Move- ment"]
         [:th {:style {:text-align "center" :width "12%"}}
