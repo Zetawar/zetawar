@@ -46,22 +46,25 @@
 (defn start [{:as router-ctx :keys [ev-chan max-render-interval]}]
   (let [timer-start (atom -1)
         last-render (atom 0)
+        render-queued? (atom false)
         render-chan (chan 1)]
     (go-loop []
       (when-let [msg (<! ev-chan)]
         ;; Reset render timer if a render just occurred
         (when (< @timer-start @last-render)
           (let [now (.getTime (js/Date.))]
-            (log/tracef "Setting timer-start to %d" now)
-            (reset! timer-start now)))
+            (reset! timer-start now)
+            (log/spy :trace @timer-start)))
 
         ;; Queue notification of render
-        (r/next-tick #(let [now (.getTime (js/Date.))]
-                        (log/trace "Rendering...")
-                        (offer! render-chan :rendered)
-                        (when (> now @last-render)
-                          (log/tracef "Setting last-render to %d" now)
-                          (reset! last-render now))))
+        (when-not @render-queued?
+          (r/next-tick #(let [now (.getTime (js/Date.))]
+                          (log/trace "Rendering...")
+                          (offer! render-chan :rendered)
+                          (when (> now @last-render)
+                            (reset! last-render now)
+                            (log/spy :trace @last-render)
+                            (reset! render-queued? false)))))
 
         ;; Handle event
         (try
@@ -73,7 +76,7 @@
 
         ;; Block till render if max-render-interval has been exceeded
         (let [since-last-render (- (.getTime (js/Date.)) @timer-start)]
-          (log/tracef "Milliseconds since render timer started: %d" since-last-render)
+          (log/spy :trace since-last-render)
           (when (> since-last-render max-render-interval)
             (log/trace "Blocking till next render...")
             (<! render-chan)

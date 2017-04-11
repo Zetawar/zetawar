@@ -8,4 +8,10 @@
     {:schema schema
      :conn (d/create-conn schema)}))
 
-;; TODO: implement resume-key
+(defmethod ig/resume-key :zetawar.system/datascript [_ opts old-opts old-impl]
+  (let [{:keys [schema]} opts
+        old-schema (:schema old-opts)]
+    (if (= schema old-schema)
+      old-impl
+      {:schema schema
+       :conn (d/create-conn schema)})))
