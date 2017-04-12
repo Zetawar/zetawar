@@ -712,37 +712,36 @@
     (catch :default ex
       false)))
 
-(defn check-compatible-armor-types-for-repair [db game repairer patient]
+(defn check-has-repairable-armor-type [db game repairer target]
   (let [possible-repair-types (get-in repairer [:unit/type :unit-type/can-repair])
-        goal-repair-type (get-in patient [:unit/type :unit-type/armor-type])]
+        goal-repair-type (get-in target [:unit/type :unit-type/armor-type])]
     (when-not (some #{goal-repair-type} possible-repair-types)
       (throw (unit-ex "Armor types are not compatible" repairer)))
     repairer))
 
-(defn compatible-armor-types-for-repair? [db game repairer patient]
+(defn has-repairable-armor-type? [db game repairer target]
   (try
-    (check-compatible-armor-types-for-repair db game repairer patient)
+    (check-has-repairable-armor-type db game repairer target)
     true
     (catch :default ex
       false)))
 
 (defn field-repair-tx
-  ([db game repairer patient]
-   (let [new-state (check-can-field-repair db game patient)]
-     (check-in-range db repairer patient)
-     (check-repairable db game patient)
-     (check-compatible-armor-types-for-repair db game repairer patient)
-     (let [patient-count (:unit/count patient)]
-       [{:db/id (e patient)
-         :unit/count (min (:game/max-count-per-unit game)
-                          (+ (:unit/count patient)
-                             (get-in repairer [:unit/type :unit-type/repair])))}
-        {:db/id (e repairer)
-         :unit/state (e new-state)}])))
+  ([db game repairer target]
+   (let [new-state (check-can-field-repair db game target)]
+     (check-in-range db repairer target)
+     (check-repairable db game target)
+     (check-has-repairable-armor-type db game repairer target)
+     [{:db/id (e target)
+       :unit/count (min (:game/max-count-per-unit game)
+                        (+ (:unit/count target)
+                           (get-in repairer [:unit/type :unit-type/repair])))}
+      {:db/id (e repairer)
+       :unit/state (e new-state)}]))
   ([db game q1 r1 q2 r2]
    (let [repairer (checked-unit-at db game q1 r1)
-         patient (checked-unit-at db game q2 r2)]
-     (field-repair-tx db game repairer patient))))
+         target (checked-unit-at db game q2 r2)]
+     (field-repair-tx db game repairer target))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Capture
@@ -932,10 +931,10 @@
 
     :action.type/field-repair-unit
     (let [{:keys [action/repairer-q action/repairer-r
-                  action/patient-q action/patient-r]} action]
+                  action/target-q action/target-r]} action]
       (field-repair-tx db game
                        repairer-q repairer-r
-                       patient-q patient-r))
+                       target-q target-r))
 
     :action.type/capture-base
     (let [{:keys [action/q action/r]} action]
@@ -1085,12 +1084,12 @@
 
 (defn field-repair-actions [db game unit]
   (if (can-field-repair? db game unit)
-    (map (fn [patient]
+    (map (fn [target]
            {:action/type :action.type/field-repair-unit
             :action/repairer-q (:unit/q unit)
             :action/repairer-r (:unit/r unit)
-            :action/patient-q (:unit/q patient)
-            :action/patient-r (:unit/r patient)})
+            :action/target-q (:unit/q target)
+            :action/target-r (:unit/r target)})
          (friends-in-range db game unit))
     []))
 

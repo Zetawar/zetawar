@@ -448,11 +448,11 @@
   (when-let [[q r] @(selected-hex conn)]
     @(can-field-repair? conn q r)))
 
-(deftrack compatible-armor-types-for-repair? [conn targeted-q targeted-r]
+(deftrack has-repairable-armor-type? [conn targeted-q targeted-r]
   (when-let [[selected-q selected-r] @(selected-hex conn)]
-    (game/compatible-armor-types-for-repair? @conn @(game conn)
-                                             @(unit-at conn selected-q selected-r)
-                                             @(unit-at conn targeted-q targeted-r))))
+    (game/has-repairable-armor-type? @conn @(game conn)
+                                     @(unit-at conn selected-q selected-r)
+                                     @(unit-at conn targeted-q targeted-r))))
 
 (deftrack selected-can-capture? [conn]
   (when-let [[q r] @(selected-hex conn)]
@@ -503,7 +503,7 @@
     (and @(selected-can-field-repair? conn)
          @(friend-in-range-of-selected? conn targeted-q targeted-r)
          @(repairable? conn targeted-q targeted-r)
-         @(compatible-armor-types-for-repair? conn targeted-q targeted-r))))
+         @(has-repairable-armor-type? conn targeted-q targeted-r))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Unit picker

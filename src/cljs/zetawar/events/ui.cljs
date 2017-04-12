@@ -98,7 +98,7 @@
                 (game/can-field-repair? db game selected-unit)
                 (game/repairable? db game unit)
                 (game/in-range? db selected-unit unit)
-                (game/compatible-armor-types-for-repair? db game selected-unit unit))
+                (game/has-repairable-armor-type? db game selected-unit unit))
              [{:db/id (e app)
                :app/targeted-q ev-q
                :app/targeted-r ev-r}]
@@ -219,14 +219,14 @@
   (let [game (app/current-game db)
         cur-faction-color (game/current-faction-color game)
         [repairer-q repairer-r] (app/selected-hex db)
-        [patient-q patient-r] (app/targeted-hex db)]
+        [target-q target-r] (app/targeted-hex db)]
     {:dispatch [[:zetawar.events.game/execute-action
                  {:action/type :action.type/field-repair-unit
                   :action/faction-color cur-faction-color
                   :action/repairer-q repairer-q
                   :action/repairer-r repairer-r
-                  :action/patient-q patient-q
-                  :action/patient-r patient-r}]
+                  :action/target-q target-q
+                  :action/target-r target-r}]
                 [::clear-selection]]}))
 
 (defmethod router/handle-event ::capture-selected
