@@ -269,93 +269,101 @@
                 :on-click #(dispatch [::events.ui/configure-faction faction])
                 :title (translate :configure-faction-tip)}]]]))))
 
+(def armor-type-abbrevs
+  {:unit-type.armor-type/personnel "P"
+   :unit-type.armor-type/armored "A"})
+
 ;; TODO: cleanup unit-picker
 (defn unit-picker [{:as view-ctx :keys [conn dispatch translate]}]
   (let [unit-types @(subs/available-unit-types conn)
         cur-faction @(subs/current-faction conn)
         color (name (:faction/color cur-faction))
-        hide-picker (fn [ev]
-                      (when ev (.preventDefault ev))
-                      (dispatch [::events.ui/hide-unit-picker]))]
+        hide-picker #(dispatch [::events.ui/hide-unit-picker])]
     [:> js/ReactBootstrap.Modal {:show @(subs/picking-unit? conn)
                                  :on-hide hide-picker}
      [:> js/ReactBootstrap.Modal.Header {:close-button true}
       [:> js/ReactBootstrap.Modal.Title
        (translate :build-title)]]
      [:> js/ReactBootstrap.Modal.Body
-      [:> js/ReactBootstrap.Table
-       {:bordered true
-        :striped true
-        :condensed true
-        :hover true}
+      [:> js/ReactBootstrap.Table {:bordered true
+                                   :striped true
+                                   :condensed true
+                                   :hover true}
        [:thead>tr
         [:th ""]
-        [:th {:style {:text-align "center" :width "12%"}}
-             "Armor Type"]
-        [:th {:style {:text-align "center" :width "12%"}}
-             "Move- ment"]
-        [:th {:style {:text-align "center" :width "12%"}}
-             "Armor"]
-        [:th {:style {:text-align "center" :width "12%"}}
-             "Range"]
-        [:th {:style {:text-align "center" :width "12%"}}
-             "Attack"]
-        [:th {:style {:text-align "center" :width "12%"}}
-             "Field Repair?"]]
-       (for [{:keys [unit-type/id] :as unit-type} unit-types]
-         (let [;; TODO: replace with unit-type-image
-               color-or-grey (if (:affordable unit-type)
-                               color
-                               "unavailable")
-               image (->> (string/replace (:unit-type/image unit-type)
-                                          "COLOR" color-or-grey)
-                           (str "/images/game/"))
-               media-class (if (:affordable unit-type)
-                             "media clickable"
-                             "media clickable text-muted")]
-          ^{:key unit-type}
-          [:tbody>tr
-           {:style {:text-align "center"}}
-           [:td>div {:style {:text-align "left"}
-                     :class media-class
-                     :on-click #(when (:affordable unit-type)
+        [:th.text-center {:style {:width "12%"}}
+         "Armor Type"]
+        [:th.text-center {:style {:width "12%"}}
+         "Move- ment"]
+        [:th.text-center {:style {:width "12%"}}
+         "Armor"]
+        [:th.text-center {:style {:width "12%"}}
+         "Range"]
+        [:th.text-center {:style {:width "12%"}}
+         "Attack"]
+        [:th.text-center {:style {:width "12%"}}
+         "Field Repair?"]]
+       (into [:tbody]
+             (for [unit-type unit-types]
+               (let [;; TODO: replace with unit-type-image
+                     color-or-grey (if (:affordable unit-type)
+                                     color
+                                     "unavailable")
+                     image (->> (string/replace (:unit-type/image unit-type)
+                                                "COLOR" color-or-grey)
+                                (str "/images/game/"))
+                     media-class (if (:affordable unit-type)
+                                   "media text-left"
+                                   "media text-left text-muted")
+                     {:keys [unit-type/id
+                             unit-type/description
+                             unit-type/cost
+                             unit-type/movement
+                             unit-type/armor
+                             unit-type/armor-type
+                             unit-type/can-capture
+                             unit-type/capturing-armor
+                             unit-type/min-range
+                             unit-type/max-range]} unit-type
+                     armor-type-abbrev (armor-type-abbrevs armor-type)]
+                 [:tr.text-center.clickable
+                  {:on-click #(when (:affordable unit-type)
                                 (dispatch [::events.ui/hide-unit-picker])
                                 (dispatch [::events.ui/build-unit id]))}
-            [:div.media-left.media-middle
-             [:img {:src image}]]
-            [:div.media-body
-             [:h4.media-heading
-              (:unit-type/description unit-type)]
-             (str "Cost: " (:unit-type/cost unit-type))]]
-           [:td ({:unit-type.armor-type/personnel [:abbr {:title "Personnel"
-                                                          :style {:cursor "inherit"}}
-                                                          "P"]
-                  :unit-type.armor-type/armored [:abbr {:title "Armored"
-                                                        :style {:cursor "inherit"}}
-                                                        "A"]}
-                 (get-in unit-type [:unit-type/armor-type]))]
-           [:td (:unit-type/movement unit-type)]
-           [:td (if (:unit-type/can-capture unit-type)
-                  [:abbr {:title (str "While capturing: " (:unit-type/capturing-armor unit-type))
-                          :style {:cursor "inherit"}}
-                   (:unit-type/armor unit-type)]
-                  [:abbr {:title "Unit cannot capture bases"
-                          :style {:cursor "inherit"}}
-                   (:unit-type/armor unit-type)])]
-           [:td (:unit-type/min-range unit-type)
-                "-"
-                (:unit-type/max-range unit-type)]
-           [:td (for [strength-info (:unit-type/strengths unit-type)
-                      :let [atype ({"personnel" "P: " "armored" "A: "}
-                                   (name (:unit-strength/armor-type strength-info)))
-                            attackstrength (:unit-strength/attack strength-info)]]
-                  ^{:key strength-info}
-                  [:div (str atype attackstrength)])]
-           [:td (interpose ", "
-                  (for [can-repair-set (:unit-type/can-repair unit-type)]
-                    ({"personnel" "P" "armored" "A"} (name can-repair-set))))]]))]]
+                  [:td>div {:class media-class}
+                   [:div.media-left.media-middle
+                    [:img {:src image}]]
+                   [:div.media-body
+                    [:h4.media-heading description]
+                    (str "Cost: " cost)]]
+                  [:td (case armor-type
+                         :unit-type.armor-type/personnel
+                         [:abbr {:title "Personnel" :style {:cursor "inherit"}}
+                          armor-type-abbrev]
+
+                         :unit-type.armor-type/armored
+                         [:abbr {:title "Armored" :style {:cursor "inherit"}}
+                          armor-type-abbrev])]
+                  [:td movement]
+                  [:td (if can-capture
+                         [:abbr {:title (str "While capturing: " capturing-armor)
+                                 :style {:cursor "inherit"}}
+                          armor]
+                         [:abbr {:title "Unit cannot capture bases"
+                                 :style {:cursor "inherit"}}
+                          armor])]
+                  [:td min-range "-" max-range]
+                  (into [:td]
+                        (for [unit-strength (:unit-type/strengths unit-type)]
+                          (let [{:keys [unit-strength/armor-type
+                                        unit-strength/attack]} unit-strength
+                                armor-type-abbrev (armor-type-abbrevs armor-type)]
+                            [:div (str armor-type-abbrev ": " attack)])))
+                  [:td (string/join ", "
+                                    (for [can-repair (:unit-type/can-repair unit-type)]
+                                      (armor-type-abbrevs can-repair "")))]])))]]
      [:> js/ReactBootstrap.Modal.Footer
-      [:button.btn.btn-default {:on-click hide-picker}
+      [:div.btn.btn-default {:on-click hide-picker}
        "Cancel"]]]))
 
 (defn faction-settings [{:as views-ctx :keys [conn dispatch translate]}]
