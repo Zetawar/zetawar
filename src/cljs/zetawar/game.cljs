@@ -728,7 +728,7 @@
 
 (defn field-repair-tx
   ([db game repairer target]
-   (let [new-state (check-can-field-repair db game target)]
+   (let [new-state (check-can-field-repair db game repairer)]
      (check-in-range db repairer target)
      (check-repairable db game target)
      (check-has-repairable-armor-type db game repairer target)
