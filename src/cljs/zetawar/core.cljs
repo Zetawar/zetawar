@@ -23,7 +23,7 @@
 
 (defonce system (atom nil))
 
-(defn ^:export run []
+(defn run []
   (let [body-id (-> js/document
                     (.getElementsByTagName "body")
                     (aget 0)
@@ -49,6 +49,7 @@
       ;; Default
       nil)))
 
+;; TODO: don't start game when viewing non-game site
 ;; TODO: don't start game when running benchmarks
 (defn ^:export init []
   (when-not (site/viewing-devcards?)
@@ -61,3 +62,9 @@
         (app/load-encoded-game-state! game-cfg encoded-game-state)
         (app/start-new-game! game-cfg :sterlings-aruba-multiplayer))
       (set! (.-onload js/window) run))))
+
+(defn ^:export reload []
+  (when-not (site/viewing-devcards?)
+    (ig/suspend! @system)
+    (reset! system (ig/resume system/game-config @system)))
+  (run))
