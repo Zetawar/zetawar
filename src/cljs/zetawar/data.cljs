@@ -39,7 +39,7 @@
     :build-unit-button "Build"
     :attack-unit-button "Attack"
     :repair-unit-button "Repair"
-    :repair-other-button "Repair"
+    :field-repair-button "Field Repair"
     :capture-base-button "Capture"
 
     ;; Building units
@@ -105,12 +105,12 @@
                {:move-unit         :moved
                 :attack-unit       :done
                 :repair-unit       :done
-                :repair-other-unit :done
+                :field-repair-unit :done
                 :capture-base      :done}}
        :moved {:transitions
                {:attack-unit       :done
                 :capture-base      :done
-                :repair-other-unit :done}}
+                :field-repair-unit :done}}
        :done  {}}}
 
      :free-attack-twice

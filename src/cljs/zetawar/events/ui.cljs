@@ -95,10 +95,10 @@
            ;; selecting friendly unit with unit or terrain selected
            (and unit
                 (or selected-unit selected-terrain)
-                (game/can-repair-other? db game selected-unit)
-                (game/can-be-repaired? db game unit)
+                (game/can-field-repair? db game selected-unit)
+                (game/repairable? db game unit)
                 (game/in-range? db selected-unit unit)
-                (game/compatible-armor-types-for-repair? db game selected-unit unit))
+                (game/has-repairable-armor-type? db game selected-unit unit))
              [{:db/id (e app)
                :app/targeted-q ev-q
                :app/targeted-r ev-r}]
@@ -122,7 +122,7 @@
                      (game/can-attack? db game unit)
                      (not= 0 (count (game/enemies-in-range db game unit))))
                     (and
-                      (game/can-repair-other? db game unit)
+                      (game/can-field-repair? db game unit)
                       (not= 0 (count (game/friends-in-range db game unit))))
                     (game/can-capture? db game unit terrain)))
            (cond-> [{:db/id (e app)
@@ -173,7 +173,7 @@
         terrain (game/base-at db game to-q to-r)]
     (if (or (and (game/can-attack? db game unit)
                  (not-empty (game/enemies-in-range db game unit)))
-            (and (game/can-repair-other? db game unit)
+            (and (game/can-field-repair? db game unit)
                  (not-empty (game/repairable-friends-in-range db game unit)))
             (game/can-capture? db game unit terrain))
       {:tx       [[:db/add (e app) :app/selected-q to-q]
@@ -219,14 +219,14 @@
   (let [game (app/current-game db)
         cur-faction-color (game/current-faction-color game)
         [repairer-q repairer-r] (app/selected-hex db)
-        [wounded-q wounded-r] (app/targeted-hex db)]
+        [target-q target-r] (app/targeted-hex db)]
     {:dispatch [[:zetawar.events.game/execute-action
-                 {:action/type :action.type/repair-other-unit
+                 {:action/type :action.type/field-repair-unit
                   :action/faction-color cur-faction-color
                   :action/repairer-q repairer-q
                   :action/repairer-r repairer-r
-                  :action/wounded-q wounded-q
-                  :action/wounded-r wounded-r}]
+                  :action/target-q target-q
+                  :action/target-r target-r}]
                 [::clear-selection]]}))
 
 (defmethod router/handle-event ::capture-selected
