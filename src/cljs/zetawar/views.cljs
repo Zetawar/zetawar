@@ -368,7 +368,7 @@
 
 (defn faction-settings [{:as views-ctx :keys [conn dispatch translate]}]
   (with-let [faction (subs/faction-to-configure conn)
-             faction-color (subs/faction-color-name conn)
+             faction-color (subs/faction-color-name faction)
              selected-player-type (r/atom nil)
              hide-settings (fn [ev]
                              (when ev (.preventDefault ev))

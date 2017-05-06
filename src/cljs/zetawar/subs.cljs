@@ -220,6 +220,14 @@
                        conn @(current-faction-eid conn)))
       0))
 
+(deftrack faction-color-name [faction]
+  (when @faction
+    (-> @faction
+        :faction/color
+        name
+        (#(str % "-name"))
+        keyword)))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Units
 
@@ -530,23 +538,6 @@
 
 (deftrack configuring-faction? [conn]
   (some? @(faction-to-configure conn)))
-
-;(deftrack faction-color-name [faction]
-;  (when @faction
-;    (-> @faction
-;        :faction/color
-;        name
-;        (#(apply str [% "-name"]))
-;        keyword))
-
-(deftrack faction-color-name [conn]
-  (when-let [faction @(faction-to-configure conn)]
-    (-> faction
-        :faction/color
-        name
-        (#(apply str [% "-name"]))
-        keyword)))
-
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; New game configuration
