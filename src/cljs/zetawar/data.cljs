@@ -17,9 +17,17 @@
     :round-label "Round"
 
     ;; Faction configuration
-    :configure-faction-tip"Configure faction"
-    :configure-faction-title "Configure faction"
+    :configure-faction-tip "Configure faction"
+    :configure-faction-title-prefix "Configure faction: "
     :player-type-label "Player type"
+
+    ;; Faction colors
+    :red-name "Red"
+    :blue-name "Blue"
+    :yellow-name "Yellow"
+    :pink-name "Pink"
+    :green-name "Green"
+    :orange-name "Orange"
 
     ;; New game settings
     :new-game-title "Start a new game"

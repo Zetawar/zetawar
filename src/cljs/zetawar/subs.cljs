@@ -220,6 +220,14 @@
                        conn @(current-faction-eid conn)))
       0))
 
+(deftrack faction-color-name [faction]
+  (when @faction
+    (-> @faction
+        :faction/color
+        name
+        (str "-name")
+        keyword)))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Units
 

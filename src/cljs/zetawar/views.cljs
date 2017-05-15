@@ -368,6 +368,7 @@
 
 (defn faction-settings [{:as views-ctx :keys [conn dispatch translate]}]
   (with-let [faction (subs/faction-to-configure conn)
+             faction-color (subs/faction-color-name faction)
              selected-player-type (r/atom nil)
              hide-settings (fn [ev]
                              (when ev (.preventDefault ev))
@@ -384,7 +385,8 @@
                                  :on-hide hide-settings}
      [:> js/ReactBootstrap.Modal.Header {:close-button true}
       [:> js/ReactBootstrap.Modal.Title
-       (translate :configure-faction-title)]]
+       (translate :configure-faction-title-prefix)
+       (translate @faction-color)]]
      [:> js/ReactBootstrap.Modal.Body
       [:form
        [:div.form-group
