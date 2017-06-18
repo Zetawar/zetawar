@@ -247,6 +247,31 @@
                :armored   4}
               :zoc
               [:personnel :armored]}
+     :sniper {:description "Sniper"
+              :cost 275
+              :movement 9
+              :can-capture true
+              :can-repair #{}
+              :min-range 2
+              :max-range 4
+              :armor-type :personnel
+              :armor 5
+              :capturing-armor 3
+              :repair 1
+              :state-map :move-attack
+              :image "tilesets/elite-command/units/sniper-COLOR.png"
+              :terrain-effects
+              {:plains    {:movement-cost 4 :armor-bonus  0 :attack-bonus  0}
+               :mountains {:movement-cost 9 :armor-bonus  5 :attack-bonus  4}
+               :woods     {:movement-cost 4 :armor-bonus  3 :attack-bonus -4}
+               :desert    {:movement-cost 5 :armor-bonus -1 :attack-bonus -1}
+               :tundra    {:movement-cost 5 :armor-bonus -1 :attack-bonus -1}
+               :swamp     {:movement-cost 9 :armor-bonus -2 :attack-bonus -3}
+               :ford      {:movement-cost 9 :armor-bonus -1 :attack-bonus -6}
+               :base      {:movement-cost 3 :armor-bonus  3 :attack-bonus  2}}
+              :attack-strengths
+              {:personnel 8
+               :armored   0}}
      :medic {:description "Medic"
              :cost 100
              :movement 9
