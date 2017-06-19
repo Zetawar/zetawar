@@ -351,7 +351,32 @@
             {:personnel 10
              :armored   10}
             :zoc
-            [:personnel :armored]}}}})
+            [:personnel :armored]}
+     :heavytank {:description "Heavy Tank"
+                 :cost 500
+                 :movement 12
+                 :can-capture false
+                 :can-repair #{}
+                 :min-range 1
+                 :max-range 1
+                 :armor-type :armored
+                 :armor 15
+                 :repair 1
+                 :state-map :move-attack
+                 :image "tilesets/elite-command/units/heavytank-COLOR.png"
+                 :terrain-effects
+                 {:plains {:movement-cost 4 :armor-bonus  0 :attack-bonus 0}
+                  :woods  {:movement-cost 6 :armor-bonus -3 :attack-bonus 0}
+                  :desert {:movement-cost 5 :armor-bonus  0 :attack-bonus 0}
+                  :tundra {:movement-cost 7 :armor-bonus  0 :attack-bonus 0}
+                  :swamp  {:movement-cost 8 :armor-bonus -4 :attack-bonus 0}
+                  :ford   {:movement-cost 8 :armor-bonus -2 :attack-bonus 0}
+                  :base   {:movement-cost 3 :armor-bonus -2 :attack-bonus 0}}
+                 :attack-strengths
+                 {:personnel 15
+                  :armored   12}
+                 :zoc
+                 [:personnel :armored]}}}})
 
 ;; TODO: remove redundant id keys (?)
 (def maps
