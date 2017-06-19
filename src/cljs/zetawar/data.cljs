@@ -376,7 +376,30 @@
                  {:personnel 15
                   :armored   12}
                  :zoc
-                 [:personnel :armored]}}}})
+                 [:personnel :armored]}
+     :artillery {:description "Artillery"
+                 :cost 400
+                 :movement 8
+                 :can-capture false
+                 :can-repair #{}
+                 :min-range 3
+                 :max-range 4
+                 :armor-type :armored
+                 :armor 6
+                 :repair 1
+                 :state-map :exclusive
+                 :image "tilesets/elite-command/units/artillery-COLOR.png"
+                 :terrain-effects
+                 {:plains {:movement-cost 4 :armor-bonus  0 :attack-bonus  0}
+                  :woods  {:movement-cost 6 :armor-bonus -3 :attack-bonus -3}
+                  :desert {:movement-cost 5 :armor-bonus  0 :attack-bonus  0}
+                  :tundra {:movement-cost 5 :armor-bonus  0 :attack-bonus  0}
+                  :swamp  {:movement-cost 6 :armor-bonus -3 :attack-bonus -3}
+                  :ford   {:movement-cost 6 :armor-bonus -2 :attack-bonus  0}
+                  :base   {:movement-cost 2 :armor-bonus  0 :attack-bonus  0}}
+                 :attack-strengths
+                 {:personnel 12
+                  :armored   13}}}}})
 
 ;; TODO: remove redundant id keys (?)
 (def maps
