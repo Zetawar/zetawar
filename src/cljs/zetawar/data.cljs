@@ -161,7 +161,8 @@
                  :tundra    {:movement-cost 4 :armor-bonus -1 :attack-bonus -1}
                  :swamp     {:movement-cost 6 :armor-bonus -2 :attack-bonus -2}
                  :ford      {:movement-cost 5 :armor-bonus -1 :attack-bonus -1}
-                 :base      {:movement-cost 2 :armor-bonus  3 :attack-bonus  2}}
+                 :base      {:movement-cost 2 :armor-bonus  3 :attack-bonus  2}
+                 :seaport   {:movement-cost 2 :armor-bonus  0 :attack-bonus  0}}
                 :attack-strengths
                 {:personnel 6
                  :armored   3}
@@ -188,7 +189,8 @@
                   :tundra    {:movement-cost 5 :armor-bonus -1 :attack-bonus  0}
                   :swamp     {:movement-cost 9 :armor-bonus -2 :attack-bonus -2}
                   :ford      {:movement-cost 9 :armor-bonus -1 :attack-bonus -1}
-                  :base      {:movement-cost 3 :armor-bonus  3 :attack-bonus -1}}
+                  :base      {:movement-cost 3 :armor-bonus  3 :attack-bonus -1}
+                  :seaport   {:movement-cost 3 :armor-bonus  0 :attack-bonus  0}}
                  :attack-strengths
                  {:personnel 8
                   :armored   9}
@@ -215,7 +217,8 @@
                :tundra    {:movement-cost 5 :armor-bonus -1 :attack-bonus -1}
                :swamp     {:movement-cost 9 :armor-bonus -2 :attack-bonus -2}
                :ford      {:movement-cost 9 :armor-bonus -1 :attack-bonus -2}
-               :base      {:movement-cost 3 :armor-bonus  3 :attack-bonus -2}}
+               :base      {:movement-cost 3 :armor-bonus  3 :attack-bonus -2}
+               :seaport   {:movement-cost 3 :armor-bonus  0 :attack-bonus  0}}
               :attack-strengths
               {:personnel 10
                :armored   10}}
@@ -241,7 +244,8 @@
                :swamp         {:movement-cost 3 :armor-bonus -2 :attack-bonus -2}
                :ford          {:movement-cost 3 :armor-bonus  0 :attack-bonus  0}
                :shallow-water {:movement-cost 6 :armor-bonus -2 :attack-bonus -2}
-               :base          {:movement-cost 2 :armor-bonus  3 :attack-bonus  2}}
+               :base          {:movement-cost 2 :armor-bonus  3 :attack-bonus  2}
+               :seaport       {:movement-cost 2 :armor-bonus  0 :attack-bonus  0}}
               :attack-strengths
               {:personnel 9
                :armored   4}
@@ -268,7 +272,8 @@
               :tundra    {:movement-cost 4 :armor-bonus -1 :attack-bonus -1}
               :swamp     {:movement-cost 6 :armor-bonus -2 :attack-bonus -2}
               :ford      {:movement-cost 5 :armor-bonus -1 :attack-bonus -1}
-              :base      {:movement-cost 2 :armor-bonus  3 :attack-bonus  2}}
+              :base      {:movement-cost 2 :armor-bonus  3 :attack-bonus  2}
+              :seaport   {:movement-cost 2 :armor-bonus  0 :attack-bonus  0}}
             :attack-strengths
             {:personnel 5
              :armored   2}
@@ -296,7 +301,8 @@
                 :swamp         {:movement-cost 6 :armor-bonus -2 :attack-bonus -2}
                 :ford          {:movement-cost 5 :armor-bonus -1 :attack-bonus -1}
                 :shallow-water {:movement-cost 7 :armor-bonus -2 :attack-bonus -2}
-                :base          {:movement-cost 2 :armor-bonus  3 :attack-bonus  2}}
+                :base          {:movement-cost 2 :armor-bonus  3 :attack-bonus  2}
+                :seaport       {:movement-cost 2 :armor-bonus  0 :attack-bonus  0}}
               :attack-strengths
               {:personnel 5
                :armored   2}
@@ -316,13 +322,14 @@
               :state-map :free-attack-twice
               :image "tilesets/elite-command/units/humvee-COLOR.png"
               :terrain-effects
-              {:plains {:movement-cost 3  :armor-bonus  0 :attack-bonus  0}
-               :woods  {:movement-cost 6  :armor-bonus -2 :attack-bonus -2}
-               :desert {:movement-cost 3  :armor-bonus  0 :attack-bonus  0}
-               :tundra {:movement-cost 6  :armor-bonus  0 :attack-bonus  0}
-               :swamp  {:movement-cost 12 :armor-bonus -3 :attack-bonus -3}
-               :ford   {:movement-cost 12 :armor-bonus -1 :attack-bonus -1}
-               :base   {:movement-cost 2  :armor-bonus  0 :attack-bonus  0}}
+              {:plains  {:movement-cost 3  :armor-bonus  0 :attack-bonus  0}
+               :woods   {:movement-cost 6  :armor-bonus -2 :attack-bonus -2}
+               :desert  {:movement-cost 3  :armor-bonus  0 :attack-bonus  0}
+               :tundra  {:movement-cost 6  :armor-bonus  0 :attack-bonus  0}
+               :swamp   {:movement-cost 12 :armor-bonus -3 :attack-bonus -3}
+               :ford    {:movement-cost 12 :armor-bonus -1 :attack-bonus -1}
+               :base    {:movement-cost 2  :armor-bonus  0 :attack-bonus  0}
+               :seaport {:movement-cost 2  :armor-bonus  0 :attack-bonus  0}}
               :attack-strengths
               {:personnel 9
                :armored   3}
@@ -341,13 +348,14 @@
             :state-map :move-attack
             :image "tilesets/elite-command/units/tank-COLOR.png"
             :terrain-effects
-            {:plains {:movement-cost 3 :armor-bonus  0 :attack-bonus 0}
-             :woods  {:movement-cost 6 :armor-bonus -3 :attack-bonus 0}
-             :desert {:movement-cost 4 :armor-bonus  0 :attack-bonus 0}
-             :tundra {:movement-cost 5 :armor-bonus  0 :attack-bonus 0}
-             :swamp  {:movement-cost 8 :armor-bonus -4 :attack-bonus 0}
-             :ford   {:movement-cost 8 :armor-bonus  0 :attack-bonus 0}
-             :base   {:movement-cost 2 :armor-bonus -2 :attack-bonus 0}}
+            {:plains  {:movement-cost 3 :armor-bonus  0 :attack-bonus 0}
+             :woods   {:movement-cost 6 :armor-bonus -3 :attack-bonus 0}
+             :desert  {:movement-cost 4 :armor-bonus  0 :attack-bonus 0}
+             :tundra  {:movement-cost 5 :armor-bonus  0 :attack-bonus 0}
+             :swamp   {:movement-cost 8 :armor-bonus -4 :attack-bonus 0}
+             :ford    {:movement-cost 8 :armor-bonus  0 :attack-bonus 0}
+             :base    {:movement-cost 2 :armor-bonus -2 :attack-bonus 0}
+             :seaport {:movement-cost 2 :armor-bonus  0 :attack-bonus 0}}
             :attack-strengths
             {:personnel 10
              :armored   10}
@@ -368,7 +376,8 @@
                :image "tilesets/elite-command/units/frigate-COLOR.png"
                :terrain-effects
                {:sea           {:movement-cost 1 :armor-bonus 0 :attack-bonus 0}
-                :shallow-water {:movement-cost 1 :armor-bonus 0 :attack-bonus 0}}
+                :shallow-water {:movement-cost 1 :armor-bonus 0 :attack-bonus 0}
+                :seaport       {:movement-cost 1 :armor-bonus 0 :attack-bonus 0}}
                :attack-strengths
                {:personnel 9
                 :armored   9}
@@ -387,7 +396,8 @@
                  :state-map :free-attack-twice
                  :image "tilesets/elite-command/units/destroyer-COLOR.png"
                  :terrain-effects
-                 {:sea {:movement-cost 1 :armor-bonus 0 :attack-bonus 0}}
+                 {:sea     {:movement-cost 1 :armor-bonus 0 :attack-bonus 0}
+                  :seaport {:movement-cost 1 :armor-bonus 0 :attack-bonus 0}}
                  :attack-strengths
                  {:personnel 10
                   :armored   12}
@@ -405,7 +415,8 @@
                :state-map :move-attack
                :image "tilesets/elite-command/units/cruiser-COLOR.png"
                :terrain-effects
-               {:sea {:movement-cost 1 :armor-bonus 0 :attack-bonus 0}}
+               {:sea     {:movement-cost 1 :armor-bonus 0 :attack-bonus 0}
+                :seaport {:movement-cost 1 :armor-bonus 0 :attack-bonus 0}}
                :attack-strengths
                {:personnel 14
                 :armored   16}
