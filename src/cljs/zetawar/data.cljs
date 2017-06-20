@@ -94,7 +94,9 @@
      :deep-water    {:description "Deep Water"
                      :image "tilesets/elite-command/terrains/deep-water.png"}
      :base          {:description "Base"
-                     :image "tilesets/elite-command/terrains/base-COLOR.png"}}
+                     :image "tilesets/elite-command/terrains/base-COLOR.png"}
+     :seaport       {:description "Seaport"
+                     :image "tilesets/elite-command/terrains/seaport-COLOR.png"}}
 
     :unit-state-maps
     {:move-attack
