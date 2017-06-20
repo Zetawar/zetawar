@@ -154,6 +154,7 @@
                 :capturing-armor 4
                 :repair 1
                 :state-map :move-attack
+                :buildable-at #{:base}
                 :image "tilesets/elite-command/units/infantry-COLOR.png"
                 :terrain-effects
                 {:plains    {:movement-cost 3 :armor-bonus  0 :attack-bonus  0}
@@ -183,6 +184,7 @@
                  :capturing-armor 6
                  :repair 1
                  :state-map :move-attack
+                 :buildable-at #{:base}
                  :image "tilesets/elite-command/units/grenadier-COLOR.png"
                  :terrain-effects
                  {:plains    {:movement-cost 4 :armor-bonus  0 :attack-bonus  0}
@@ -212,6 +214,7 @@
               :capturing-armor 4
               :repair 1
               :state-map :move-attack
+              :buildable-at #{:base}
               :image "tilesets/elite-command/units/mortar-COLOR.png"
               :terrain-effects
               {:plains    {:movement-cost 4 :armor-bonus  0 :attack-bonus  0}
@@ -239,6 +242,7 @@
               :capturing-armor 7
               :repair 1
               :state-map :move-attack
+              :buildable-at #{:base}
               :image "tilesets/elite-command/units/ranger-COLOR.png"
               :terrain-effects
               {:plains        {:movement-cost 3 :armor-bonus  0 :attack-bonus  0}
@@ -269,6 +273,7 @@
              :capturing-armor 4
              :repair 1
              :state-map :move-attack
+             :buildable-at #{:base}
              :image "tilesets/elite-command/units/medic-COLOR.png"
              :terrain-effects
              {:plains    {:movement-cost 3 :armor-bonus  0 :attack-bonus  0}
@@ -298,6 +303,7 @@
                :capturing-armor 4
                :repair 1
                :state-map :move-attack
+               :buildable-at #{:base}
                :image "tilesets/elite-command/units/engineer-COLOR.png"
                :terrain-effects
                {:plains        {:movement-cost 3 :armor-bonus  0 :attack-bonus  0}
@@ -328,6 +334,7 @@
               :armor 8
               :repair 1
               :state-map :free-attack-twice
+              :buildable-at #{:base}
               :image "tilesets/elite-command/units/humvee-COLOR.png"
               :terrain-effects
               {:plains  {:movement-cost 3  :armor-bonus  0 :attack-bonus  0}
@@ -355,6 +362,7 @@
             :armor 12
             :repair 1
             :state-map :move-attack
+            :buildable-at #{:base}
             :image "tilesets/elite-command/units/tank-COLOR.png"
             :terrain-effects
             {:plains  {:movement-cost 3 :armor-bonus  0 :attack-bonus 0}
@@ -383,6 +391,7 @@
                :armor 8
                :repair 1
                :state-map :free-attack-twice
+               :buildable-at #{:seaport}
                :image "tilesets/elite-command/units/frigate-COLOR.png"
                :terrain-effects
                {:sea           {:movement-cost 1 :armor-bonus 0 :attack-bonus 0}
@@ -405,6 +414,7 @@
                  :armor 12
                  :repair 1
                  :state-map :free-attack-twice
+                 :buildable-at #{:seaport}
                  :image "tilesets/elite-command/units/destroyer-COLOR.png"
                  :terrain-effects
                  {:sea     {:movement-cost 1 :armor-bonus 0 :attack-bonus 0}
@@ -425,6 +435,7 @@
                :armor 15
                :repair 1
                :state-map :move-attack
+               :buildable-at #{:seaport}
                :image "tilesets/elite-command/units/cruiser-COLOR.png"
                :terrain-effects
                {:sea     {:movement-cost 1 :armor-bonus 0 :attack-bonus 0}
