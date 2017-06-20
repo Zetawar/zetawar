@@ -288,14 +288,15 @@
                :state-map :move-attack
                :image "tilesets/elite-command/units/engineer-COLOR.png"
                :terrain-effects
-               {:plains    {:movement-cost 3 :armor-bonus  0 :attack-bonus  0}
-                :mountains {:movement-cost 6 :armor-bonus  5 :attack-bonus  2}
-                :woods     {:movement-cost 4 :armor-bonus  3 :attack-bonus  2}
-                :desert    {:movement-cost 4 :armor-bonus -1 :attack-bonus -1}
-                :tundra    {:movement-cost 4 :armor-bonus -1 :attack-bonus -1}
-                :swamp     {:movement-cost 6 :armor-bonus -2 :attack-bonus -2}
-                :ford      {:movement-cost 5 :armor-bonus -1 :attack-bonus -1}
-                :base      {:movement-cost 2 :armor-bonus  3 :attack-bonus  2}}
+               {:plains        {:movement-cost 3 :armor-bonus  0 :attack-bonus  0}
+                :mountains     {:movement-cost 6 :armor-bonus  5 :attack-bonus  2}
+                :woods         {:movement-cost 4 :armor-bonus  3 :attack-bonus  2}
+                :desert        {:movement-cost 4 :armor-bonus -1 :attack-bonus -1}
+                :tundra        {:movement-cost 4 :armor-bonus -1 :attack-bonus -1}
+                :swamp         {:movement-cost 6 :armor-bonus -2 :attack-bonus -2}
+                :ford          {:movement-cost 5 :armor-bonus -1 :attack-bonus -1}
+                :shallow-water {:movement-cost 7 :armor-bonus -2 :attack-bonus -2}
+                :base          {:movement-cost 2 :armor-bonus  3 :attack-bonus  2}}
               :attack-strengths
               {:personnel 5
                :armored   2}
