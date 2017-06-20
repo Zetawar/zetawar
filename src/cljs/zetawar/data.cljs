@@ -352,7 +352,65 @@
             {:personnel 10
              :armored   10}
             :zoc
-            [:personnel :armored]}}}})
+            [:personnel :armored]}
+     ;; Naval
+     :frigate {:description "Frigate"
+               :cost 300
+               :movement 8
+               :can-capture false
+               :can-repair #{}
+               :min-range 1
+               :max-range 1
+               :armor-type :naval
+               :armor 8
+               :repair 1
+               :state-map :free-attack-twice
+               :image "tilesets/elite-command/units/frigate-COLOR.png"
+               :terrain-effects
+               {:sea           {:movement-cost 1 :armor-bonus 0 :attack-bonus 0}
+                :shallow-water {:movement-cost 1 :armor-bonus 0 :attack-bonus 0}}
+               :attack-strengths
+               {:personnel 9
+                :armored   9}
+               :zoc
+               [:personnel :armored]}
+     :destroyer {:description "Destroyer"
+                 :cost 600
+                 :movement 5
+                 :can-capture false
+                 :can-repair #{}
+                 :min-range 1
+                 :max-range 4
+                 :armor-type :naval
+                 :armor 12
+                 :repair 1
+                 :state-map :free-attack-twice
+                 :image "tilesets/elite-command/units/destroyer-COLOR.png"
+                 :terrain-effects
+                 {:sea {:movement-cost 1 :armor-bonus 0 :attack-bonus 0}}
+                 :attack-strengths
+                 {:personnel 10
+                  :armored   12}
+                 :zoc
+                 [:personnel :armored]}
+     :cruiser {:description "Cruiser"
+               :cost 1000
+               :can-capture false
+               :can-repair #{}
+               :min-range 1
+               :max-range 3
+               :armor-type :naval
+               :armor 15
+               :repair 1
+               :state-map :move-attack
+               :image "tilesets/elite-command/units/cruiser-COLOR.png"
+               :terrain-effects
+               {:sea {:movement-cost 1 :armor-bonus 0 :attack-bonus 0}}
+               :attack-strengths
+               {:personnel 14
+                :armored   16}
+               :zoc
+               [:personnel :armored]}}}})
 
 ;; TODO: remove redundant id keys (?)
 (def maps
