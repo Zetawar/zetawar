@@ -167,7 +167,8 @@
                  :seaport   {:movement-cost 2 :armor-bonus  0 :attack-bonus  0}}
                 :attack-strengths
                 {:personnel 6
-                 :armored   3}
+                 :armored   3
+                 :naval     4}
                 :zoc
                 [:personnel :armored]}
      :grenadier {:description "Grenadier"
@@ -195,7 +196,8 @@
                   :seaport   {:movement-cost 3 :armor-bonus  0 :attack-bonus  0}}
                  :attack-strengths
                  {:personnel 8
-                  :armored   9}
+                  :armored   9
+                  :naval     6}
                  :zoc
                  [:personnel :armored]}
      :mortar {:description "Mortar"
@@ -223,7 +225,8 @@
                :seaport   {:movement-cost 3 :armor-bonus  0 :attack-bonus  0}}
               :attack-strengths
               {:personnel 10
-               :armored   10}}
+               :armored   10
+               :naval     10}}
      :ranger {:description "Ranger"
               :cost 200
               :movement 9
@@ -250,7 +253,8 @@
                :seaport       {:movement-cost 2 :armor-bonus  0 :attack-bonus  0}}
               :attack-strengths
               {:personnel 9
-               :armored   4}
+               :armored   4
+               :naval     6}
               :zoc
               [:personnel :armored]}
      :medic {:description "Medic"
@@ -278,7 +282,8 @@
               :seaport   {:movement-cost 2 :armor-bonus  0 :attack-bonus  0}}
             :attack-strengths
             {:personnel 5
-             :armored   2}
+             :armored   2
+             :naval     3}
             :zoc
             [:personnel :armored]}
     :engineer {:description "Engineer"
@@ -307,7 +312,8 @@
                 :seaport       {:movement-cost 2 :armor-bonus  0 :attack-bonus  0}}
               :attack-strengths
               {:personnel 5
-               :armored   2}
+               :armored   2
+               :naval     3}
               :zoc
               [:personnel :armored]}
      ;; Armored
@@ -334,7 +340,8 @@
                :seaport {:movement-cost 2  :armor-bonus  0 :attack-bonus  0}}
               :attack-strengths
               {:personnel 9
-               :armored   3}
+               :armored   3
+               :naval     6}
               :zoc
               [:personnel :armored]}
      :tank {:description "Tank"
@@ -360,7 +367,8 @@
              :seaport {:movement-cost 2 :armor-bonus  0 :attack-bonus 0}}
             :attack-strengths
             {:personnel 10
-             :armored   10}
+             :armored   10
+             :naval     9}
             :zoc
             [:personnel :armored]}
      ;; Naval
@@ -382,7 +390,8 @@
                 :seaport       {:movement-cost 1 :armor-bonus 0 :attack-bonus 0}}
                :attack-strengths
                {:personnel 9
-                :armored   9}
+                :armored   9
+                :naval     8}
                :zoc
                [:personnel :armored]}
      :destroyer {:description "Destroyer"
@@ -402,7 +411,8 @@
                   :seaport {:movement-cost 1 :armor-bonus 0 :attack-bonus 0}}
                  :attack-strengths
                  {:personnel 10
-                  :armored   12}
+                  :armored   12
+                  :naval     8}
                  :zoc
                  [:personnel :armored]}
      :cruiser {:description "Cruiser"
@@ -421,7 +431,8 @@
                 :seaport {:movement-cost 1 :armor-bonus 0 :attack-bonus 0}}
                :attack-strengths
                {:personnel 14
-                :armored   16}
+                :armored   16
+                :naval     12}
                :zoc
                [:personnel :armored]}}}})
 
