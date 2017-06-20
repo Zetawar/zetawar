@@ -135,7 +135,17 @@
        :moved-1-attacked-1 {:transitions
                             {:attack-unit  :done
                              :capture-base :done}}
-       :done               {}}}}
+       :done               {}}}
+
+     :move-or-attack
+     {:start-state :start
+      :built-state :done
+      :states
+      {:start {:transitions
+               {:move-unit   :done
+                :attack-unit :done
+                :repair-unit :done}}
+       :done  {}}}}
 
     ;; TODO: check how repair amount works in Elite Command
     ;; TODO: add :buildable-at (or -by?) => {<terrain type ids>...}
@@ -387,7 +397,7 @@
                  :armor-type :armored
                  :armor 6
                  :repair 1
-                 :state-map :exclusive
+                 :state-map :move-or-attack
                  :image "tilesets/elite-command/units/artillery-COLOR.png"
                  :terrain-effects
                  {:plains {:movement-cost 4 :armor-bonus  0 :attack-bonus  0}
@@ -410,7 +420,7 @@
                       :armor-type :armored
                       :armor 8
                       :repair 1
-                      :state-map :exclusive
+                      :state-map :move-or-attack
                       :image "tilesets/elite-command/units/heavyartillery-COLOR.png"
                       :terrain-effects
                       {:plains {:movement-cost 2 :armor-bonus  0 :attack-bonus  0}
