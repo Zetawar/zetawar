@@ -399,7 +399,30 @@
                   :base   {:movement-cost 2 :armor-bonus  0 :attack-bonus  0}}
                  :attack-strengths
                  {:personnel 12
-                  :armored   13}}}}})
+                  :armored   13}}
+     :heavyartillery {:description "Heavy Artillery"
+                      :cost 1250
+                      :movement 2
+                      :can-capture false
+                      :can-repair #{}
+                      :min-range 4
+                      :max-range 6
+                      :armor-type :armored
+                      :armor 8
+                      :repair 1
+                      :state-map :exclusive
+                      :image "tilesets/elite-command/units/heavyartillery-COLOR.png"
+                      :terrain-effects
+                      {:plains {:movement-cost 2 :armor-bonus  0 :attack-bonus  0}
+                       :woods  {:movement-cost 2 :armor-bonus -3 :attack-bonus -5}
+                       :desert {:movement-cost 2 :armor-bonus  0 :attack-bonus  0}
+                       :tundra {:movement-cost 2 :armor-bonus  0 :attack-bonus  0}
+                       :swamp  {:movement-cost 2 :armor-bonus -3 :attack-bonus -5}
+                       :ford   {:movement-cost 2 :armor-bonus -2 :attack-bonus  0}
+                       :base   {:movement-cost 1 :armor-bonus  0 :attack-bonus  0}}
+                      :attack-strengths
+                      {:personnel 14
+                       :armored   15}}}}})
 
 ;; TODO: remove redundant id keys (?)
 (def maps
