@@ -417,8 +417,8 @@
                  :buildable-at #{:seaport}
                  :image "tilesets/elite-command/units/destroyer-COLOR.png"
                  :terrain-effects
-                 {:sea     {:movement-cost 1 :armor-bonus 0 :attack-bonus 0}
-                  :seaport {:movement-cost 1 :armor-bonus 0 :attack-bonus 0}}
+                 {:deep-water {:movement-cost 1 :armor-bonus 0 :attack-bonus 0}
+                  :seaport    {:movement-cost 1 :armor-bonus 0 :attack-bonus 0}}
                  :attack-strengths
                  {:personnel 10
                   :armored   12
@@ -427,6 +427,7 @@
                  [:personnel :armored]}
      :cruiser {:description "Cruiser"
                :cost 1000
+               :movement 4
                :can-capture false
                :can-repair #{}
                :min-range 1
@@ -438,8 +439,8 @@
                :buildable-at #{:seaport}
                :image "tilesets/elite-command/units/cruiser-COLOR.png"
                :terrain-effects
-               {:sea     {:movement-cost 1 :armor-bonus 0 :attack-bonus 0}
-                :seaport {:movement-cost 1 :armor-bonus 0 :attack-bonus 0}}
+               {:deep-water {:movement-cost 1 :armor-bonus 0 :attack-bonus 0}
+                :seaport    {:movement-cost 1 :armor-bonus 0 :attack-bonus 0}}
                :attack-strengths
                {:personnel 14
                 :armored   16
