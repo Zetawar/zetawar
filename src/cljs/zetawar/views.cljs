@@ -271,7 +271,8 @@
 
 (def armor-type-abbrevs
   {:unit-type.armor-type/personnel "P"
-   :unit-type.armor-type/armored "A"})
+   :unit-type.armor-type/armored "A"
+   :unit-type.armor-type/naval "N"})
 
 ;; TODO: cleanup unit-picker
 (defn unit-picker [{:as view-ctx :keys [conn dispatch translate]}]
@@ -343,7 +344,10 @@
 
                          :unit-type.armor-type/armored
                          [:abbr {:title "Armored" :style {:cursor "inherit"}}
-                          armor-type-abbrev])]
+                          armor-type-abbrev]
+
+                         :unit-type.armor-type/naval
+                         [:abbr {:title "Naval" :style {:cursor "inherit"}}])]
                   [:td movement]
                   [:td (if can-capture
                          [:abbr {:title (str "While capturing: " capturing-armor)
