@@ -394,7 +394,7 @@
                :buildable-at #{:seaport}
                :image "tilesets/elite-command/units/frigate-COLOR.png"
                :terrain-effects
-               {:sea           {:movement-cost 1 :armor-bonus 0 :attack-bonus 0}
+               {:deep-water    {:movement-cost 1 :armor-bonus 0 :attack-bonus 0}
                 :shallow-water {:movement-cost 1 :armor-bonus 0 :attack-bonus 0}
                 :seaport       {:movement-cost 1 :armor-bonus 0 :attack-bonus 0}}
                :attack-strengths
