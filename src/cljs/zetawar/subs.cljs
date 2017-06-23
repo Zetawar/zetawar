@@ -70,7 +70,8 @@
 (def terrain-pull [:terrain/q
                    :terrain/r
                    {:terrain/type [:terrain-type/id
-                                   :terrain-type/image]
+                                   :terrain-type/image
+                                   :terrain-type/base-type]
                     :terrain/owner [:faction/color]}])
 
 ;; TODO: use terrains output instead of running a separate query

@@ -99,12 +99,14 @@
    :terrain/game-pos-idx            {:db/unique      :db.unique/identity}
    :terrain/owner                   {:db/valueType   :db.type/ref}
    :terrain/type                    {:db/valueType   :db.type/ref}
+   ;:terrain/base-type               {:db/valueType   :db.type/ref}
 
    ;; Terrain type
    :terrain-type/game-id-idx        {:db/unique      :db.unique/identity}
    :terrain-type/effects            {:db/valueType   :db.type/ref
                                      :db/cardinality :db.cardinality/many
                                      :db/isComponent true}
+   ;:terrain-type/base-type          {:db/valueType   :db.type/ref}
 
    ;; Terrain effects
    :terrain-effect/unit-type        {:db/valueType   :db.type/ref

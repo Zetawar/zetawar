@@ -156,8 +156,7 @@
   (contains? x :terrain/type))
 
 (defn base? [x]
-  (= :terrain-type.id/base
-     (get-in x [:terrain/type :terrain-type/id])))
+  ((:terrain/type x) :terrain-type/base-type))
 
 (defn terrain-hex [terrain]
   [(:terrain/q terrain)
@@ -1191,7 +1190,8 @@
                 :terrain-type/id terrain-type-id
                 :terrain-type/game-id-idx terrain-type-idx
                 :terrain-type/description (:description terrain-def)
-                :terrain-type/image (:image terrain-def)})))
+                :terrain-type/image (:image terrain-def)
+                :terrain-type/base-type (:base-type terrain-def)})))
           terrains-def)))
 
 (defn attack-strengths-tx [db game-id unit-type-eid attack-strengths-def]
