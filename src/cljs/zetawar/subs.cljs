@@ -382,34 +382,6 @@
       @(can-capture? conn q r)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; Unit construction
-
-(deftrack available-unit-type-eids [conn]
-  (->> @(posh/q '[:find ?ut
-                  :in $ ?g
-                  :where
-                  [_   :app/game ?g]
-                  [?g  :game/current-faction ?f]
-                  [?f  :faction/credits ?credits]
-                  [?ut :unit-type/cost ?cost]
-                  [?ut :unit-type/id ?unit-type-id]]
-                conn @(game-eid conn)
-                {:cache :forever})
-       (map first)
-       (into [])))
-
-(deftrack available-unit-types [conn]
-  (let [{:keys [faction/credits]} @(current-faction conn)]
-    (->> @(available-unit-type-eids conn)
-         (map (fn [ut-eid]
-                (let [ut @(posh/pull conn '[*] ut-eid)
-                      affordable (<= (:unit-type/cost ut) credits)]
-                  ;; TODO: make affordable a namespaced key (?)
-                  (assoc ut :affordable affordable))))
-         (sort-by :unit-type/cost)
-         (into []))))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Selection and target
 
 (deftrack selected? [conn q r]
@@ -514,6 +486,40 @@
          @(friend-in-range-of-selected? conn targeted-q targeted-r)
          @(repairable? conn targeted-q targeted-r)
          @(has-repairable-armor-type? conn targeted-q targeted-r))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Unit construction
+
+(deftrack available-unit-type-eids [conn]
+  (when-let [[sel-q sel-r] @(selected-hex conn)]
+    (let [selected-base-name (-> @(terrain-at conn sel-q sel-r)
+                                 (get-in [:terrain/type :terrain-type/id])
+                                 name)]
+      (->> @(posh/q '[:find ?ut ?i
+                      :in $ ?g
+                      :where
+                      [_   :app/game ?g]
+                      [?g  :game/current-faction ?f]
+                      [?f  :faction/credits ?credits]
+                      [?ut :unit-type/cost ?cost]
+                      [?ut :unit-type/id ?unit-type-id]
+                      [?ut :unit-type/buildable-at ?i]]
+                    conn @(game-eid conn)
+                    {:cache :forever})
+           (filter #(= selected-base-name (name (second %))))
+           (map first)
+           (into [])))))
+
+(deftrack available-unit-types [conn]
+  (let [{:keys [faction/credits]} @(current-faction conn)]
+    (->> @(available-unit-type-eids conn)
+         (map (fn [ut-eid]
+                (let [ut @(posh/pull conn '[*] ut-eid)
+                      affordable (<= (:unit-type/cost ut) credits)]
+                  ;; TODO: make affordable a namespaced key (?)
+                  (assoc ut :affordable affordable))))
+         (sort-by :unit-type/cost)
+         (into []))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Unit picker
