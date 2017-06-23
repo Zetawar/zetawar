@@ -76,27 +76,38 @@
 
     :terrains
     {:plains        {:description "Plains"
-                     :image "tilesets/elite-command/terrains/plains.png"}
+                     :image "tilesets/elite-command/terrains/plains.png"
+                     :base-type false}
      :mountains     {:description "Mountains"
-                     :image "tilesets/elite-command/terrains/mountains.png"}
+                     :image "tilesets/elite-command/terrains/mountains.png"
+                     :base-type false}
      :woods         {:description "Woods"
-                     :image "tilesets/elite-command/terrains/woods.png"}
+                     :image "tilesets/elite-command/terrains/woods.png"
+                     :base-type false}
      :desert        {:description "Desert"
-                     :image "tilesets/elite-command/terrains/desert.png"}
+                     :image "tilesets/elite-command/terrains/desert.png"
+                     :base-type false}
      :tundra        {:description "Tundra"
-                     :image "tilesets/elite-command/terrains/tundra.png"}
+                     :image "tilesets/elite-command/terrains/tundra.png"
+                     :base-type false}
      :swamp         {:description "Swamp"
-                     :image "tilesets/elite-command/terrains/swamp.png"}
+                     :image "tilesets/elite-command/terrains/swamp.png"
+                     :base-type false}
      :ford          {:description "Ford"
-                     :image "tilesets/elite-command/terrains/ford.png"}
+                     :image "tilesets/elite-command/terrains/ford.png"
+                     :base-type false}
      :shallow-water {:description "Shallow Water"
-                     :image "tilesets/elite-command/terrains/shallow-water.png"}
+                     :image "tilesets/elite-command/terrains/shallow-water.png"
+                     :base-type false}
      :deep-water    {:description "Deep Water"
-                     :image "tilesets/elite-command/terrains/deep-water.png"}
+                     :image "tilesets/elite-command/terrains/deep-water.png"
+                     :base-type false}
      :base          {:description "Base"
-                     :image "tilesets/elite-command/terrains/base-COLOR.png"}
+                     :image "tilesets/elite-command/terrains/base-COLOR.png"
+                     :base-type true}
      :seaport       {:description "Seaport"
-                     :image "tilesets/elite-command/terrains/seaport-COLOR.png"}}
+                     :image "tilesets/elite-command/terrains/seaport-COLOR.png"
+                     :base-type true}}
 
     :unit-state-maps
     {:move-attack
