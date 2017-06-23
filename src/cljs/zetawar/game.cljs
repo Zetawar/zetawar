@@ -216,6 +216,11 @@
        name
        (keyword 'unit-type.armor-type)))
 
+(defn to-buildable-at [buildable-at-name]
+  (->> buildable-at-name
+       name
+       (keyword 'unit-type.buildable-at)))
+
 (defn unit? [x]
   (contains? x :unit/type))
 
@@ -1238,6 +1243,7 @@
                      :unit-type/capturing-armor (or capturing-armor armor)
                      :unit-type/repair (:repair unit-def)
                      :unit-type/state-map [:unit-state-map/game-id-idx unit-state-map-idx]
+                     :unit-type/buildable-at (map #(to-buildable-at %) (:buildable-at unit-def))
                      :unit-type/image (:image unit-def)
                      :unit-type/zoc-armor-types (map #(to-armor-type %) (:zoc unit-def))}]
                    (into (attack-strengths-tx db game-id unit-type-eid (:attack-strengths unit-def)))

@@ -261,6 +261,7 @@
                                     :unit-type/armor-type
                                     :unit-type/min-range
                                     :unit-type/max-range
+                                    :unit-type/buildable-at
                                     :unit-type/image]}]
                 unit-eid)))
 
