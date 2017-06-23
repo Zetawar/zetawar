@@ -347,7 +347,8 @@
                           armor-type-abbrev]
 
                          :unit-type.armor-type/naval
-                         [:abbr {:title "Naval" :style {:cursor "inherit"}}])]
+                         [:abbr {:title "Naval" :style {:cursor "inherit"}}
+                          armor-type-abbrev])]
                   [:td movement]
                   [:td (if can-capture
                          [:abbr {:title (str "While capturing: " capturing-armor)
