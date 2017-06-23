@@ -562,7 +562,9 @@
       :terrain-type :deep-water}
      {:q 1
       :r 4
-      :terrain-type :mountains}
+      :terrain-type :seaport
+      ;:terrain-type :mountains
+      }
      {:q 2
       :r 4
       :terrain-type :plains}
