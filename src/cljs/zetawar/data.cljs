@@ -420,7 +420,7 @@
                    :armor 8
                    :repair 1
                    :state-map :move-attack
-                   :buildable-at #{:airfield}
+                   :buildable-at #{:base :airfield}
                    :image "tilesets/elite-command/units/mobileflak-COLOR.png"
                    :terrain-effects
                    {:plains   {:movement-cost 3 :armor-bonus  0 :attack-bonus  0}
