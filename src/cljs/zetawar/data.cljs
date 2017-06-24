@@ -695,7 +695,7 @@
       :terrain-type :deep-water}
      {:q 5
       :r 8
-      :terrain-type :mountains}
+      :terrain-type :seaport #_:mountains}
      {:q 6
       :r 8
       :terrain-type :plains}
