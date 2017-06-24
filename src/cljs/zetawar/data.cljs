@@ -460,7 +460,8 @@
                :attack-strengths
                {:personnel 9
                 :armored   9
-                :naval     8}
+                :naval     8
+                :air       0}
                :zoc
                [:personnel :armored]}
      :destroyer {:description "Destroyer"
@@ -482,7 +483,8 @@
                  :attack-strengths
                  {:personnel 10
                   :armored   12
-                  :naval     8}
+                  :naval     8
+                  :air       0}
                  :zoc
                  [:personnel :armored]}
      :cruiser {:description "Cruiser"
