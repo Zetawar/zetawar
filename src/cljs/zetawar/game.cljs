@@ -102,6 +102,19 @@
       ffirst
       (or 0)))
 
+(defn faction-base-being-captured-count [db faction]
+  (-> (d/q '[:find (count ?b)
+             :in $ ?f
+             :where
+             [?b :terrain/owner ?f]
+             [(not= ?ef f)]
+             [?ef :faction/units ?u]
+             [?u :unit/terrain ?b]
+             [?u :unit/capturing true]]
+           db (e faction))
+      ffirst
+      (or 0)))
+
 (defn enemy-base-count [db faction]
   (-> (d/q '[:find (count ?b)
              :in $ ?f
@@ -133,8 +146,9 @@
 
 (defn income [db game faction]
   (let [base-count (faction-base-count db faction)
+        captured-count (faction-base-being-captured-count db faction)
         {:keys [game/credits-per-base]} game]
-    (* base-count credits-per-base)))
+    (* (- base-count captured-count) credits-per-base)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Terrain
