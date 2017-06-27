@@ -138,10 +138,10 @@
        :moved-1-attacked-0 {:transitions
                             {:attack-unit  :moved-1-attacked-1
                              :capture-base :done}}
-       :moved-1-attacked-1 {:transitions
+       :moved-0-attacked-1 {:transitions
                             {:attack-unit  :done
                              :capture-base :done}}
-       :moved-0-attacked-1 {:transitions
+       :moved-1-attacked-1 {:transitions
                             {:attack-unit  :done
                              :capture-base :done}}
        :done               {}}}
