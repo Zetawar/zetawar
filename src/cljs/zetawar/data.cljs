@@ -146,6 +146,23 @@
                              :capture-base :done}}
        :done               {}}}
 
+     :free-attack-once
+     {:start-state :start
+      :built-state :done
+      :states
+      {:start              {:transitions
+                            {:move-unit    :moved-1-attacked-0
+                             :attack-unit  :moved-0-attacked-1
+                             :repair-unit  :done
+                             :capture-base :done}}
+       :moved-0-attacked-1 {:transitions
+                            {:move-unit    :done
+                             :capture-base :done}}
+       :moved-1-attacked-0 {:transitions
+                            {:attack-unit  :done
+                             :capture-base :done}}
+       :done               {}}}
+
      :free-attack-twice
      {:start-state :start
       :built-state :done
