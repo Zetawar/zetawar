@@ -201,7 +201,7 @@
                 :armor 6
                 :capturing-armor 4
                 :repair 1
-                :state-map :move-attack
+                :state-map :move-attack-once
                 :buildable-at #{:base}
                 :image "tilesets/elite-command/units/infantry-COLOR.png"
                 :terrain-effects
@@ -231,7 +231,7 @@
                  :armor 8
                  :capturing-armor 6
                  :repair 1
-                 :state-map :move-attack
+                 :state-map :move-attack-once
                  :buildable-at #{:base}
                  :image "tilesets/elite-command/units/grenadier-COLOR.png"
                  :terrain-effects
@@ -261,7 +261,7 @@
               :armor 6
               :capturing-armor 4
               :repair 1
-              :state-map :move-attack
+              :state-map :move-attack-once
               :buildable-at #{:base}
               :image "tilesets/elite-command/units/mortar-COLOR.png"
               :terrain-effects
@@ -289,7 +289,7 @@
               :armor 9
               :capturing-armor 7
               :repair 1
-              :state-map :move-attack
+              :state-map :move-attack-once
               :buildable-at #{:base}
               :image "tilesets/elite-command/units/ranger-COLOR.png"
               :terrain-effects
@@ -320,7 +320,7 @@
              :armor 6
              :capturing-armor 4
              :repair 1
-             :state-map :move-attack
+             :state-map :move-attack-once
              :buildable-at #{:base}
              :image "tilesets/elite-command/units/medic-COLOR.png"
              :terrain-effects
@@ -350,7 +350,7 @@
                :armor 6
                :capturing-armor 4
                :repair 1
-               :state-map :move-attack
+               :state-map :move-attack-once
                :buildable-at #{:base}
                :image "tilesets/elite-command/units/engineer-COLOR.png"
                :terrain-effects
@@ -409,7 +409,7 @@
             :armor-type :armored
             :armor 12
             :repair 1
-            :state-map :move-attack
+            :state-map :move-attack-once
             :buildable-at #{:base}
             :image "tilesets/elite-command/units/tank-COLOR.png"
             :terrain-effects
