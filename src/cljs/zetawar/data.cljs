@@ -483,7 +483,7 @@
                :armor-type :naval
                :armor 15
                :repair 1
-               :state-map :move-attack
+               :state-map :move-attack-twice
                :buildable-at #{:seaport}
                :image "tilesets/elite-command/units/cruiser-COLOR.png"
                :terrain-effects
