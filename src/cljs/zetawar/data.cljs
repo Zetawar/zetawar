@@ -110,7 +110,7 @@
                      :base-type true}}
 
     :unit-state-maps
-    {:move-attack
+    {:move-attack-once
      {:start-state :start
       :built-state :done
       :states
