@@ -461,7 +461,7 @@
                  :armor-type :naval
                  :armor 12
                  :repair 1
-                 :state-map :free-attack-twice
+                 :state-map :free-attack-once
                  :buildable-at #{:seaport}
                  :image "tilesets/elite-command/units/destroyer-COLOR.png"
                  :terrain-effects
