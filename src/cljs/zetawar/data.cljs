@@ -113,7 +113,7 @@
                      :base-type true}}
 
     :unit-state-maps
-    {:move-attack
+    {:move-attack-once
      {:start-state :start
       :built-state :done
       :states
@@ -128,6 +128,43 @@
                 :capture-base      :done
                 :field-repair-unit :done}}
        :done  {}}}
+
+     :move-attack-twice
+     {:start-state :start
+      :built-state :done
+      :states
+      {:start              {:transitions
+                            {:move-unit    :moved-1-attacked-0
+                             :attack-unit  :moved-0-attacked-1
+                             :repair-unit  :done
+                             :capture-base :done}}
+       :moved-0-attacked-1 {:transitions
+                            {:attack-unit  :done
+                             :capture-base :done}}
+       :moved-1-attacked-0 {:transitions
+                            {:attack-unit  :moved-1-attacked-1
+                             :capture-base :done}}
+       :moved-1-attacked-1 {:transitions
+                            {:attack-unit  :done
+                             :capture-base :done}}
+       :done               {}}}
+
+     :free-attack-once
+     {:start-state :start
+      :built-state :done
+      :states
+      {:start              {:transitions
+                            {:move-unit    :moved-1-attacked-0
+                             :attack-unit  :moved-0-attacked-1
+                             :repair-unit  :done
+                             :capture-base :done}}
+       :moved-0-attacked-1 {:transitions
+                            {:move-unit    :done
+                             :capture-base :done}}
+       :moved-1-attacked-0 {:transitions
+                            {:attack-unit  :done
+                             :capture-base :done}}
+       :done               {}}}
 
      :free-attack-twice
      {:start-state :start
@@ -167,7 +204,7 @@
                 :armor 6
                 :capturing-armor 4
                 :repair 1
-                :state-map :move-attack
+                :state-map :move-attack-once
                 :buildable-at #{:base}
                 :image "tilesets/elite-command/units/infantry-COLOR.png"
                 :terrain-effects
@@ -199,7 +236,7 @@
                  :armor 8
                  :capturing-armor 6
                  :repair 1
-                 :state-map :move-attack
+                 :state-map :move-attack-once
                  :buildable-at #{:base}
                  :image "tilesets/elite-command/units/grenadier-COLOR.png"
                  :terrain-effects
@@ -231,7 +268,7 @@
               :armor 6
               :capturing-armor 4
               :repair 1
-              :state-map :move-attack
+              :state-map :move-attack-once
               :buildable-at #{:base}
               :image "tilesets/elite-command/units/mortar-COLOR.png"
               :terrain-effects
@@ -261,7 +298,7 @@
               :armor 9
               :capturing-armor 7
               :repair 1
-              :state-map :move-attack
+              :state-map :move-attack-once
               :buildable-at #{:base}
               :image "tilesets/elite-command/units/ranger-COLOR.png"
               :terrain-effects
@@ -294,7 +331,7 @@
              :armor 6
              :capturing-armor 4
              :repair 1
-             :state-map :move-attack
+             :state-map :move-attack-once
              :buildable-at #{:base}
              :image "tilesets/elite-command/units/medic-COLOR.png"
              :terrain-effects
@@ -326,7 +363,7 @@
                :armor 6
                :capturing-armor 4
                :repair 1
-               :state-map :move-attack
+               :state-map :move-attack-once
                :buildable-at #{:base}
                :image "tilesets/elite-command/units/engineer-COLOR.png"
                :terrain-effects
@@ -389,7 +426,7 @@
             :armor-type :armored
             :armor 12
             :repair 1
-            :state-map :move-attack
+            :state-map :move-attack-once
             :buildable-at #{:base}
             :image "tilesets/elite-command/units/tank-COLOR.png"
             :terrain-effects
@@ -474,7 +511,7 @@
                  :armor-type :naval
                  :armor 12
                  :repair 1
-                 :state-map :free-attack-twice
+                 :state-map :free-attack-once
                  :buildable-at #{:seaport}
                  :image "tilesets/elite-command/units/destroyer-COLOR.png"
                  :terrain-effects
@@ -497,7 +534,7 @@
                :armor-type :naval
                :armor 15
                :repair 1
-               :state-map :move-attack
+               :state-map :move-attack-twice
                :buildable-at #{:seaport}
                :image "tilesets/elite-command/units/cruiser-COLOR.png"
                :terrain-effects
@@ -721,8 +758,7 @@
       :terrain-type :deep-water}
      {:q 1
       :r 4
-      :terrain-type :seaport
-      ;:terrain-type :mountains
+      :terrain-type :seaport #_:mountains
       }
      {:q 2
       :r 4

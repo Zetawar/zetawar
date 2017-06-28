@@ -349,10 +349,13 @@
 
                          :unit-type.armor-type/naval
                          [:abbr {:title "Naval" :style {:cursor "inherit"}}
+<<<<<<< HEAD
                           armor-type-abbrev]
 
                          :unit-type.armor-type/air
                          [:abbr {:title "Air" :style {:cursor "inherit"}}
+=======
+>>>>>>> 76780f8daec37cad4f438f4cd94bc310b2372cc4
                           armor-type-abbrev])]
                   [:td movement]
                   [:td (if can-capture
