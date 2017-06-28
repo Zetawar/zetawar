@@ -456,7 +456,7 @@
                    :armor-type :armored
                    :armor 8
                    :repair 1
-                   :state-map :move-attack
+                   :state-map :move-attack-twice
                    :buildable-at #{:base :airfield}
                    :image "tilesets/elite-command/units/mobileflak-COLOR.png"
                    :terrain-effects
@@ -558,7 +558,7 @@
                :armor-type :air
                :armor 12
                :repair 1
-               :state-map :free-attack-twice
+               :state-map :free-attack-once
                :buildable-at #{:airfield}
                :image "tilesets/elite-command/units/fighter-COLOR.png"
                :terrain-effects
@@ -589,7 +589,7 @@
               :armor-type :air
               :armor 10
               :repair 1
-              :state-map :free-attack-twice
+              :state-map :free-attack-once
               :buildable-at #{:airfield}
               :image "tilesets/elite-command/units/bomber-COLOR.png"
               :terrain-effects
@@ -620,7 +620,7 @@
                :armor-type :air
                :armor 8
                :repair 1
-               :state-map :free-attack-twice
+               :state-map :free-attack-once
                :buildable-at #{:airfield}
                :image "tilesets/elite-command/units/gunship-COLOR.png"
                :terrain-effects
