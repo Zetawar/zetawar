@@ -137,7 +137,7 @@
                              :capture-base :done}}
        :done               {}}}
 
-     :move-or-attack
+     :exclusive
      {:start-state :start
       :built-state :done
       :states
@@ -422,7 +422,7 @@
                  :armor-type :armored
                  :armor 6
                  :repair 1
-                 :state-map :move-or-attack
+                 :state-map :exclusive
                  :image "tilesets/elite-command/units/artillery-COLOR.png"
                  :terrain-effects
                  {:plains {:movement-cost 4 :armor-bonus  0 :attack-bonus  0}
@@ -445,7 +445,7 @@
                        :armor-type :armored
                        :armor 8
                        :repair 1
-                       :state-map :move-or-attack
+                       :state-map :exclusive
                        :image "tilesets/elite-command/units/heavyartillery-COLOR.png"
                        :terrain-effects
                        {:plains {:movement-cost 2 :armor-bonus  0 :attack-bonus  0}
