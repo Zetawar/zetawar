@@ -60,6 +60,9 @@
     (str "To play multiplayer follow the instructions "
          "<a href=\"https://www.kickstarter.com/projects/311016908/zetawar/posts/1608417\">"
          "here</a>.")
+
+    ;; Status information
+    :hover-tile-location "Hovering over tile: "
     }})
 
 ;; TODO: remove redundant id keys (?)
