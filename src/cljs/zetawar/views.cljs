@@ -113,7 +113,9 @@
 (defn tile [{:as view-ctx :keys [dispatch]} terrain]
   (let [{:keys [terrain/q terrain/r]} terrain]
     ^{:key (str q "," r)}
-    [:g {:on-click #(dispatch [::events.ui/select-hex q r])}
+    [:g {:on-click #(dispatch [::events.ui/select-hex q r])
+         :on-mouse-enter #(dispatch [::events.ui/hover-hex-enter q r])
+         :on-mouse-leave #(dispatch [::events.ui/hover-hex-leave q r])}
      [terrain-tile view-ctx terrain q r]
      [tile-border view-ctx q r]
      [board-unit view-ctx q r]
