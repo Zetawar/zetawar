@@ -159,6 +159,19 @@
                 conn)
        (into {})))
 
+(deftrack faction-eid->base-being-captured-count [conn]
+  (->> @(posh/q '[:find ?f (count ?t)
+                  :where
+                  [_ :app/game ?g]
+                  [?g :game/factions ?f]
+                  [?t :terrain/owner ?f]
+                  [(not= ?ef f)]
+                  [?ef :faction/units ?u]
+                  [?u :unit/terrain ?t]
+                  [?u :unit/capturing true]]
+                conn)
+       (into {})))
+
 (deftrack faction-eid->unit-count [conn]
   (->> @(posh/q '[:find ?f (count ?u)
                   :where
@@ -195,13 +208,17 @@
 (deftrack current-base-count [conn]
   (get @(faction-eid->base-count conn) @(current-faction-eid conn)))
 
+(deftrack current-base-being-captured-count [conn]
+  (get @(faction-eid->base-being-captured-count conn) @(current-faction-eid conn)))
+
 (deftrack current-unit-count [conn]
   (get @(faction-eid->unit-count conn) @(current-faction-eid conn)))
 
 (deftrack current-income [conn]
   (let [{:keys [game/credits-per-base]} @(game conn)]
     (* credits-per-base
-       @(current-base-count conn))))
+       (- @(current-base-count conn)
+          @(current-base-being-captured-count conn)))))
 
 (deftrack enemy-unit-count [conn]
   (or (ffirst @(posh/q '[:find (count ?u)
