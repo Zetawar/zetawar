@@ -275,12 +275,19 @@
 (defn on-base? [db game unit]
   (base? (terrain-at db game (:unit/q unit) (:unit/r unit))))
 
+(defn on-owned-base? [db game unit]
+  (let [{:keys [unit/q unit/r]} unit
+        terrain (terrain-at db game q r)]
+    (and (base? terrain)
+         (= (some-> terrain :terrain/owner e)
+            (e (unit-faction db unit))))))
+
 (defn on-capturable-base? [db game unit]
   (let [{:keys [unit/q unit/r]} unit
         terrain (terrain-at db game q r)]
     (and (base? terrain)
-         (not= (:terrain/owner terrain)
-               (unit-faction db unit)))))
+         (not= (some-> terrain :terrain/owner e)
+               (e (unit-faction db unit))))))
 
 (defn unit-ex [message unit]
   (ex-info message (select-keys unit [:unit/q :unit/r])))
@@ -673,7 +680,7 @@
 
 (defn check-can-repair [db game unit]
   (check-unit-current db game unit)
-  (when-not (:game/self-repair game)
+  (when-not (or (:game/self-repair game) (on-owned-base? db game unit))
     (throw (game-ex "Unit self repair is not allowed" game)))
   (when (:unit/capturing unit)
     (throw (unit-ex "Unit cannot make repairs while capturing" unit)))
