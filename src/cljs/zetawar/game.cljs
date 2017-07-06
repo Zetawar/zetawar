@@ -170,7 +170,7 @@
   (contains? x :terrain/type))
 
 (defn base? [x]
-  ((:terrain/type x) :terrain-type/base-type))
+  (get-in x [:terrain/type :terrain-type/base-type]))
 
 (defn terrain-hex [terrain]
   [(:terrain/q terrain)
