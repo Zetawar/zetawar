@@ -162,7 +162,10 @@
      ;; TODO: make link red
      [:a {:href "#" :on-click (fn [e]
                                 (.preventDefault e)
-                                (dispatch [::events.ui/end-turn]))}
+                                (if @(subs/available-moves-left? conn)
+                                  (if (js/confirm (translate :end-turn-alert))
+                                    (dispatch [::events.ui/end-turn]))
+                                  (dispatch [::events.ui/end-turn])))}
       (translate :end-turn-link)]
      (when show-copy-link
        [:span " · " [copy-url-link view-ctx]])
