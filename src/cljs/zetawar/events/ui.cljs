@@ -360,3 +360,16 @@
 (defmethod router/handle-event ::start-new-game
   [{:as handler-ctx :keys [ev-chan conn]} [_ scenario-id]]
   (app/start-new-game! handler-ctx scenario-id))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; End turn alert
+
+(defmethod router/handle-event ::show-end-turn-alert
+  [{:as handler-ctx :keys [ev-chan db]} _]
+  (let [app (app/root db)]
+    {:tx [[:db/add (e app) :app/end-turn-alert true]]}))
+
+(defmethod router/handle-event ::hide-end-turn-alert
+  [{:as handler-ctx :keys [ev-chan db]} _]
+  (let [app (app/root db)]
+    {:tx [[:db/add (e app) :app/end-turn-alert false]]}))
