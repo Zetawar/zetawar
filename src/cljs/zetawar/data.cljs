@@ -60,8 +60,10 @@
     (str "To play multiplayer follow the instructions "
          "<a href=\"https://www.kickstarter.com/projects/311016908/zetawar/posts/1608417\">"
          "here</a>.")
+
+    ;; Ending turn
     :end-turn-alert "Are you sure you want to end your turn? You still have available moves."
-    }})
+    :end-turn-confirm "Yes, end my turn"}})
 
 ;; TODO: remove redundant id keys (?)
 (def rulesets
