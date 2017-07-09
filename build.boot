@@ -12,6 +12,7 @@
    [crisptrutski/boot-cljs-test "0.3.0" :scope "test"]
    [deraen/boot-sass "0.3.0" :scope "test"]
    [devcards "0.2.2" :scope "test"]
+   [org.clojars.micha/boot-cp "1.0.1" :scope "test"]
    [org.clojure/tools.nrepl "0.2.12" :scope "test"]
    [org.martinklepsch/boot-gzip "0.1.3" :scope "test"]
    [org.slf4j/slf4j-nop "1.7.21" :scope "test"]
