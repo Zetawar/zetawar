@@ -277,7 +277,7 @@
      (translate :hover-tile-location)
      (if hover-q
        (str hover-q ", " hover-r)
-       :none)]))
+       (translate :none))]))
 
 (def armor-type-abbrevs
   {:unit-type.armor-type/personnel "P"
