@@ -273,7 +273,7 @@
 
 (defn status-info [{:as view-ctx :keys [conn translate]}]
   (let [[hover-q hover-r] @(subs/hover-hex conn)]
-    [:p
+    [:p.hidden-xs.hidden-sm
      (translate :hover-tile-location)
      (if hover-q
        (str hover-q ", " hover-r)
