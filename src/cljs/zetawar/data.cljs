@@ -75,7 +75,7 @@
      :flanking-attack-bonus 2
      :opposite-attack-bonus 3
      :stochastic-damage     false
-     :self-repair           true
+     :self-repair           false
      :move-through-friendly true}
 
     :terrains
@@ -113,8 +113,9 @@
                 :capture-base      :done}}
        :moved {:transitions
                {:attack-unit       :done
-                :capture-base      :done
-                :field-repair-unit :done}}
+                :repair-unit       :done
+                :field-repair-unit :done
+                :capture-base      :done}}
        :done  {}}}
 
      :free-attack-twice
@@ -129,15 +130,19 @@
        :moved-0-attacked-1 {:transitions
                             {:move-unit    :moved-1-attacked-1
                              :attack-unit  :moved-0-attacked-2
+                             :repair-unit  :done
                              :capture-base :done}}
        :moved-0-attacked-2 {:transitions
                             {:move-unit    :done
+                             :repair-unit  :done
                              :capture-base :done}}
        :moved-1-attacked-0 {:transitions
                             {:attack-unit  :moved-1-attacked-1
+                             :repair-unit  :done
                              :capture-base :done}}
        :moved-1-attacked-1 {:transitions
                             {:attack-unit  :done
+                             :repair-unit  :done
                              :capture-base :done}}
        :done               {}}}
 
@@ -308,38 +313,38 @@
               :swamp     {:movement-cost 6 :armor-bonus -2 :attack-bonus -2}
               :ford      {:movement-cost 5 :armor-bonus -1 :attack-bonus -1}
               :base      {:movement-cost 2 :armor-bonus  3 :attack-bonus  2}}
-            :attack-strengths
-            {:personnel 5
-             :armored   2}
-            :zoc
-            [:personnel :armored]}
-    :engineer {:description "Engineer"
-               :cost 200
-               :movement 9
-               :can-capture true
-               :can-repair #{:armored}
-               :min-range 1
-               :max-range 1
-               :armor-type :personnel
-               :armor 6
-               :capturing-armor 4
-               :repair 1
-               :state-map :move-attack
-               :image "tilesets/elite-command/units/engineer-COLOR.png"
-               :terrain-effects
-               {:plains    {:movement-cost 3 :armor-bonus  0 :attack-bonus  0}
-                :mountains {:movement-cost 6 :armor-bonus  5 :attack-bonus  2}
-                :woods     {:movement-cost 4 :armor-bonus  3 :attack-bonus  2}
-                :desert    {:movement-cost 4 :armor-bonus -1 :attack-bonus -1}
-                :tundra    {:movement-cost 4 :armor-bonus -1 :attack-bonus -1}
-                :swamp     {:movement-cost 6 :armor-bonus -2 :attack-bonus -2}
-                :ford      {:movement-cost 5 :armor-bonus -1 :attack-bonus -1}
-                :base      {:movement-cost 2 :armor-bonus  3 :attack-bonus  2}}
-              :attack-strengths
-              {:personnel 5
-               :armored   2}
-              :zoc
-              [:personnel :armored]}
+             :attack-strengths
+             {:personnel 5
+              :armored   2}
+             :zoc
+             [:personnel :armored]}
+     :engineer {:description "Engineer"
+                :cost 200
+                :movement 9
+                :can-capture true
+                :can-repair #{:armored}
+                :min-range 1
+                :max-range 1
+                :armor-type :personnel
+                :armor 6
+                :capturing-armor 4
+                :repair 1
+                :state-map :move-attack
+                :image "tilesets/elite-command/units/engineer-COLOR.png"
+                :terrain-effects
+                {:plains    {:movement-cost 3 :armor-bonus  0 :attack-bonus  0}
+                 :mountains {:movement-cost 6 :armor-bonus  5 :attack-bonus  2}
+                 :woods     {:movement-cost 4 :armor-bonus  3 :attack-bonus  2}
+                 :desert    {:movement-cost 4 :armor-bonus -1 :attack-bonus -1}
+                 :tundra    {:movement-cost 4 :armor-bonus -1 :attack-bonus -1}
+                 :swamp     {:movement-cost 6 :armor-bonus -2 :attack-bonus -2}
+                 :ford      {:movement-cost 5 :armor-bonus -1 :attack-bonus -1}
+                 :base      {:movement-cost 2 :armor-bonus  3 :attack-bonus  2}}
+                :attack-strengths
+                {:personnel 5
+                 :armored   2}
+                :zoc
+                [:personnel :armored]}
      ;; Armored
      :humvee {:description "Humvee"
               :cost 300
