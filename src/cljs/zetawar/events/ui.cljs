@@ -99,9 +99,9 @@
                 (game/repairable? db game unit)
                 (game/in-range? db selected-unit unit)
                 (game/has-repairable-armor-type? db game selected-unit unit))
-             [{:db/id (e app)
-               :app/targeted-q ev-q
-               :app/targeted-r ev-r}]
+           [{:db/id (e app)
+             :app/targeted-q ev-q
+             :app/targeted-r ev-r}]
 
            ;; selecting owned base with no unit selected
            (and terrain
@@ -118,12 +118,13 @@
            ;; selecting unselected friendly unit
            (and unit
                 (or (game/can-move? db game unit)
+                    (game/can-repair? db game unit)
                     (and
                      (game/can-attack? db game unit)
                      (not= 0 (count (game/enemies-in-range db game unit))))
                     (and
-                      (game/can-field-repair? db game unit)
-                      (not= 0 (count (game/friends-in-range db game unit))))
+                     (game/can-field-repair? db game unit)
+                     (not= 0 (count (game/friends-in-range db game unit))))
                     (game/can-capture? db game unit terrain)))
            (cond-> [{:db/id (e app)
                      :app/selected-q ev-q
