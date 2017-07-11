@@ -3,7 +3,7 @@
  :resource-paths #{"assets"}
  :dependencies
  '[;; Dev
-   [adzerk/boot-cljs "1.7.228-2" :scope "test"]
+   [adzerk/boot-cljs "2.0.0" :scope "test"]
    [adzerk/boot-cljs-repl "0.3.3" :scope "test"]
    [adzerk/boot-reload "0.5.1" :scope "test"]
    [binaryage/devtools "0.9.1" :scope "test"]
@@ -12,6 +12,7 @@
    [crisptrutski/boot-cljs-test "0.3.0" :scope "test"]
    [deraen/boot-sass "0.3.0" :scope "test"]
    [devcards "0.2.2" :scope "test"]
+   [org.clojars.micha/boot-cp "1.0.1" :scope "test"]
    [org.clojure/tools.nrepl "0.2.12" :scope "test"]
    [org.martinklepsch/boot-gzip "0.1.3" :scope "test"]
    [org.slf4j/slf4j-nop "1.7.21" :scope "test"]
@@ -132,6 +133,14 @@
                      #"^(.*)\.js\.gz$" "$1.js"})
         (codox :name "Zetawar" :language :clojurescript)
         (target :dir (when target-dir #{target-dir}))))
+
+(deftask build-game-runner
+  "Build Zetawar CLI game runner."
+  []
+  (comp (cljs :ids ["js/game-runner"]
+              :optimizations :simple
+              :source-map true)
+        (target)))
 
 (deftask dev
   "Run Zetawar dev environment."

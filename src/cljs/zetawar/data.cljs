@@ -71,7 +71,7 @@
      :flanking-attack-bonus 2
      :opposite-attack-bonus 3
      :stochastic-damage     false
-     :self-repair           true
+     :self-repair           false
      :move-through-friendly true}
 
     :terrains
@@ -122,8 +122,9 @@
                 :capture-base      :done}}
        :moved {:transitions
                {:attack-unit       :done
-                :capture-base      :done
-                :field-repair-unit :done}}
+                :repair-unit       :done
+                :field-repair-unit :done
+                :capture-base      :done}}
        :done  {}}}
 
      :move-attack-twice
@@ -175,15 +176,19 @@
        :moved-0-attacked-1 {:transitions
                             {:move-unit    :moved-1-attacked-1
                              :attack-unit  :moved-0-attacked-2
+                             :repair-unit  :done
                              :capture-base :done}}
        :moved-0-attacked-2 {:transitions
                             {:move-unit    :done
+                             :repair-unit  :done
                              :capture-base :done}}
        :moved-1-attacked-0 {:transitions
                             {:attack-unit  :moved-1-attacked-1
+                             :repair-unit  :done
                              :capture-base :done}}
        :moved-1-attacked-1 {:transitions
                             {:attack-unit  :done
+                             :repair-unit  :done
                              :capture-base :done}}
        :done               {}}}
 
