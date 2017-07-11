@@ -273,22 +273,11 @@
 
 (defn status-info [{:as view-ctx :keys [conn translate]}]
   (let [[hover-q hover-r] @(subs/hover-hex conn)]
-    [:div
-     [:p.hidden-xs.hidden-sm
-      (translate :hover-tile-location)
-      (if hover-q
-        (str hover-q ", " hover-r)
-        (translate :none))]
-     (when @(subs/selected-unit conn)
-       [:p "Selected: "
-        (interleave
-         ["Movement Cost: ", " Attack Bonus: ", " Armor Bonus: "]
-         @(subs/selected-stats conn))])
-     (when @(subs/targeted-hex conn)
-       [:p "Targeted: "
-        (interleave
-         ["Movement Cost: ", " Attack Bonus: ", " Armor Bonus: "]
-         @(subs/targeted-stats conn))])]))
+    [:p.hidden-xs.hidden-sm
+     (translate :hover-tile-location)
+     (if hover-q
+       (str hover-q ", " hover-r)
+       (translate :none))]))
 
 (def armor-type-abbrevs
   {:unit-type.armor-type/personnel "P"
