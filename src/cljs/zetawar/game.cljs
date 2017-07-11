@@ -292,6 +292,19 @@
 (defn unit-ex [message unit]
   (ex-info message (select-keys unit [:unit/q :unit/r])))
 
+(defn unit-terrain-stats [db unit terrain]
+  (only (d/q '[:find ?mc ?at ?ar
+               :in $ ?u ?t
+               :where
+               [?u  :unit/type ?ut]
+               [?t  :terrain/type ?tt]
+               [?tt :terrain-type/effects ?e]
+               [?e  :terrain-effect/unit-type ?ut]
+               [?e  :terrain-effect/attack-bonus ?at]
+               [?e  :terrain-effect/armor-bonus ?ar]
+               [?e  :terrain-effect/movement-cost ?mc]]
+             db (e unit) (e terrain))))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Unit States
 
