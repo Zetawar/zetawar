@@ -6,7 +6,7 @@
    [zetawar.data :as data]
    [zetawar.db :as db :refer [e find-by qe qes qess]]
    [zetawar.hex :as hex]
-   [zetawar.util :refer [breakpoint inspect oonly]]))
+   [zetawar.util :refer [breakpoint inspect oonly only]]))
 
 ;; TODO: improve exception data
 
