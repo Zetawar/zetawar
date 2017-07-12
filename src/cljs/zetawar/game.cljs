@@ -292,7 +292,7 @@
 (defn unit-ex [message unit]
   (ex-info message (select-keys unit [:unit/q :unit/r])))
 
-(defn terrain-effects [db unit terrain]
+(defn unit-terrain-effects [db unit terrain]
   (only (d/q '[:find ?mc ?at ?ar
                :in $ ?u ?t
                :where

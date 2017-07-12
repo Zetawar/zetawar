@@ -453,19 +453,19 @@
   (when-let [[q r] @(selected-hex conn)]
     @(unit-at conn q r)))
 
-(deftrack terrain-effects [conn unit-q unit-r terrain-q terrain-r]
+(deftrack unit-terrain-effects [conn unit-q unit-r terrain-q terrain-r]
   (let [unit @(unit-at conn unit-q unit-r)
         terrain @(terrain-at conn terrain-q terrain-r)]
-    (game/terrain-effects @conn unit terrain)))
+    (game/unit-terrain-effects @conn unit terrain)))
 
 (deftrack selected-terrain-effects [conn]
   (when-let [[q r] @(selected-hex conn)]
-    @(terrain-effects conn q r q r)))
+    @(unit-terrain-effects conn q r q r)))
 
 (deftrack targeted-terrain-effects [conn]
   (when-let [[terrain-q terrain-r] @(targeted-hex conn)]
     (let [[unit-q unit-r] @(selected-hex conn)]
-      @(terrain-effects conn unit-q unit-r terrain-q terrain-r))))
+      @(unit-terrain-effects conn unit-q unit-r terrain-q terrain-r))))
 
 (deftrack unit-selected? [conn]
   (when-let [[q r] @(selected-hex conn)]
