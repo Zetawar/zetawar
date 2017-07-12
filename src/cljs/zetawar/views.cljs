@@ -271,7 +271,7 @@
 
 (defn status-info [{:as view-ctx :keys [conn translate]}]
   [:div
-   (when-let [[selected-mc selected-at selected-ar] @(subs/selected-stats conn)]
+   (when-let [[selected-mc selected-at selected-ar] @(subs/selected-terrain-effects conn)]
      [:div.row.col-md-6
       [:> js/ReactBootstrap.Table
        [:thead>tr
@@ -285,7 +285,7 @@
          [:td selected-mc]
          [:td selected-at]
          [:td selected-ar]]
-        (when-let [[targeted-mc targeted-at targeted-ar] @(subs/targeted-stats conn)]
+        (when-let [[targeted-mc targeted-at targeted-ar] @(subs/targeted-terrain-effects conn)]
           [:tr.text-center
            [:td (translate :targeted-label)]
            [:td targeted-mc]
