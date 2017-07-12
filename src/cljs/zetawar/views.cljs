@@ -113,9 +113,7 @@
 (defn tile [{:as view-ctx :keys [dispatch]} terrain]
   (let [{:keys [terrain/q terrain/r]} terrain]
     ^{:key (str q "," r)}
-    [:g {:on-click #(dispatch [::events.ui/select-hex q r])
-         :on-mouse-enter #(dispatch [::events.ui/hover-hex-enter q r])
-         :on-mouse-leave #(dispatch [::events.ui/hover-hex-leave q r])}
+    [:g {:on-click #(dispatch [::events.ui/select-hex q r])}
      [terrain-tile view-ctx terrain q r]
      [tile-border view-ctx q r]
      [board-unit view-ctx q r]
@@ -272,33 +270,27 @@
                 :title (translate :configure-faction-tip)}]]]))))
 
 (defn status-info [{:as view-ctx :keys [conn translate]}]
-  (let [[hover-q hover-r] @(subs/hover-hex conn)]
-    [:div
-     [:p.hidden-xs.hidden-sm
-      (translate :hover-tile-location)
-      (if hover-q
-        (str hover-q ", " hover-r)
-        (translate :none))]
-     (when-let [[selected-mc selected-at selected-ar] @(subs/selected-stats conn)]
-       [:div.row.col-md-6
-        [:> js/ReactBootstrap.Table
-         [:thead>tr
-          [:th.text-center (translate :terrain-label)]
-          [:th.text-center (translate :movement-cost-label)]
-          [:th.text-center (translate :attack-bonus-label)]
-          [:th.text-center (translate :armor-bonus-label)]]
-         [:tbody
+  [:div
+   (when-let [[selected-mc selected-at selected-ar] @(subs/selected-stats conn)]
+     [:div.row.col-md-6
+      [:> js/ReactBootstrap.Table
+       [:thead>tr
+        [:th.text-center (translate :terrain-label)]
+        [:th.text-center (translate :movement-cost-label)]
+        [:th.text-center (translate :attack-bonus-label)]
+        [:th.text-center (translate :armor-bonus-label)]]
+       [:tbody
+        [:tr.text-center
+         [:td (translate :selected-label)]
+         [:td selected-mc]
+         [:td selected-at]
+         [:td selected-ar]]
+        (when-let [[targeted-mc targeted-at targeted-ar] @(subs/targeted-stats conn)]
           [:tr.text-center
-           [:td (translate :selected-label)]
-           [:td selected-mc]
-           [:td selected-at]
-           [:td selected-ar]]
-          (when-let [[targeted-mc targeted-at targeted-ar] @(subs/targeted-stats conn)]
-            [:tr.text-center
-             [:td (translate :targeted-label)]
-             [:td targeted-mc]
-             [:td targeted-at]
-             [:td targeted-ar]])]]])]))
+           [:td (translate :targeted-label)]
+           [:td targeted-mc]
+           [:td targeted-at]
+           [:td targeted-ar]])]]])])
 
 (def armor-type-abbrevs
   {:unit-type.armor-type/personnel "P"
