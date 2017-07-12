@@ -64,6 +64,11 @@
     ;; Status information
     :hover-tile-location "Hovering over tile: "
     :none "none"
+    :movement-cost-label "Movement Cost"
+    :attack-bonus-label "Attack Bonus"
+    :armor-bonus-label "Armor Bonus"
+    :selected-label "Selected"
+    :targeted-label "Targeted"
     }})
 
 ;; TODO: remove redundant id keys (?)
