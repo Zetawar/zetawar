@@ -279,16 +279,26 @@
       (if hover-q
         (str hover-q ", " hover-r)
         (translate :none))]
-     (when @(subs/selected-unit conn)
-       [:p "Selected: "
-        (interleave
-         ["Movement Cost: ", " Attack Bonus: ", " Armor Bonus: "]
-         @(subs/selected-stats conn))])
-     (when @(subs/targeted-hex conn)
-       [:p "Targeted: "
-        (interleave
-         ["Movement Cost: ", " Attack Bonus: ", " Armor Bonus: "]
-         @(subs/targeted-stats conn))])]))
+     (when-let [[selected-mc selected-at selected-ar] @(subs/selected-stats conn)]
+       [:div.row.col-md-6
+        [:> js/ReactBootstrap.Table
+         [:thead>tr
+          [:th.text-center (translate :terrain-label)]
+          [:th.text-center (translate :movement-cost-label)]
+          [:th.text-center (translate :attack-bonus-label)]
+          [:th.text-center (translate :armor-bonus-label)]]
+         [:tbody
+          [:tr.text-center
+           [:td (translate :selected-label)]
+           [:td selected-mc]
+           [:td selected-at]
+           [:td selected-ar]]
+          (when-let [[targeted-mc targeted-at targeted-ar] @(subs/targeted-stats conn)]
+            [:tr.text-center
+             [:td (translate :targeted-label)]
+             [:td targeted-mc]
+             [:td targeted-at]
+             [:td targeted-ar]])]]])]))
 
 (def armor-type-abbrevs
   {:unit-type.armor-type/personnel "P"
