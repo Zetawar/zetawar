@@ -570,3 +570,14 @@
       (select-values [:app/hover-q
                       :app/hover-r])
       not-empty))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; End turn
+
+(deftrack available-moves-left? [conn]
+  (some
+   (fn [[q r] coordinates] @(unit-can-act? conn q r))
+   @(friend-locations conn)))
+
+(deftrack show-end-turn-alert? [conn]
+  (:app/end-turn-alert @(app conn)))

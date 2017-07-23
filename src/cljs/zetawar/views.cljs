@@ -156,6 +156,20 @@
         [:a {:href "#" :on-click #(.preventDefault %)}
          (translate :copy-game-url-link)])})))
 
+(defn end-turn-alert [{:as view-ctx :keys [conn dispatch translate]}]
+  [:> js/ReactBootstrap.Modal {:show @(subs/show-end-turn-alert? conn)
+                               :on-hide #(dispatch [::events.ui/hide-end-turn-alert])}
+   [:> js/ReactBootstrap.Modal.Body
+    (translate :end-turn-alert)]
+   [:> js/ReactBootstrap.Modal.Footer
+    [:div.btn.btn-default {:on-click (fn [e]
+                                       (.preventDefault e)
+                                       (dispatch [::events.ui/end-turn])
+                                       (dispatch [::events.ui/hide-end-turn-alert]))}
+     (translate :end-turn-confirm)]
+    [:div.btn.btn-default {:on-click #(dispatch [::events.ui/hide-end-turn-alert])}
+     (translate :cancel-button)]]])
+
 (defn faction-status [{:as view-ctx :keys [conn dispatch translate]}]
   (let [{:keys [app/show-copy-link]} @(subs/app conn)
         {:keys [game/round]} @(subs/game conn)
@@ -164,7 +178,9 @@
      ;; TODO: make link red
      [:a {:href "#" :on-click (fn [e]
                                 (.preventDefault e)
-                                (dispatch [::events.ui/end-turn]))}
+                                (if @(subs/available-moves-left? conn)
+                                  (dispatch [::events.ui/show-end-turn-alert])
+                                  (dispatch [::events.ui/end-turn])))}
       (translate :end-turn-link)]
      (when show-copy-link
        [:span " · " [copy-url-link view-ctx]])
@@ -480,6 +496,7 @@
    [new-game-settings view-ctx]
    [faction-settings view-ctx]
    [unit-picker view-ctx]
+   [end-turn-alert view-ctx]
    ;; TODO: break win dialog out into it's own component
    ;; TODO: add continue + start new game buttons to win dialog
    [:> js/ReactBootstrap.Modal {:show @(subs/show-win-message? conn)
