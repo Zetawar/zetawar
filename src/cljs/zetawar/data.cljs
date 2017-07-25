@@ -63,7 +63,10 @@
 
     ;; Status information
     :hover-tile-location "Hover: "
-    }})
+
+    ;; Ending turn
+    :end-turn-alert "Are you sure you want to end your turn? You still have available moves."
+    :end-turn-confirm "Yes, end my turn"}})
 
 ;; TODO: remove redundant id keys (?)
 (def rulesets

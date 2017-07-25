@@ -376,3 +376,16 @@
   (let [app (app/root db)]
       {:tx [[:db/retract (e app) :app/hover-q q]
             [:db/retract (e app) :app/hover-r r]]}))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; End turn alert
+
+(defmethod router/handle-event ::show-end-turn-alert
+  [{:as handler-ctx :keys [ev-chan db]} _]
+  (let [app (app/root db)]
+    {:tx [[:db/add (e app) :app/end-turn-alert true]]}))
+
+(defmethod router/handle-event ::hide-end-turn-alert
+  [{:as handler-ctx :keys [ev-chan db]} _]
+  (let [app (app/root db)]
+    {:tx [[:db/add (e app) :app/end-turn-alert false]]}))
