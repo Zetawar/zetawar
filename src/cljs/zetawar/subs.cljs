@@ -361,6 +361,11 @@
 (deftrack in-range-of-friend-at? [conn unit-q unit-r friend-q friend-r]
   (contains? @(friend-locations-in-range-of conn unit-q unit-r) [friend-q friend-r]))
 
+(deftrack unit-terrain-effects [conn unit-q unit-r terrain-q terrain-r]
+  (when-let [unit @(unit-at conn unit-q unit-r)]
+    (let [terrain @(terrain-at conn terrain-q terrain-r)]
+      (game/unit-terrain-effects @conn unit terrain))))
+
 (deftrack repairable? [conn q r]
   (when-let [unit @(unit-at conn q r)]
     (game/repairable? @conn @(game conn) unit)))
@@ -452,11 +457,6 @@
 (deftrack selected-unit [conn]
   (when-let [[q r] @(selected-hex conn)]
     @(unit-at conn q r)))
-
-(deftrack unit-terrain-effects [conn unit-q unit-r terrain-q terrain-r]
-  (when-let [unit @(unit-at conn unit-q unit-r)]
-    (let [terrain @(terrain-at conn terrain-q terrain-r)]
-      (game/unit-terrain-effects @conn unit terrain))))
 
 (deftrack selected-terrain-effects [conn]
   (when-let [[q r] @(selected-hex conn)]
