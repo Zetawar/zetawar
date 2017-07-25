@@ -272,12 +272,13 @@
                 :title (translate :configure-faction-tip)}]]]))))
 
 (defn status-info [{:as view-ctx :keys [conn translate]}]
-  (let [[hover-q hover-r] @(subs/hover-hex conn)]
-    [:p.hidden-xs.hidden-sm
-     (translate :hover-tile-location)
-     (if hover-q
-       (str hover-q ", " hover-r)
-       (translate :none))]))
+  [:div
+   (let [[hover-q hover-r] @(subs/hover-hex conn)]
+     [:span.hidden-xs.hidden-sm
+      (translate :hover-tile-location)
+      (if hover-q
+        (str hover-q "," hover-r)
+        (translate :none))])])
 
 (def armor-type-abbrevs
   {:unit-type.armor-type/personnel "P"
