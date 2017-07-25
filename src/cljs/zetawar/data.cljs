@@ -63,7 +63,6 @@
 
     ;; Status information
     :hover-tile-location "Hover: "
-    :none "none"
     }})
 
 ;; TODO: remove redundant id keys (?)
