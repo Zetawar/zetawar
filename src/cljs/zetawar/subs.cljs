@@ -575,3 +575,14 @@
 
 (deftrack configuring-new-game? [conn]
   (:app/configuring-new-game @(app conn)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; End turn
+
+(deftrack available-moves-left? [conn]
+  (some
+   (fn [[q r] coordinates] @(unit-can-act? conn q r))
+   @(friend-locations conn)))
+
+(deftrack show-end-turn-alert? [conn]
+  (:app/end-turn-alert @(app conn)))
