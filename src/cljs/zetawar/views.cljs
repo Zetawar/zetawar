@@ -288,21 +288,33 @@
 (defn status-info [{:as view-ctx :keys [conn translate]}]
   [:div
    (let [[sel-q sel-r] @(subs/selected-hex conn)
-         [tar-q tar-r] @(subs/targeted-hex conn)]
+         [tar-q tar-r] @(subs/targeted-hex conn)
+         [sel-mc sel-at sel-ar] @(subs/selected-terrain-effects conn)
+         [tar-mc tar-at tar-ar] @(subs/targeted-terrain-effects conn)]
      [:span
-      "Selected: "
+      (translate :selected-label)
       (if sel-q
-        (str
-         sel-q "," sel-r " "
-         "(" (string/join "," @(subs/selected-terrain-effects conn)) ")")
-        " -")
+        [:span
+         [:abbr {:title (translate :tile-coordinates-label) :style {:cursor "inherit"}}
+          (str sel-q "," sel-r)]
+         (if sel-mc ;; If selected doesn't contain a unit
+           [:span
+            " ("
+            [:abbr {:title (translate :terrain-effects-label) :style {:cursor "inherit"}}
+             (str sel-mc "," sel-at "," sel-ar)]
+            ")"])]
+        [:span " -"])
       " • "
-      "Targeted: "
+      (translate :targeted-label)
       (if tar-q
-        (str
-         tar-q "," tar-r " "
-         "(" (string/join "," @(subs/targeted-terrain-effects conn)) ")")
-        " -")])])
+        [:span
+         [:abbr {:title (translate :tile-coordinates-label) :style {:cursor "inherit"}}
+          (str tar-q "," tar-r)]
+         " ("
+         [:abbr {:title (translate :terrain-effects-label) :style {:cursor "inherit"}}
+          (str tar-mc "," tar-at "," tar-ar)]
+         ")"]
+        [:span " -"])])])
 
 (def armor-type-abbrevs
   {:unit-type.armor-type/personnel "P"
