@@ -62,7 +62,7 @@
          "here</a>.")
 
     ;; Status information
-    :hover-tile-location "Hovering over tile: "
+    :hover-tile-location "Hover: "
     :none "none"
     }})
 
