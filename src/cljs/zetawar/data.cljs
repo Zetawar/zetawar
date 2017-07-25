@@ -62,12 +62,13 @@
          "here</a>.")
 
     ;; Status information
-    :terrain-label "Terrain"
+    :tile-coordinates-label "X,Y (Tile Coordinates)"
+    :terrain-effects-label "Movement Cost, Attack Bonus, Armor Bonus"
     :movement-cost-label "Movement Cost"
     :attack-bonus-label "Attack Bonus"
     :armor-bonus-label "Armor Bonus"
-    :selected-label "Selected"
-    :targeted-label "Targeted"
+    :selected-label "Selected: "
+    :targeted-label "Targeted: "
 
     ;; Ending turn
     :end-turn-alert "Are you sure you want to end your turn? You still have available moves."
