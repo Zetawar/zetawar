@@ -271,26 +271,22 @@
 
 (defn status-info [{:as view-ctx :keys [conn translate]}]
   [:div
-   (when-let [[selected-mc selected-at selected-ar] @(subs/selected-terrain-effects conn)]
-     [:div.row.col-md-6
-      [:> js/ReactBootstrap.Table
-       [:thead>tr
-        [:th.text-center (translate :terrain-label)]
-        [:th.text-center (translate :movement-cost-label)]
-        [:th.text-center (translate :attack-bonus-label)]
-        [:th.text-center (translate :armor-bonus-label)]]
-       [:tbody
-        [:tr.text-center
-         [:td (translate :selected-label)]
-         [:td selected-mc]
-         [:td selected-at]
-         [:td selected-ar]]
-        (when-let [[targeted-mc targeted-at targeted-ar] @(subs/targeted-terrain-effects conn)]
-          [:tr.text-center
-           [:td (translate :targeted-label)]
-           [:td targeted-mc]
-           [:td targeted-at]
-           [:td targeted-ar]])]]])])
+   (let [[sel-q sel-r] @(subs/selected-hex conn)
+         [tar-q tar-r] @(subs/targeted-hex conn)]
+     [:span
+      "Selected: "
+      (if sel-q
+        (str
+         sel-q "," sel-r " "
+         "(" (string/join "," @(subs/selected-terrain-effects conn)) ")")
+        " -")
+      " • "
+      "Targeted: "
+      (if tar-q
+        (str
+         tar-q "," tar-r " "
+         "(" (string/join "," @(subs/targeted-terrain-effects conn)) ")")
+        " -")])])
 
 (def armor-type-abbrevs
   {:unit-type.armor-type/personnel "P"
