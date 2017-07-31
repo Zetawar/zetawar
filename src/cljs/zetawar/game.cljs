@@ -1360,11 +1360,11 @@
 (defn bases-tx [db game-id scenario-def]
   (let [game (game-by-id db game-id)]
     (for [base (:bases scenario-def)]
-      (let [{:keys [q r]} base]
+      (let [{:keys [q r base-type]} base]
         {:terrain/game-pos-idx (game-pos-idx game q r)
          :terrain/q q
          :terrain/r r
-         :terrain/type [:terrain-type/game-id-idx (game-id-idx game-id :terrain-type.id/base)]
+         :terrain/type [:terrain-type/game-id-idx (game-id-idx game-id (keyword "terrain-type.id" base-type))]
          :map/_terrains (e (:game/map game))}))))
 
 (defn factions-tx [db game-id factions]
