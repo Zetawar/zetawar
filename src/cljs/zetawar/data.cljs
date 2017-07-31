@@ -733,7 +733,7 @@
       :terrain-type :deep-water}
      {:q 1
       :r 4
-      :terrain-type :seaport #_:mountains
+      :terrain-type :mountains
       }
      {:q 2
       :r 4
@@ -854,7 +854,7 @@
       :terrain-type :deep-water}
      {:q 5
       :r 8
-      :terrain-type :seaport #_:mountains}
+      :terrain-type :mountains}
      {:q 6
       :r 8
       :terrain-type :plains}
@@ -1532,10 +1532,12 @@
     :max-count-per-unit 10
     :credits-per-base 100
     :bases
-    [{:q 1 :r 2}
-     {:q 2 :r 1}
-     {:q 5 :r 7}
-     {:q 7 :r 6}]
+    [{:q 1 :r 2 :base-type :base}
+     {:q 1 :r 4 :base-type :seaport}
+     {:q 2 :r 1 :base-type :base}
+     {:q 5 :r 7 :base-type :base}
+     {:q 5 :r 8 :base-type :seaport}
+     {:q 7 :r 6 :base-type :base}]
     :factions
     [{:color :blue
       :credits 300
