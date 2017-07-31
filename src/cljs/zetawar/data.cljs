@@ -731,10 +731,10 @@
      {:q 0
       :r 4
       :terrain-type :deep-water}
+     ;; Multiplayer base location
      {:q 1
       :r 4
-      :terrain-type :mountains
-      }
+      :terrain-type :mountains}
      {:q 2
       :r 4
       :terrain-type :plains}
@@ -852,6 +852,7 @@
      {:q 4
       :r 8
       :terrain-type :deep-water}
+     ;; Multiplayer base location
      {:q 5
       :r 8
       :terrain-type :mountains}
