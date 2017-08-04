@@ -318,8 +318,8 @@
           (str tar-mc "," tar-at "," tar-ar)]
          ")"]
         [:span " -"])
-      " • "
       [:span.hidden-xs.hidden-sm
+       " • "
        (translate :hover-tile-location)
        (if hover-q
          (str hover-q "," hover-r)
