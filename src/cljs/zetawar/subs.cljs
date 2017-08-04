@@ -577,6 +577,15 @@
   (:app/configuring-new-game @(app conn)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Tile coordinates
+
+(deftrack hover-hex [conn]
+  (-> @(app conn)
+      (select-values [:app/hover-q
+                      :app/hover-r])
+      not-empty))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; End turn
 
 (deftrack available-moves-left? [conn]

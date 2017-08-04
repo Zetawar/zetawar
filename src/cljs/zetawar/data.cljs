@@ -69,6 +69,7 @@
     :armor-bonus-label "Armor Bonus"
     :selected-label "Selected: "
     :targeted-label "Targeted: "
+    :hover-tile-location "Hover: "
 
     ;; Ending turn
     :end-turn-alert "Are you sure you want to end your turn? You still have available moves."
