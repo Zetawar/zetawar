@@ -6,7 +6,7 @@
    [zetawar.data :as data]
    [zetawar.db :as db :refer [e find-by qe qes qess]]
    [zetawar.hex :as hex]
-   [zetawar.util :refer [breakpoint inspect oonly]]))
+   [zetawar.util :refer [breakpoint inspect oonly only]]))
 
 ;; TODO: improve exception data
 
@@ -291,6 +291,19 @@
 
 (defn unit-ex [message unit]
   (ex-info message (select-keys unit [:unit/q :unit/r])))
+
+(defn unit-terrain-effects [db unit terrain]
+  (only (d/q '[:find ?mc ?at ?ar
+               :in $ ?u ?t
+               :where
+               [?u  :unit/type ?ut]
+               [?t  :terrain/type ?tt]
+               [?tt :terrain-type/effects ?e]
+               [?e  :terrain-effect/unit-type ?ut]
+               [?e  :terrain-effect/attack-bonus ?at]
+               [?e  :terrain-effect/armor-bonus ?ar]
+               [?e  :terrain-effect/movement-cost ?mc]]
+             db (e unit) (e terrain))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Unit States

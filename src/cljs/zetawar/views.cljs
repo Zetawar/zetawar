@@ -289,12 +289,41 @@
 
 (defn status-info [{:as view-ctx :keys [conn translate]}]
   [:div
-   (let [[hover-q hover-r] @(subs/hover-hex conn)]
-     [:span.hidden-xs.hidden-sm
-      (translate :hover-tile-location)
-      (if hover-q
-        (str hover-q "," hover-r)
-        "-")])])
+   (let [[sel-q sel-r] @(subs/selected-hex conn)
+         [tar-q tar-r] @(subs/targeted-hex conn)
+         [sel-mc sel-at sel-ar] @(subs/selected-terrain-effects conn)
+         [tar-mc tar-at tar-ar] @(subs/targeted-terrain-effects conn)
+         [hover-q hover-r] @(subs/hover-hex conn)]
+     [:span
+      (translate :selected-label)
+      (if sel-q
+        [:span
+         [:abbr {:title (translate :tile-coordinates-label) :style {:cursor "inherit"}}
+          (str sel-q "," sel-r)]
+         (if sel-mc ;; If selected doesn't contain a unit
+           [:span
+            " ("
+            [:abbr {:title (translate :terrain-effects-label) :style {:cursor "inherit"}}
+             (str sel-mc "," sel-at "," sel-ar)]
+            ")"])]
+        [:span " -"])
+      " • "
+      (translate :targeted-label)
+      (if tar-q
+        [:span
+         [:abbr {:title (translate :tile-coordinates-label) :style {:cursor "inherit"}}
+          (str tar-q "," tar-r)]
+         " ("
+         [:abbr {:title (translate :terrain-effects-label) :style {:cursor "inherit"}}
+          (str tar-mc "," tar-at "," tar-ar)]
+         ")"]
+        [:span " -"])
+      [:span.hidden-xs.hidden-sm
+       " • "
+       (translate :hover-tile-location)
+       (if hover-q
+         (str hover-q "," hover-r)
+         "-")]])])
 
 (def armor-type-abbrevs
   {:unit-type.armor-type/personnel "P"
