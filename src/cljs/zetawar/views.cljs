@@ -292,7 +292,8 @@
    (let [[sel-q sel-r] @(subs/selected-hex conn)
          [tar-q tar-r] @(subs/targeted-hex conn)
          [sel-mc sel-at sel-ar] @(subs/selected-terrain-effects conn)
-         [tar-mc tar-at tar-ar] @(subs/targeted-terrain-effects conn)]
+         [tar-mc tar-at tar-ar] @(subs/targeted-terrain-effects conn)
+         [hover-q hover-r] @(subs/hover-hex conn)]
      [:span
       (translate :selected-label)
       (if sel-q
@@ -316,13 +317,13 @@
          [:abbr {:title (translate :terrain-effects-label) :style {:cursor "inherit"}}
           (str tar-mc "," tar-at "," tar-ar)]
          ")"]
-        [:span " -"])])
-   (let [[hover-q hover-r] @(subs/hover-hex conn)]
-     [:span.hidden-xs.hidden-sm
-      (translate :hover-tile-location)
-      (if hover-q
-        (str hover-q "," hover-r)
-        "-")])])
+        [:span " -"])
+      " • "
+      [:span.hidden-xs.hidden-sm
+       (translate :hover-tile-location)
+       (if hover-q
+         (str hover-q "," hover-r)
+         "-")]])])
 
 (def armor-type-abbrevs
   {:unit-type.armor-type/personnel "P"
