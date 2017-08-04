@@ -363,6 +363,21 @@
   (app/start-new-game! handler-ctx scenario-id))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Tile coordinates
+
+(defmethod router/handle-event ::hover-hex-enter
+  [{:as handler-ctx :keys [ev-chan db]} [_ q r]]
+  (let [app (app/root db)]
+    {:tx [[:db/add (e app) :app/hover-q q]
+          [:db/add (e app) :app/hover-r r]]}))
+
+(defmethod router/handle-event ::hover-hex-leave
+  [{:as handler-ctx :keys [ev-chan db]} [_ q r]]
+  (let [app (app/root db)]
+      {:tx [[:db/retract (e app) :app/hover-q q]
+            [:db/retract (e app) :app/hover-r r]]}))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; End turn alert
 
 (defmethod router/handle-event ::show-end-turn-alert

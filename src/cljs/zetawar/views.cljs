@@ -113,7 +113,9 @@
 (defn tile [{:as view-ctx :keys [dispatch]} terrain]
   (let [{:keys [terrain/q terrain/r]} terrain]
     ^{:key (str q "," r)}
-    [:g {:on-click #(dispatch [::events.ui/select-hex q r])}
+    [:g {:on-click #(dispatch [::events.ui/select-hex q r])
+         :on-mouse-enter #(dispatch [::events.ui/hover-hex-enter q r])
+         :on-mouse-leave #(dispatch [::events.ui/hover-hex-leave q r])}
      [terrain-tile view-ctx terrain q r]
      [tile-border view-ctx q r]
      [board-unit view-ctx q r]
@@ -284,6 +286,15 @@
                 :aria-hidden true
                 :on-click #(dispatch [::events.ui/configure-faction faction])
                 :title (translate :configure-faction-tip)}]]]))))
+
+(defn status-info [{:as view-ctx :keys [conn translate]}]
+  [:div
+   (let [[hover-q hover-r] @(subs/hover-hex conn)]
+     [:span.hidden-xs.hidden-sm
+      (translate :hover-tile-location)
+      (if hover-q
+        (str hover-q "," hover-r)
+        "-")])])
 
 (def armor-type-abbrevs
   {:unit-type.armor-type/personnel "P"
@@ -478,7 +489,8 @@
     [faction-actions view-ctx]]
    [:div.col-md-10
     [faction-status view-ctx]
-    [board view-ctx]]])
+    [board view-ctx]
+    [status-info view-ctx]]])
 
 (defn app-root [{:as view-ctx :keys [conn dispatch translate]}]
   [:div
