@@ -77,37 +77,50 @@
     :terrains
     {:plains        {:description "Plains"
                      :image "tilesets/elite-command/terrains/plains.png"
-                     :base-type false}
+                     :can-build []}
      :mountains     {:description "Mountains"
                      :image "tilesets/elite-command/terrains/mountains.png"
-                     :base-type false}
+                     :can-build []}
      :woods         {:description "Woods"
                      :image "tilesets/elite-command/terrains/woods.png"
-                     :base-type false}
+                     :can-build []}
      :desert        {:description "Desert"
                      :image "tilesets/elite-command/terrains/desert.png"
-                     :base-type false}
+                     :can-build []}
      :tundra        {:description "Tundra"
                      :image "tilesets/elite-command/terrains/tundra.png"
-                     :base-type false}
+                     :can-build []}
      :swamp         {:description "Swamp"
                      :image "tilesets/elite-command/terrains/swamp.png"
-                     :base-type false}
+                     :can-build []}
      :ford          {:description "Ford"
                      :image "tilesets/elite-command/terrains/ford.png"
-                     :base-type false}
+                     :can-build []}
      :shallow-water {:description "Shallow Water"
                      :image "tilesets/elite-command/terrains/shallow-water.png"
-                     :base-type false}
+                     :can-build []}
      :deep-water    {:description "Deep Water"
                      :image "tilesets/elite-command/terrains/deep-water.png"
-                     :base-type false}
+                     :can-build []}
      :base          {:description "Base"
                      :image "tilesets/elite-command/terrains/base-COLOR.png"
-                     :base-type true}
+                     :can-build [:infantry
+                                 :grenadier
+                                 :mortar
+                                 :ranger
+                                 :sniper
+                                 :medic
+                                 :engineer
+                                 :humvee
+                                 :tank
+                                 :heavy-tank
+                                 :artillery
+                                 :heavy-artillery]}
      :seaport       {:description "Seaport"
                      :image "tilesets/elite-command/terrains/seaport-COLOR.png"
-                     :base-type true}}
+                     :can-build [:frigate
+                                 :destroyer
+                                 :cruiser]}}
 
     :unit-state-maps
     {:move-attack-once
@@ -217,7 +230,6 @@
                 :capturing-armor 4
                 :repair 1
                 :state-map :move-attack-once
-                :buildable-at #{:base}
                 :image "tilesets/elite-command/units/infantry-COLOR.png"
                 :terrain-effects
                 {:plains    {:movement-cost 3 :armor-bonus  0 :attack-bonus  0}
@@ -247,7 +259,6 @@
                  :capturing-armor 6
                  :repair 1
                  :state-map :move-attack-once
-                 :buildable-at #{:base}
                  :image "tilesets/elite-command/units/grenadier-COLOR.png"
                  :terrain-effects
                  {:plains    {:movement-cost 4 :armor-bonus  0 :attack-bonus  0}
@@ -277,7 +288,6 @@
               :capturing-armor 4
               :repair 1
               :state-map :move-attack-once
-              :buildable-at #{:base}
               :image "tilesets/elite-command/units/mortar-COLOR.png"
               :terrain-effects
               {:plains    {:movement-cost 4 :armor-bonus  0 :attack-bonus  0}
@@ -305,7 +315,6 @@
               :capturing-armor 7
               :repair 1
               :state-map :move-attack-once
-              :buildable-at #{:base}
               :image "tilesets/elite-command/units/ranger-COLOR.png"
               :terrain-effects
               {:plains        {:movement-cost 3 :armor-bonus  0 :attack-bonus  0}
@@ -336,7 +345,6 @@
               :capturing-armor 3
               :repair 1
               :state-map :move-attack-once
-              :buildable-at #{:base}
               :image "tilesets/elite-command/units/sniper-COLOR.png"
               :terrain-effects
               {:plains    {:movement-cost 4 :armor-bonus  0 :attack-bonus  0}
@@ -364,7 +372,6 @@
              :capturing-armor 4
              :repair 1
              :state-map :move-attack-once
-             :buildable-at #{:base}
              :image "tilesets/elite-command/units/medic-COLOR.png"
              :terrain-effects
              {:plains    {:movement-cost 3 :armor-bonus  0 :attack-bonus  0}
@@ -394,7 +401,6 @@
                :capturing-armor 4
                :repair 1
                :state-map :move-attack-once
-               :buildable-at #{:base}
                :image "tilesets/elite-command/units/engineer-COLOR.png"
                :terrain-effects
                {:plains        {:movement-cost 3 :armor-bonus  0 :attack-bonus  0}
@@ -425,7 +431,6 @@
               :armor 8
               :repair 1
               :state-map :free-attack-twice
-              :buildable-at #{:base}
               :image "tilesets/elite-command/units/humvee-COLOR.png"
               :terrain-effects
               {:plains  {:movement-cost 3  :armor-bonus  0 :attack-bonus  0}
@@ -453,7 +458,6 @@
             :armor 12
             :repair 1
             :state-map :move-attack-once
-            :buildable-at #{:base}
             :image "tilesets/elite-command/units/tank-COLOR.png"
             :terrain-effects
             {:plains  {:movement-cost 3 :armor-bonus  0 :attack-bonus 0}
@@ -481,7 +485,6 @@
                   :armor 15
                   :repair 1
                   :state-map :move-attack-once
-                  :buildable-at #{:base}
                   :image "tilesets/elite-command/units/heavytank-COLOR.png"
                   :terrain-effects
                   {:plains  {:movement-cost 4 :armor-bonus  0 :attack-bonus 0}
@@ -509,7 +512,6 @@
                  :armor 6
                  :repair 1
                  :state-map :exclusive
-                 :buildable-at #{:base}
                  :image "tilesets/elite-command/units/artillery-COLOR.png"
                  :terrain-effects
                  {:plains  {:movement-cost 4 :armor-bonus  0 :attack-bonus  0}
@@ -535,7 +537,6 @@
                        :armor 8
                        :repair 1
                        :state-map :exclusive
-                       :buildable-at #{:base}
                        :image "tilesets/elite-command/units/heavyartillery-COLOR.png"
                        :terrain-effects
                        {:plains  {:movement-cost 2 :armor-bonus  0 :attack-bonus  0}
@@ -562,7 +563,6 @@
                :armor 8
                :repair 1
                :state-map :free-attack-twice
-               :buildable-at #{:seaport}
                :image "tilesets/elite-command/units/frigate-COLOR.png"
                :terrain-effects
                {:deep-water    {:movement-cost 1 :armor-bonus 0 :attack-bonus 0}
@@ -585,7 +585,6 @@
                  :armor 12
                  :repair 1
                  :state-map :free-attack-once
-                 :buildable-at #{:seaport}
                  :image "tilesets/elite-command/units/destroyer-COLOR.png"
                  :terrain-effects
                  {:deep-water {:movement-cost 1 :armor-bonus 0 :attack-bonus 0}
@@ -607,7 +606,6 @@
                :armor 15
                :repair 1
                :state-map :move-attack-twice
-               :buildable-at #{:seaport}
                :image "tilesets/elite-command/units/cruiser-COLOR.png"
                :terrain-effects
                {:deep-water {:movement-cost 1 :armor-bonus 0 :attack-bonus 0}
