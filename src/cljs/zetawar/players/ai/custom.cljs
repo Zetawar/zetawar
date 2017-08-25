@@ -13,7 +13,7 @@
 (defn score-actor [db game actor actor-ctx]
   (cond
     (game/unit? actor) (rand-int 100)
-    (game/base? actor) (+ (rand-int 100) 100)))
+    (game/base? db actor) (+ (rand-int 100) 100)))
 
 (defn score-base-action [db game base action-ctx action]
   (rand-int 200))
