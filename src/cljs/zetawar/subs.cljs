@@ -508,21 +508,20 @@
 
 (deftrack available-unit-type-eids [conn]
   (when-let [[sel-q sel-r] @(selected-hex conn)]
-    (let [selected-base-name (-> @(terrain-at conn sel-q sel-r)
-                                 (get-in [:terrain/type :terrain-type/id])
-                                 name)]
-      (->> @(posh/q '[:find ?ut ?i
-                      :in $ ?g
+    (let [selected-base (e @(terrain-at conn sel-q sel-r))]
+      (->> @(posh/q '[:find ?ut
+                      :in $ ?g ?t
                       :where
                       [_   :app/game ?g]
                       [?g  :game/current-faction ?f]
                       [?f  :faction/credits ?credits]
                       [?ut :unit-type/cost ?cost]
                       [?ut :unit-type/id ?unit-type-id]
-                      [?ut :unit-type/buildable-at ?i]]
-                    conn @(game-eid conn)
+                      [?t  :terrain/type ?tt]
+                      [?tt :terrain-type/can-build ?cb]
+                      [?cb :terrain-build/unit-type ?ut]]
+                    conn @(game-eid conn) selected-base
                     {:cache :forever})
-           (filter #(= selected-base-name (name (second %))))
            (map first)
            (into [])))))
 
