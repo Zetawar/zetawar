@@ -71,7 +71,7 @@
                    :terrain/r
                    {:terrain/type [:terrain-type/id
                                    :terrain-type/image
-                                   :terrain-type/base-type]
+                                   :terrain-type/can-build]
                     :terrain/owner [:faction/color]}])
 
 ;; TODO: use terrains output instead of running a separate query
@@ -279,7 +279,6 @@
                                     :unit-type/armor-type
                                     :unit-type/min-range
                                     :unit-type/max-range
-                                    :unit-type/buildable-at
                                     :unit-type/image]}]
                 unit-eid)))
 
