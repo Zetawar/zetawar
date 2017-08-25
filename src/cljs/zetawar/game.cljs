@@ -169,8 +169,14 @@
 (defn terrain? [x]
   (contains? x :terrain/type))
 
-(defn base? [x]
-  (get-in x [:terrain/type :terrain-type/base-type]))
+(defn base? [db x]
+  #_(empty? (qe '[:find ?cb
+                :in $ ?t
+                :where
+                [?t  :terrain/type ?tt]
+                [?tt :terrain-type/can-build ?cb]]
+              db x))
+  (not (empty? (get-in x [:terrain/type :terrain-type/can-build]))))
 
 (defn terrain-hex [terrain]
   [(:terrain/q terrain)
