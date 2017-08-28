@@ -91,7 +91,7 @@
         actor (choose-actor db game actor-ctx)]
     (when actor
       (cond
-        (game/base? db actor)
+        (game/base? actor)
         (let [action-ctx (*mk-base-action-ctx* db game actor-ctx actor)]
           (choose-base-action db game actor action-ctx))
 

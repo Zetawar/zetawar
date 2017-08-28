@@ -6,7 +6,7 @@ ZetawarAI = (function() {
     };
 
     ZetawarAI.scoreActor = function(db, game, actor, actor_ctx) {
-        if (zetawar.js.game.is_base(db, actor)) {
+        if (zetawar.js.game.is_base(actor)) {
             return 100 + Math.floor(Math.random() * 100);
         }
         return Math.floor(Math.random() * 100);

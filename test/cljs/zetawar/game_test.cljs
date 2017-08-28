@@ -61,7 +61,7 @@
   (let [db @(helper/create-scenario-conn :sterlings-aruba-multiplayer)
         game (app/current-game db)]
     (is (nil? (game/base-at db game 1 0)))
-    (is (game/base? db (game/base-at db game 1 2)))))
+    (is (game/base? (game/base-at db game 1 2)))))
 
 (deftest test-checked-base-at
   (let [db @(helper/create-scenario-conn :sterlings-aruba-multiplayer)

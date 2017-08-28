@@ -5,8 +5,8 @@
 (defn ^:export is_unit [x]
   (game/unit? x))
 
-(defn ^:export is_base [db x]
-  (game/base? db x))
+(defn ^:export is_base [x]
+  (game/base? x))
 
 (defn ^:export terrain_hex [terrain]
   (clj->js (game/terrain-hex terrain)))

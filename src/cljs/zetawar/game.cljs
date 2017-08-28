@@ -169,13 +169,7 @@
 (defn terrain? [x]
   (contains? x :terrain/type))
 
-(defn base? [db x]
-  #_(empty? (qe '[:find ?cb
-                :in $ ?t
-                :where
-                [?t  :terrain/type ?tt]
-                [?tt :terrain-type/can-build ?cb]]
-              db x))
+(defn base? [x]
   (not (empty? (get-in x [:terrain/type :terrain-type/can-build]))))
 
 (defn terrain-hex [terrain]
@@ -198,7 +192,7 @@
 
 (defn base-at [db game q r]
   (let [terrain (terrain-at db game q r)]
-    (when (base? db terrain)
+    (when (base? terrain)
       terrain)))
 
 (defn checked-base-at [db game q r]
@@ -217,7 +211,7 @@
                        })))))
 
 (defn current-base? [db game x]
-  (when (base? db x)
+  (when (base? x)
     (let [cur-faction (:game/current-faction game)
           base-faction (:terrain/owner x)]
       (= cur-faction base-faction))))
@@ -283,19 +277,19 @@
       false)))
 
 (defn on-base? [db game unit]
-  (base? db (terrain-at db game (:unit/q unit) (:unit/r unit))))
+  (base? (terrain-at db game (:unit/q unit) (:unit/r unit))))
 
 (defn on-owned-base? [db game unit]
   (let [{:keys [unit/q unit/r]} unit
         terrain (terrain-at db game q r)]
-    (and (base? db terrain)
+    (and (base? terrain)
          (= (some-> terrain :terrain/owner e)
             (e (unit-faction db unit))))))
 
 (defn on-capturable-base? [db game unit]
   (let [{:keys [unit/q unit/r]} unit
         terrain (terrain-at db game q r)]
-    (and (base? db terrain)
+    (and (base? terrain)
          (not= (some-> terrain :terrain/owner e)
                (e (unit-faction db unit))))))
 
@@ -784,7 +778,7 @@
   (check-unit-current db game unit)
   (when-not (-> unit :unit/type :unit-type/can-capture)
     (throw (unit-ex "Unit does not have the ability to capture" unit)))
-  (when-not (and terrain (base? db terrain))
+  (when-not (and terrain (base? terrain))
     (throw (unit-ex "Unit unit is not on a base" unit)))
   (when (:unit/capturing unit)
     (throw (unit-ex "Unit is already caturing" unit)))
