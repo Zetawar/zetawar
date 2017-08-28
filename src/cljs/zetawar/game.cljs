@@ -1227,24 +1227,16 @@
                 :terrain-type/id terrain-type-id
                 :terrain-type/game-id-idx terrain-type-idx
                 :terrain-type/description (:description terrain-def)
-                :terrain-type/image (:image terrain-def)
-                ;:terrain-type/can-build (into (build-terrains-tx db game-id terrain-type-id (:can-build terrain-def)))
-                })))
+                :terrain-type/image (:image terrain-def)})))
           terrains-def)))
 
-(defn terrain-types-tx2 [db game-id terrains-def]
+(defn terrain-can-build-tx [db game-id terrains-def]
   (let [game (game-by-id db game-id)]
     (into []
           (map
            (fn [[terrain-type-name terrain-def]]
-             (let [terrain-type-id (to-terrain-type-id terrain-type-name)
-                   terrain-type-idx (game-id-idx game-id terrain-type-id)]
-               {:db/id (db/next-temp-id)
-                :game/_terrain-types (e game)
-                :terrain-type/id terrain-type-id
-                :terrain-type/game-id-idx terrain-type-idx
-                :terrain-type/description (:description terrain-def)
-                :terrain-type/image (:image terrain-def)
+             (let [terrain-type-id (to-terrain-type-id terrain-type-name)]
+               {:db/id (e (find-by db :terrain-type/id terrain-type-id))
                 :terrain-type/can-build (into (build-terrains-tx db game-id terrain-type-id (:can-build terrain-def)))})))
           terrains-def)))
 
@@ -1469,7 +1461,7 @@
     (d/transact! conn (terrain-types-tx @conn game-id (:terrains ruleset)))
     (d/transact! conn (unit-state-map-tx @conn game-id (:unit-state-maps ruleset)))
     (d/transact! conn (unit-types-tx @conn game-id (:units ruleset)))
-    (d/transact! conn (terrain-types-tx2 @conn game-id (:terrains ruleset)))
+    (d/transact! conn (terrain-can-build-tx @conn game-id (:terrains ruleset)))
 
     ;; Map and bases
     (d/transact! conn (game-map-tx @conn game-id (map-defs map-id)))
