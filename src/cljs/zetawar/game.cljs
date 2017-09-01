@@ -6,7 +6,7 @@
    [zetawar.data :as data]
    [zetawar.db :as db :refer [e find-by qe qes qess]]
    [zetawar.hex :as hex]
-   [zetawar.util :refer [breakpoint inspect oonly]]))
+   [zetawar.util :refer [breakpoint inspect oonly only]]))
 
 ;; TODO: improve exception data
 
@@ -275,15 +275,35 @@
 (defn on-base? [db game unit]
   (base? (terrain-at db game (:unit/q unit) (:unit/r unit))))
 
+(defn on-owned-base? [db game unit]
+  (let [{:keys [unit/q unit/r]} unit
+        terrain (terrain-at db game q r)]
+    (and (base? terrain)
+         (= (some-> terrain :terrain/owner e)
+            (e (unit-faction db unit))))))
+
 (defn on-capturable-base? [db game unit]
   (let [{:keys [unit/q unit/r]} unit
         terrain (terrain-at db game q r)]
     (and (base? terrain)
-         (not= (:terrain/owner terrain)
-               (unit-faction db unit)))))
+         (not= (some-> terrain :terrain/owner e)
+               (e (unit-faction db unit))))))
 
 (defn unit-ex [message unit]
   (ex-info message (select-keys unit [:unit/q :unit/r])))
+
+(defn unit-terrain-effects [db unit terrain]
+  (only (d/q '[:find ?mc ?at ?ar
+               :in $ ?u ?t
+               :where
+               [?u  :unit/type ?ut]
+               [?t  :terrain/type ?tt]
+               [?tt :terrain-type/effects ?e]
+               [?e  :terrain-effect/unit-type ?ut]
+               [?e  :terrain-effect/attack-bonus ?at]
+               [?e  :terrain-effect/armor-bonus ?ar]
+               [?e  :terrain-effect/movement-cost ?mc]]
+             db (e unit) (e terrain))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Unit States
@@ -673,7 +693,7 @@
 
 (defn check-can-repair [db game unit]
   (check-unit-current db game unit)
-  (when-not (:game/self-repair game)
+  (when-not (or (:game/self-repair game) (on-owned-base? db game unit))
     (throw (game-ex "Unit self repair is not allowed" game)))
   (when (:unit/capturing unit)
     (throw (unit-ex "Unit cannot make repairs while capturing" unit)))

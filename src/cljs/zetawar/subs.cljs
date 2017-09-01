@@ -361,6 +361,11 @@
 (deftrack in-range-of-friend-at? [conn unit-q unit-r friend-q friend-r]
   (contains? @(friend-locations-in-range-of conn unit-q unit-r) [friend-q friend-r]))
 
+(deftrack unit-terrain-effects [conn unit-q unit-r terrain-q terrain-r]
+  (when-let [unit @(unit-at conn unit-q unit-r)]
+    (let [terrain @(terrain-at conn terrain-q terrain-r)]
+      (game/unit-terrain-effects @conn unit terrain))))
+
 (deftrack repairable? [conn q r]
   (when-let [unit @(unit-at conn q r)]
     (game/repairable? @conn @(game conn) unit)))
@@ -452,6 +457,15 @@
 (deftrack selected-unit [conn]
   (when-let [[q r] @(selected-hex conn)]
     @(unit-at conn q r)))
+
+(deftrack selected-terrain-effects [conn]
+  (when-let [[q r] @(selected-hex conn)]
+    @(unit-terrain-effects conn q r q r)))
+
+(deftrack targeted-terrain-effects [conn]
+  (when-let [[terrain-q terrain-r] @(targeted-hex conn)]
+    (let [[unit-q unit-r] @(selected-hex conn)]
+      @(unit-terrain-effects conn unit-q unit-r terrain-q terrain-r))))
 
 (deftrack unit-selected? [conn]
   (when-let [[q r] @(selected-hex conn)]
@@ -561,3 +575,23 @@
 
 (deftrack configuring-new-game? [conn]
   (:app/configuring-new-game @(app conn)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Tile coordinates
+
+(deftrack hover-hex [conn]
+  (-> @(app conn)
+      (select-values [:app/hover-q
+                      :app/hover-r])
+      not-empty))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; End turn
+
+(deftrack available-moves-left? [conn]
+  (some
+   (fn [[q r] coordinates] @(unit-can-act? conn q r))
+   @(friend-locations conn)))
+
+(deftrack show-end-turn-alert? [conn]
+  (:app/end-turn-alert @(app conn)))
