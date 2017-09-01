@@ -110,10 +110,21 @@
              :width tiles/width :height tiles/height
              :xlink-href (site/prefix "/images/game/" image)}]))
 
-(defn tile [{:as view-ctx :keys [dispatch]} terrain]
+(defn tile [{:as view-ctx :keys [conn dispatch]} terrain]
   (let [{:keys [terrain/q terrain/r]} terrain]
     ^{:key (str q "," r)}
-    [:g {:on-click #(dispatch [::events.ui/select-hex q r])}
+    [:g {:on-click #(dispatch [::events.ui/select-hex q r])
+         :cursor (if (or
+                      @(subs/valid-destination-for-selected? conn q r)
+                      @(subs/enemy-in-range-of-selected? conn q r)
+                      @(subs/unit-can-act? conn q r)
+                      (and @(subs/current-base? conn q r)
+                           (not @(subs/unit-at? conn q r)))
+                      (and @(subs/repairable-friend-in-range-of-selected? conn q r)
+                           @(subs/selected-can-field-repair? conn)
+                           @(subs/has-repairable-armor-type? conn q r)))
+                   "pointer"
+                   "default")}
      [terrain-tile view-ctx terrain q r]
      [tile-border view-ctx q r]
      [board-unit view-ctx q r]
