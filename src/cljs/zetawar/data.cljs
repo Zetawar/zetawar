@@ -76,51 +76,27 @@
 
     :terrains
     {:plains        {:description "Plains"
-                     :image "tilesets/elite-command/terrains/plains.png"
-                     :can-build []}
+                     :image "tilesets/elite-command/terrains/plains.png"}
      :mountains     {:description "Mountains"
-                     :image "tilesets/elite-command/terrains/mountains.png"
-                     :can-build []}
+                     :image "tilesets/elite-command/terrains/mountains.png"}
      :woods         {:description "Woods"
-                     :image "tilesets/elite-command/terrains/woods.png"
-                     :can-build []}
+                     :image "tilesets/elite-command/terrains/woods.png"}
      :desert        {:description "Desert"
-                     :image "tilesets/elite-command/terrains/desert.png"
-                     :can-build []}
+                     :image "tilesets/elite-command/terrains/desert.png"}
      :tundra        {:description "Tundra"
-                     :image "tilesets/elite-command/terrains/tundra.png"
-                     :can-build []}
+                     :image "tilesets/elite-command/terrains/tundra.png"}
      :swamp         {:description "Swamp"
-                     :image "tilesets/elite-command/terrains/swamp.png"
-                     :can-build []}
+                     :image "tilesets/elite-command/terrains/swamp.png"}
      :ford          {:description "Ford"
-                     :image "tilesets/elite-command/terrains/ford.png"
-                     :can-build []}
+                     :image "tilesets/elite-command/terrains/ford.png"}
      :shallow-water {:description "Shallow Water"
-                     :image "tilesets/elite-command/terrains/shallow-water.png"
-                     :can-build []}
+                     :image "tilesets/elite-command/terrains/shallow-water.png"}
      :deep-water    {:description "Deep Water"
-                     :image "tilesets/elite-command/terrains/deep-water.png"
-                     :can-build []}
+                     :image "tilesets/elite-command/terrains/deep-water.png"}
      :base          {:description "Base"
-                     :image "tilesets/elite-command/terrains/base-COLOR.png"
-                     :can-build [:infantry
-                                 :grenadier
-                                 :mortar
-                                 :ranger
-                                 :sniper
-                                 :medic
-                                 :engineer
-                                 :humvee
-                                 :tank
-                                 :heavy-tank
-                                 :artillery
-                                 :heavy-artillery]}
+                     :image "tilesets/elite-command/terrains/base-COLOR.png"}
      :seaport       {:description "Seaport"
-                     :image "tilesets/elite-command/terrains/seaport-COLOR.png"
-                     :can-build [:frigate
-                                 :destroyer
-                                 :cruiser]}}
+                     :image "tilesets/elite-command/terrains/seaport-COLOR.png"}}
 
     :unit-state-maps
     {:move-attack-once
@@ -223,6 +199,7 @@
                 :movement 9
                 :can-capture true
                 :can-repair #{}
+                :buildable-at #{:base}
                 :min-range 1
                 :max-range 1
                 :armor-type :personnel
@@ -252,6 +229,7 @@
                  :movement 9
                  :can-capture true
                  :can-repair #{}
+                 :buildable-at #{:base}
                  :min-range 1
                  :max-range 2
                  :armor-type :personnel
@@ -281,6 +259,7 @@
               :movement 9
               :can-capture true
               :can-repair #{}
+              :buildable-at #{:base}
               :min-range 2
               :max-range 3
               :armor-type :personnel
@@ -308,6 +287,7 @@
               :movement 9
               :can-capture true
               :can-repair #{}
+              :buildable-at #{:base}
               :min-range 1
               :max-range 1
               :armor-type :personnel
@@ -338,6 +318,7 @@
               :movement 9
               :can-capture true
               :can-repair #{}
+              :buildable-at #{:base}
               :min-range 2
               :max-range 4
               :armor-type :personnel
@@ -365,6 +346,7 @@
              :movement 9
              :can-capture true
              :can-repair #{:personnel}
+             :buildable-at #{:base}
              :min-range 1
              :max-range 1
              :armor-type :personnel
@@ -394,6 +376,7 @@
                :movement 9
                :can-capture true
                :can-repair #{:armored}
+               :buildable-at #{:base}
                :min-range 1
                :max-range 1
                :armor-type :personnel
@@ -425,6 +408,7 @@
               :movement 15
               :can-capture false
               :can-repair #{}
+              :buildable-at #{:base}
               :min-range 1
               :max-range 1
               :armor-type :armored
@@ -452,6 +436,7 @@
             :movement 12
             :can-capture false
             :can-repair #{}
+            :buildable-at #{:base}
             :min-range 1
             :max-range 1
             :armor-type :armored
@@ -479,6 +464,7 @@
                   :movement 12
                   :can-capture false
                   :can-repair #{}
+                  :buildable-at #{:base}
                   :min-range 1
                   :max-range 1
                   :armor-type :armored
@@ -506,6 +492,7 @@
                  :movement 8
                  :can-capture false
                  :can-repair #{}
+                 :buildable-at #{:base}
                  :min-range 3
                  :max-range 4
                  :armor-type :armored
@@ -531,6 +518,7 @@
                        :movement 2
                        :can-capture false
                        :can-repair #{}
+                       :buildable-at #{:base}
                        :min-range 4
                        :max-range 6
                        :armor-type :armored
@@ -557,6 +545,7 @@
                :movement 8
                :can-capture false
                :can-repair #{}
+               :buildable-at #{:seaport}
                :min-range 1
                :max-range 1
                :armor-type :naval
@@ -579,6 +568,7 @@
                  :movement 5
                  :can-capture false
                  :can-repair #{}
+                 :buildable-at #{:seaport}
                  :min-range 1
                  :max-range 4
                  :armor-type :naval
@@ -600,6 +590,7 @@
                :movement 4
                :can-capture false
                :can-repair #{}
+               :buildable-at #{:seaport}
                :min-range 1
                :max-range 3
                :armor-type :naval
