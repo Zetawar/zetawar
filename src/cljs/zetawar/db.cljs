@@ -113,7 +113,7 @@
                                      :db/index       true}
 
    ;; Terrain build
-   :terrain-build/unit-type         {:db/valueType   :db.type/ref}
+   :terrain-can-build/unit-type     {:db/valueType   :db.type/ref}
    })
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
