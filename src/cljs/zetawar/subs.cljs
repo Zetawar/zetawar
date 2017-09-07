@@ -518,8 +518,7 @@
                       [?ut :unit-type/cost ?cost]
                       [?ut :unit-type/id ?unit-type-id]
                       [?t  :terrain/type ?tt]
-                      [?tt :terrain-type/can-build ?cb]
-                      [?cb :terrain-can-build/unit-type ?ut]]
+                      [?tt :terrain-type/can-build ?ut]]
                     conn @(game-eid conn) selected-base
                     {:cache :forever})
            (map first)

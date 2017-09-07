@@ -1246,9 +1246,8 @@
           (map
            (fn [terrain-type-name]
              (let [terrain-type-idx (->> terrain-type-name to-terrain-type-id (game-id-idx game-id))]
-               {:db/id (db/next-temp-id)
-                :terrain-type/_can-build [:terrain-type/game-id-idx terrain-type-idx]
-                :terrain-can-build/unit-type unit-type-eid})))
+               {:db/id [:terrain-type/game-id-idx terrain-type-idx]
+                :terrain-type/can-build unit-type-eid})))
           buildable-at-def)))
 
 (defn unit-types-tx [db game-id units-def]

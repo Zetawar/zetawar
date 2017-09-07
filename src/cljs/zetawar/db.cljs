@@ -105,15 +105,11 @@
                                      :db/cardinality :db.cardinality/many
                                      :db/isComponent true}
    :terrain-type/can-build          {:db/valueType   :db.type/ref
-                                     :db/cardinality :db.cardinality/many
-                                     :db/isComponent true}
+                                     :db/cardinality :db.cardinality/many}
 
    ;; Terrain effects
    :terrain-effect/unit-type        {:db/valueType   :db.type/ref
                                      :db/index       true}
-
-   ;; Terrain build
-   :terrain-can-build/unit-type     {:db/valueType   :db.type/ref}
    })
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
