@@ -400,12 +400,12 @@
                           armor-type-abbrev]
 
                          :unit-type.armor-type/armored
-                         [:abbr {:title "Armored" 
+                         [:abbr {:title (translate :personnel-name)
                                  :style {:cursor "inherit"}}
                           armor-type-abbrev]
 
                          :unit-type.armor-type/naval
-                         [:abbr {:title "Naval" 
+                         [:abbr {:title (translate :naval-name)
                                  :style {:cursor "inherit"}}
                           armor-type-abbrev])]
                   [:td movement]

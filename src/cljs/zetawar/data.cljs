@@ -32,6 +32,7 @@
     ;; Armor types
     :personnel-name "Personnel"
     :armored-name "Armored"
+    :naval-name "Naval"
 
     ;; New game settings
     :new-game-title "Start a new game"
