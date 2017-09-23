@@ -1373,7 +1373,7 @@
         {:terrain/game-pos-idx (game-pos-idx game q r)
          :terrain/q q
          :terrain/r r
-         :terrain/type [:terrain-type/game-id-idx (game-id-idx game-id (keyword "terrain-type.id" base-type))]
+         :terrain/type [:terrain-type/game-id-idx (game-id-idx game-id (to-terrain-type-id base-type))]
          :map/_terrains (e (:game/map game))}))))
 
 (defn factions-tx [db game-id factions]
