@@ -29,6 +29,10 @@
     :green-name "Green"
     :orange-name "Orange"
 
+    ;; Armor types
+    :personnel-name "Personnel"
+    :armored-name "Armored"
+
     ;; New game settings
     :new-game-title "Start a new game"
     :scenario-label "Scenario"
@@ -44,7 +48,15 @@
 
     ;; Building units
     :build-title "Select a unit to build"
-    :unit-cost-label "Cost"
+    :unit-cost-label "Cost: "
+    :armor-type-label "Armor Type"
+    :movement-label "Move- ment"
+    :armor-label "Armor"
+    :range-label "Range"
+    :attack-label "Attack"
+    :field-repair-label "Field Repair?"
+    :while-capturing-label "While capturing: "
+    :unit-cannot-capture-bases-label "Unit cannot capture bases"
 
     ;; Win dialog
     :win-title "Congratulations! You won!"
@@ -60,7 +72,21 @@
     (str "To play multiplayer follow the instructions "
          "<a href=\"https://www.kickstarter.com/projects/311016908/zetawar/posts/1608417\">"
          "here</a>.")
-    }})
+
+    ;; Status information
+    :tile-coordinates-label "X,Y (Tile Coordinates)"
+    :terrain-effects-label "Movement Cost, Attack Bonus, Armor Bonus"
+    :movement-cost-label "Movement Cost"
+    :attack-bonus-label "Attack Bonus"
+    :armor-bonus-label "Armor Bonus"
+    :selected-label "Selected: "
+    :targeted-label "Targeted: "
+    :hover-tile-location "Hover: "
+
+    ;; Ending turn
+    :end-turn-alert "Are you sure you want to end your turn? You still have available moves."
+    :end-turn-confirm "Yes, end my turn"}})
+
 
 ;; TODO: remove redundant id keys (?)
 (def rulesets
