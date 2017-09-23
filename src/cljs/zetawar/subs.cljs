@@ -545,6 +545,20 @@
          @(has-repairable-armor-type? conn targeted-q targeted-r))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Clickable
+
+(deftrack clickable? [conn q r]
+  (or
+   @(valid-destination-for-selected? conn q r)
+   @(enemy-in-range-of-selected? conn q r)
+   @(unit-can-act? conn q r)
+   (and @(current-base? conn q r)
+        (not @(unit-at? conn q r)))
+   (and @(repairable-friend-in-range-of-selected? conn q r)
+        @(selected-can-field-repair? conn)
+        @(has-repairable-armor-type? conn q r))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Unit picker
 
 (deftrack picking-unit? [conn]

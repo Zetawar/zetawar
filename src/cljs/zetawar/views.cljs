@@ -116,15 +116,7 @@
     [:g {:on-click #(dispatch [::events.ui/select-hex q r])
          :on-mouse-enter #(dispatch [::events.ui/hover-hex-enter q r])
          :on-mouse-leave #(dispatch [::events.ui/hover-hex-leave q r])
-         :cursor (if (or
-                      @(subs/valid-destination-for-selected? conn q r)
-                      @(subs/enemy-in-range-of-selected? conn q r)
-                      @(subs/unit-can-act? conn q r)
-                      (and @(subs/current-base? conn q r)
-                           (not @(subs/unit-at? conn q r)))
-                      (and @(subs/repairable-friend-in-range-of-selected? conn q r)
-                           @(subs/selected-can-field-repair? conn)
-                           @(subs/has-repairable-armor-type? conn q r)))
+         :cursor (if @(subs/clickable? conn q r)
                    "pointer"
                    "default")}
      [terrain-tile view-ctx terrain q r]
