@@ -6,7 +6,7 @@
    [zetawar.data :as data]
    [zetawar.db :as db :refer [e find-by qe qes qess]]
    [zetawar.hex :as hex]
-   [zetawar.util :refer [breakpoint inspect oonly]]))
+   [zetawar.util :refer [breakpoint inspect oonly only]]))
 
 ;; TODO: improve exception data
 
@@ -102,6 +102,19 @@
       ffirst
       (or 0)))
 
+(defn faction-base-being-captured-count [db faction]
+  (-> (d/q '[:find (count ?b)
+             :in $ ?f
+             :where
+             [?b :terrain/owner ?f]
+             [(not= ?ef f)]
+             [?ef :faction/units ?u]
+             [?u :unit/terrain ?b]
+             [?u :unit/capturing true]]
+           db (e faction))
+      ffirst
+      (or 0)))
+
 (defn enemy-base-count [db faction]
   (-> (d/q '[:find (count ?b)
              :in $ ?f
@@ -133,8 +146,9 @@
 
 (defn income [db game faction]
   (let [base-count (faction-base-count db faction)
+        captured-count (faction-base-being-captured-count db faction)
         {:keys [game/credits-per-base]} game]
-    (* base-count credits-per-base)))
+    (* (- base-count captured-count) credits-per-base)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Terrain
@@ -156,7 +170,7 @@
   (contains? x :terrain/type))
 
 (defn base? [x]
-  ((:terrain/type x) :terrain-type/base-type))
+  (not (empty? (get-in x [:terrain/type :terrain-type/can-build]))))
 
 (defn terrain-hex [terrain]
   [(:terrain/q terrain)
@@ -265,15 +279,35 @@
 (defn on-base? [db game unit]
   (base? (terrain-at db game (:unit/q unit) (:unit/r unit))))
 
+(defn on-owned-base? [db game unit]
+  (let [{:keys [unit/q unit/r]} unit
+        terrain (terrain-at db game q r)]
+    (and (base? terrain)
+         (= (some-> terrain :terrain/owner e)
+            (e (unit-faction db unit))))))
+
 (defn on-capturable-base? [db game unit]
   (let [{:keys [unit/q unit/r]} unit
         terrain (terrain-at db game q r)]
     (and (base? terrain)
-         (not= (:terrain/owner terrain)
-               (unit-faction db unit)))))
+         (not= (some-> terrain :terrain/owner e)
+               (e (unit-faction db unit))))))
 
 (defn unit-ex [message unit]
   (ex-info message (select-keys unit [:unit/q :unit/r])))
+
+(defn unit-terrain-effects [db unit terrain]
+  (only (d/q '[:find ?mc ?at ?ar
+               :in $ ?u ?t
+               :where
+               [?u  :unit/type ?ut]
+               [?t  :terrain/type ?tt]
+               [?tt :terrain-type/effects ?e]
+               [?e  :terrain-effect/unit-type ?ut]
+               [?e  :terrain-effect/attack-bonus ?at]
+               [?e  :terrain-effect/armor-bonus ?ar]
+               [?e  :terrain-effect/movement-cost ?mc]]
+             db (e unit) (e terrain))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Unit States
@@ -663,7 +697,7 @@
 
 (defn check-can-repair [db game unit]
   (check-unit-current db game unit)
-  (when-not (:game/self-repair game)
+  (when-not (or (:game/self-repair game) (on-owned-base? db game unit))
     (throw (game-ex "Unit self repair is not allowed" game)))
   (when (:unit/capturing unit)
     (throw (unit-ex "Unit cannot make repairs while capturing" unit)))
@@ -1190,8 +1224,7 @@
                 :terrain-type/id terrain-type-id
                 :terrain-type/game-id-idx terrain-type-idx
                 :terrain-type/description (:description terrain-def)
-                :terrain-type/image (:image terrain-def)
-                :terrain-type/base-type (:base-type terrain-def)})))
+                :terrain-type/image (:image terrain-def)})))
           terrains-def)))
 
 (defn attack-strengths-tx [db game-id unit-type-eid attack-strengths-def]
@@ -1220,6 +1253,16 @@
                 :terrain-effect/armor-bonus armor-bonus})))
           terrain-effects-def)))
 
+(defn terrain-build-tx [db game-id unit-type-eid buildable-at-def]
+  (let [game (game-by-id db game-id)]
+    (into []
+          (map
+           (fn [terrain-type-name]
+             (let [terrain-type-idx (->> terrain-type-name to-terrain-type-id (game-id-idx game-id))]
+               {:db/id [:terrain-type/game-id-idx terrain-type-idx]
+                :terrain-type/can-build unit-type-eid})))
+          buildable-at-def)))
+
 (defn unit-types-tx [db game-id units-def]
   (let [game (game-by-id db game-id)]
     (into []
@@ -1243,11 +1286,11 @@
                      :unit-type/capturing-armor (or capturing-armor armor)
                      :unit-type/repair (:repair unit-def)
                      :unit-type/state-map [:unit-state-map/game-id-idx unit-state-map-idx]
-                     :unit-type/buildable-at (map #(to-buildable-at %) (:buildable-at unit-def))
                      :unit-type/image (:image unit-def)
                      :unit-type/zoc-armor-types (map #(to-armor-type %) (:zoc unit-def))}]
                    (into (attack-strengths-tx db game-id unit-type-eid (:attack-strengths unit-def)))
-                   (into (terrain-effects-tx db game-id unit-type-eid (:terrain-effects unit-def)))))))
+                   (into (terrain-effects-tx db game-id unit-type-eid (:terrain-effects unit-def)))
+                   (into (terrain-build-tx db game-id unit-type-eid (:buildable-at unit-def)))))))
           units-def)))
 
 (defn unit-states-tx [db game-id state-map-eid state-map-name states]
@@ -1339,11 +1382,11 @@
 (defn bases-tx [db game-id scenario-def]
   (let [game (game-by-id db game-id)]
     (for [base (:bases scenario-def)]
-      (let [{:keys [q r]} base]
+      (let [{:keys [q r base-type]} base]
         {:terrain/game-pos-idx (game-pos-idx game q r)
          :terrain/q q
          :terrain/r r
-         :terrain/type [:terrain-type/game-id-idx (game-id-idx game-id :terrain-type.id/base)]
+         :terrain/type [:terrain-type/game-id-idx (game-id-idx game-id (to-terrain-type-id base-type))]
          :map/_terrains (e (:game/map game))}))))
 
 (defn factions-tx [db game-id factions]

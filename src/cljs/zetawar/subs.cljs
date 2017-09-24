@@ -71,7 +71,7 @@
                    :terrain/r
                    {:terrain/type [:terrain-type/id
                                    :terrain-type/image
-                                   :terrain-type/base-type]
+                                   :terrain-type/can-build]
                     :terrain/owner [:faction/color]}])
 
 ;; TODO: use terrains output instead of running a separate query
@@ -159,6 +159,19 @@
                 conn)
        (into {})))
 
+(deftrack faction-eid->base-being-captured-count [conn]
+  (->> @(posh/q '[:find ?f (count ?t)
+                  :where
+                  [_ :app/game ?g]
+                  [?g :game/factions ?f]
+                  [?t :terrain/owner ?f]
+                  [(not= ?ef f)]
+                  [?ef :faction/units ?u]
+                  [?u :unit/terrain ?t]
+                  [?u :unit/capturing true]]
+                conn)
+       (into {})))
+
 (deftrack faction-eid->unit-count [conn]
   (->> @(posh/q '[:find ?f (count ?u)
                   :where
@@ -195,13 +208,17 @@
 (deftrack current-base-count [conn]
   (get @(faction-eid->base-count conn) @(current-faction-eid conn)))
 
+(deftrack current-base-being-captured-count [conn]
+  (get @(faction-eid->base-being-captured-count conn) @(current-faction-eid conn)))
+
 (deftrack current-unit-count [conn]
   (get @(faction-eid->unit-count conn) @(current-faction-eid conn)))
 
 (deftrack current-income [conn]
   (let [{:keys [game/credits-per-base]} @(game conn)]
     (* credits-per-base
-       @(current-base-count conn))))
+       (- @(current-base-count conn)
+          @(current-base-being-captured-count conn)))))
 
 (deftrack enemy-unit-count [conn]
   (or (ffirst @(posh/q '[:find (count ?u)
@@ -262,7 +279,6 @@
                                     :unit-type/armor-type
                                     :unit-type/min-range
                                     :unit-type/max-range
-                                    :unit-type/buildable-at
                                     :unit-type/image]}]
                 unit-eid)))
 
@@ -346,6 +362,11 @@
 (deftrack in-range-of-friend-at? [conn unit-q unit-r friend-q friend-r]
   (contains? @(friend-locations-in-range-of conn unit-q unit-r) [friend-q friend-r]))
 
+(deftrack unit-terrain-effects [conn unit-q unit-r terrain-q terrain-r]
+  (when-let [unit @(unit-at conn unit-q unit-r)]
+    (let [terrain @(terrain-at conn terrain-q terrain-r)]
+      (game/unit-terrain-effects @conn unit terrain))))
+
 (deftrack repairable? [conn q r]
   (when-let [unit @(unit-at conn q r)]
     (game/repairable? @conn @(game conn) unit)))
@@ -409,6 +430,15 @@
 (deftrack selected-unit [conn]
   (when-let [[q r] @(selected-hex conn)]
     @(unit-at conn q r)))
+
+(deftrack selected-terrain-effects [conn]
+  (when-let [[q r] @(selected-hex conn)]
+    @(unit-terrain-effects conn q r q r)))
+
+(deftrack targeted-terrain-effects [conn]
+  (when-let [[terrain-q terrain-r] @(targeted-hex conn)]
+    (let [[unit-q unit-r] @(selected-hex conn)]
+      @(unit-terrain-effects conn unit-q unit-r terrain-q terrain-r))))
 
 (deftrack unit-selected? [conn]
   (when-let [[q r] @(selected-hex conn)]
@@ -492,21 +522,19 @@
 
 (deftrack available-unit-type-eids [conn]
   (when-let [[sel-q sel-r] @(selected-hex conn)]
-    (let [selected-base-name (-> @(terrain-at conn sel-q sel-r)
-                                 (get-in [:terrain/type :terrain-type/id])
-                                 name)]
-      (->> @(posh/q '[:find ?ut ?i
-                      :in $ ?g
+    (let [selected-base (e @(terrain-at conn sel-q sel-r))]
+      (->> @(posh/q '[:find ?ut
+                      :in $ ?g ?t
                       :where
                       [_   :app/game ?g]
                       [?g  :game/current-faction ?f]
                       [?f  :faction/credits ?credits]
                       [?ut :unit-type/cost ?cost]
                       [?ut :unit-type/id ?unit-type-id]
-                      [?ut :unit-type/buildable-at ?i]]
-                    conn @(game-eid conn)
+                      [?t  :terrain/type ?tt]
+                      [?tt :terrain-type/can-build ?ut]]
+                    conn @(game-eid conn) selected-base
                     {:cache :forever})
-           (filter #(= selected-base-name (name (second %))))
            (map first)
            (into [])))))
 
@@ -552,3 +580,23 @@
 
 (deftrack configuring-new-game? [conn]
   (:app/configuring-new-game @(app conn)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Tile coordinates
+
+(deftrack hover-hex [conn]
+  (-> @(app conn)
+      (select-values [:app/hover-q
+                      :app/hover-r])
+      not-empty))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; End turn
+
+(deftrack available-moves-left? [conn]
+  (some
+   (fn [[q r] coordinates] @(unit-can-act? conn q r))
+   @(friend-locations conn)))
+
+(deftrack show-end-turn-alert? [conn]
+  (:app/end-turn-alert @(app conn)))

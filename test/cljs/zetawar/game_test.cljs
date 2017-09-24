@@ -393,11 +393,13 @@
         db @conn
         game (app/current-game db)
         unit (game/unit-at db game 2 2)
-        damaged-db (d/db-with db [[:db/add (e unit) :unit/count 9]])
-        damaged-unit (game/unit-at damaged-db game 2 2)]
+        damaged-db (-> db
+                       (d/db-with (game/teleport-tx db game 2 2 1 2))
+                       (d/db-with [[:db/add (e unit) :unit/count 9]]))
+        damaged-unit (game/unit-at damaged-db game 1 2)]
     (testing "repairing damaged unit"
       (let [repaired-db (d/db-with damaged-db (game/repair-tx damaged-db game damaged-unit))
-            repaired-unit (game/unit-at repaired-db game 2 2)]
+            repaired-unit (game/unit-at repaired-db game 1 2)]
         (is (= (:unit/count repaired-unit) 10))))))
 
 ;; TODO: test repair!
