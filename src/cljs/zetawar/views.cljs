@@ -400,7 +400,7 @@
                           armor-type-abbrev]
 
                          :unit-type.armor-type/armored
-                         [:abbr {:title (translate :personnel-name)
+                         [:abbr {:title (translate :armored-name)
                                  :style {:cursor "inherit"}}
                           armor-type-abbrev]
 
