@@ -330,7 +330,8 @@
 
 (def armor-type-abbrevs
   {:unit-type.armor-type/personnel "P"
-   :unit-type.armor-type/armored "A"})
+   :unit-type.armor-type/armored "A"
+   :unit-type.armor-type/naval "N"})
 
 ;; TODO: cleanup unit-picker
 (defn unit-picker [{:as view-ctx :keys [conn dispatch translate]}]
@@ -351,17 +352,17 @@
        [:thead>tr
         [:th ""]
         [:th.text-center {:style {:width "12%"}}
-         "Armor Type"]
+         (translate :armor-type-label)]
         [:th.text-center {:style {:width "12%"}}
-         "Move- ment"]
+         (translate :movement-label)]
         [:th.text-center {:style {:width "12%"}}
-         "Armor"]
+         (translate :armor-label)]
         [:th.text-center {:style {:width "12%"}}
-         "Range"]
+         (translate :range-label)]
         [:th.text-center {:style {:width "12%"}}
-         "Attack"]
+         (translate :attack-label)]
         [:th.text-center {:style {:width "12%"}}
-         "Field Repair?"]]
+         (translate :field-repair-label)]]
        (into [:tbody]
              (for [unit-type unit-types]
                (let [;; TODO: replace with unit-type-image
@@ -394,21 +395,29 @@
                     [:img {:src image}]]
                    [:div.media-body
                     [:h4.media-heading description]
-                    (str "Cost: " cost)]]
+                    (str (translate :unit-cost-label) cost)]]
                   [:td (case armor-type
                          :unit-type.armor-type/personnel
-                         [:abbr {:title "Personnel" :style {:cursor "inherit"}}
+                         [:abbr {:title (translate :personnel-name)
+                                 :style {:cursor "inherit"}}
                           armor-type-abbrev]
 
                          :unit-type.armor-type/armored
-                         [:abbr {:title "Armored" :style {:cursor "inherit"}}
+                         [:abbr {:title (translate :armored-name)
+                                 :style {:cursor "inherit"}}
+                          armor-type-abbrev]
+
+                         :unit-type.armor-type/naval
+                         [:abbr {:title (translate :naval-name)
+                                 :style {:cursor "inherit"}}
                           armor-type-abbrev])]
                   [:td movement]
                   [:td (if can-capture
-                         [:abbr {:title (str "While capturing: " capturing-armor)
+                         [:abbr {:title (str (translate :while-capturing-label)
+                                             capturing-armor)
                                  :style {:cursor "inherit"}}
                           armor]
-                         [:abbr {:title "Unit cannot capture bases"
+                         [:abbr {:title (translate :unit-cannot-capture-bases-label)
                                  :style {:cursor "inherit"}}
                           armor])]
                   [:td min-range "-" max-range]
@@ -423,7 +432,7 @@
                                       (armor-type-abbrevs can-repair "")))]])))]]
      [:> js/ReactBootstrap.Modal.Footer
       [:div.btn.btn-default {:on-click hide-picker}
-       "Cancel"]]]))
+       (translate :cancel-button)]]]))
 
 (defn faction-settings [{:as views-ctx :keys [conn dispatch translate]}]
   (with-let [faction (subs/faction-to-configure conn)
