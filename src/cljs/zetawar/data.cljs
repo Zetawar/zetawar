@@ -32,6 +32,7 @@
     ;; Armor types
     :personnel-name "Personnel"
     :armored-name "Armored"
+    :naval-name "Naval"
 
     ;; New game settings
     :new-game-title "Start a new game"
@@ -120,10 +121,12 @@
      :deep-water    {:description "Deep Water"
                      :image "tilesets/elite-command/terrains/deep-water.png"}
      :base          {:description "Base"
-                     :image "tilesets/elite-command/terrains/base-COLOR.png"}}
+                     :image "tilesets/elite-command/terrains/base-COLOR.png"}
+     :seaport       {:description "Seaport"
+                     :image "tilesets/elite-command/terrains/seaport-COLOR.png"}}
 
     :unit-state-maps
-    {:move-attack
+    {:move-attack-once
      {:start-state :start
       :built-state :done
       :states
@@ -139,6 +142,43 @@
                 :field-repair-unit :done
                 :capture-base      :done}}
        :done  {}}}
+
+     :move-attack-twice
+     {:start-state :start
+      :built-state :done
+      :states
+      {:start              {:transitions
+                            {:move-unit    :moved-1-attacked-0
+                             :attack-unit  :moved-0-attacked-1
+                             :repair-unit  :done
+                             :capture-base :done}}
+       :moved-0-attacked-1 {:transitions
+                            {:attack-unit  :done
+                             :capture-base :done}}
+       :moved-1-attacked-0 {:transitions
+                            {:attack-unit  :moved-1-attacked-1
+                             :capture-base :done}}
+       :moved-1-attacked-1 {:transitions
+                            {:attack-unit  :done
+                             :capture-base :done}}
+       :done               {}}}
+
+     :free-attack-once
+     {:start-state :start
+      :built-state :done
+      :states
+      {:start              {:transitions
+                            {:move-unit    :moved-1-attacked-0
+                             :attack-unit  :moved-0-attacked-1
+                             :repair-unit  :done
+                             :capture-base :done}}
+       :moved-0-attacked-1 {:transitions
+                            {:move-unit    :done
+                             :capture-base :done}}
+       :moved-1-attacked-0 {:transitions
+                            {:attack-unit  :done
+                             :capture-base :done}}
+       :done               {}}}
 
      :free-attack-twice
      {:start-state :start
@@ -186,13 +226,14 @@
                 :movement 9
                 :can-capture true
                 :can-repair #{}
+                :buildable-at #{:base}
                 :min-range 1
                 :max-range 1
                 :armor-type :personnel
                 :armor 6
                 :capturing-armor 4
                 :repair 1
-                :state-map :move-attack
+                :state-map :move-attack-once
                 :image "tilesets/elite-command/units/infantry-COLOR.png"
                 :terrain-effects
                 {:plains    {:movement-cost 3 :armor-bonus  0 :attack-bonus  0}
@@ -202,10 +243,12 @@
                  :tundra    {:movement-cost 4 :armor-bonus -1 :attack-bonus -1}
                  :swamp     {:movement-cost 6 :armor-bonus -2 :attack-bonus -2}
                  :ford      {:movement-cost 5 :armor-bonus -1 :attack-bonus -1}
-                 :base      {:movement-cost 2 :armor-bonus  3 :attack-bonus  2}}
+                 :base      {:movement-cost 2 :armor-bonus  3 :attack-bonus  2}
+                 :seaport   {:movement-cost 2 :armor-bonus  0 :attack-bonus  0}}
                 :attack-strengths
                 {:personnel 6
-                 :armored   3}
+                 :armored   3
+                 :naval     4}
                 :zoc
                 [:personnel :armored]}
      :grenadier {:description "Grenadier"
@@ -213,13 +256,14 @@
                  :movement 9
                  :can-capture true
                  :can-repair #{}
+                 :buildable-at #{:base}
                  :min-range 1
                  :max-range 2
                  :armor-type :personnel
                  :armor 8
                  :capturing-armor 6
                  :repair 1
-                 :state-map :move-attack
+                 :state-map :move-attack-once
                  :image "tilesets/elite-command/units/grenadier-COLOR.png"
                  :terrain-effects
                  {:plains    {:movement-cost 4 :armor-bonus  0 :attack-bonus  0}
@@ -229,10 +273,12 @@
                   :tundra    {:movement-cost 5 :armor-bonus -1 :attack-bonus  0}
                   :swamp     {:movement-cost 9 :armor-bonus -2 :attack-bonus -2}
                   :ford      {:movement-cost 9 :armor-bonus -1 :attack-bonus -1}
-                  :base      {:movement-cost 3 :armor-bonus  3 :attack-bonus -1}}
+                  :base      {:movement-cost 3 :armor-bonus  3 :attack-bonus -1}
+                  :seaport   {:movement-cost 3 :armor-bonus  0 :attack-bonus  0}}
                  :attack-strengths
                  {:personnel 8
-                  :armored   9}
+                  :armored   9
+                  :naval     6}
                  :zoc
                  [:personnel :armored]}
      :mortar {:description "Mortar"
@@ -240,13 +286,14 @@
               :movement 9
               :can-capture true
               :can-repair #{}
+              :buildable-at #{:base}
               :min-range 2
               :max-range 3
               :armor-type :personnel
               :armor 6
               :capturing-armor 4
               :repair 1
-              :state-map :move-attack
+              :state-map :move-attack-once
               :image "tilesets/elite-command/units/mortar-COLOR.png"
               :terrain-effects
               {:plains    {:movement-cost 4 :armor-bonus  0 :attack-bonus  0}
@@ -256,22 +303,25 @@
                :tundra    {:movement-cost 5 :armor-bonus -1 :attack-bonus -1}
                :swamp     {:movement-cost 9 :armor-bonus -2 :attack-bonus -2}
                :ford      {:movement-cost 9 :armor-bonus -1 :attack-bonus -2}
-               :base      {:movement-cost 3 :armor-bonus  3 :attack-bonus -2}}
+               :base      {:movement-cost 3 :armor-bonus  3 :attack-bonus -2}
+               :seaport   {:movement-cost 3 :armor-bonus  0 :attack-bonus  0}}
               :attack-strengths
               {:personnel 10
-               :armored   10}}
+               :armored   10
+               :naval     10}}
      :ranger {:description "Ranger"
               :cost 200
               :movement 9
               :can-capture true
               :can-repair #{}
+              :buildable-at #{:base}
               :min-range 1
               :max-range 1
               :armor-type :personnel
               :armor 9
               :capturing-armor 7
               :repair 1
-              :state-map :move-attack
+              :state-map :move-attack-once
               :image "tilesets/elite-command/units/ranger-COLOR.png"
               :terrain-effects
               {:plains        {:movement-cost 3 :armor-bonus  0 :attack-bonus  0}
@@ -282,10 +332,12 @@
                :swamp         {:movement-cost 3 :armor-bonus -2 :attack-bonus -2}
                :ford          {:movement-cost 3 :armor-bonus  0 :attack-bonus  0}
                :shallow-water {:movement-cost 6 :armor-bonus -2 :attack-bonus -2}
-               :base          {:movement-cost 2 :armor-bonus  3 :attack-bonus  2}}
+               :base          {:movement-cost 2 :armor-bonus  3 :attack-bonus  2}
+               :seaport       {:movement-cost 2 :armor-bonus  0 :attack-bonus  0}}
               :attack-strengths
               {:personnel 9
-               :armored   4}
+               :armored   4
+               :naval     6}
               :zoc
               [:personnel :armored]}
      :sniper {:description "Sniper"
@@ -293,13 +345,14 @@
               :movement 9
               :can-capture true
               :can-repair #{}
+              :buildable-at #{:base}
               :min-range 2
               :max-range 4
               :armor-type :personnel
               :armor 5
               :capturing-armor 3
               :repair 1
-              :state-map :move-attack
+              :state-map :move-attack-once
               :image "tilesets/elite-command/units/sniper-COLOR.png"
               :terrain-effects
               {:plains    {:movement-cost 4 :armor-bonus  0 :attack-bonus  0}
@@ -309,22 +362,25 @@
                :tundra    {:movement-cost 5 :armor-bonus -1 :attack-bonus -1}
                :swamp     {:movement-cost 9 :armor-bonus -2 :attack-bonus -3}
                :ford      {:movement-cost 9 :armor-bonus -1 :attack-bonus -6}
-               :base      {:movement-cost 3 :armor-bonus  3 :attack-bonus  2}}
+               :base      {:movement-cost 3 :armor-bonus  3 :attack-bonus  2}
+               :seaport   {:movement-cost 3 :armor-bonus  0 :attack-bonus  0}}
               :attack-strengths
               {:personnel 8
-               :armored   0}}
+               :armored   0
+               :naval     0}}
      :medic {:description "Medic"
              :cost 100
              :movement 9
              :can-capture true
              :can-repair #{:personnel}
+             :buildable-at #{:base}
              :min-range 1
              :max-range 1
              :armor-type :personnel
              :armor 6
              :capturing-armor 4
              :repair 1
-             :state-map :move-attack
+             :state-map :move-attack-once
              :image "tilesets/elite-command/units/medic-COLOR.png"
              :terrain-effects
              {:plains    {:movement-cost 3 :armor-bonus  0 :attack-bonus  0}
@@ -334,45 +390,52 @@
               :tundra    {:movement-cost 4 :armor-bonus -1 :attack-bonus -1}
               :swamp     {:movement-cost 6 :armor-bonus -2 :attack-bonus -2}
               :ford      {:movement-cost 5 :armor-bonus -1 :attack-bonus -1}
-              :base      {:movement-cost 2 :armor-bonus  3 :attack-bonus  2}}
-             :attack-strengths
-             {:personnel 5
-              :armored   2}
-             :zoc
-             [:personnel :armored]}
-     :engineer {:description "Engineer"
-                :cost 200
-                :movement 9
-                :can-capture true
-                :can-repair #{:armored}
-                :min-range 1
-                :max-range 1
-                :armor-type :personnel
-                :armor 6
-                :capturing-armor 4
-                :repair 1
-                :state-map :move-attack
-                :image "tilesets/elite-command/units/engineer-COLOR.png"
-                :terrain-effects
-                {:plains    {:movement-cost 3 :armor-bonus  0 :attack-bonus  0}
-                 :mountains {:movement-cost 6 :armor-bonus  5 :attack-bonus  2}
-                 :woods     {:movement-cost 4 :armor-bonus  3 :attack-bonus  2}
-                 :desert    {:movement-cost 4 :armor-bonus -1 :attack-bonus -1}
-                 :tundra    {:movement-cost 4 :armor-bonus -1 :attack-bonus -1}
-                 :swamp     {:movement-cost 6 :armor-bonus -2 :attack-bonus -2}
-                 :ford      {:movement-cost 5 :armor-bonus -1 :attack-bonus -1}
-                 :base      {:movement-cost 2 :armor-bonus  3 :attack-bonus  2}}
-                :attack-strengths
-                {:personnel 5
-                 :armored   2}
-                :zoc
-                [:personnel :armored]}
+              :base      {:movement-cost 2 :armor-bonus  3 :attack-bonus  2}
+              :seaport   {:movement-cost 2 :armor-bonus  0 :attack-bonus  0}}
+            :attack-strengths
+            {:personnel 5
+             :armored   2
+             :naval     3}
+            :zoc
+            [:personnel :armored]}
+    :engineer {:description "Engineer"
+               :cost 200
+               :movement 9
+               :can-capture true
+               :can-repair #{:armored}
+               :buildable-at #{:base}
+               :min-range 1
+               :max-range 1
+               :armor-type :personnel
+               :armor 6
+               :capturing-armor 4
+               :repair 1
+               :state-map :move-attack-once
+               :image "tilesets/elite-command/units/engineer-COLOR.png"
+               :terrain-effects
+               {:plains        {:movement-cost 3 :armor-bonus  0 :attack-bonus  0}
+                :mountains     {:movement-cost 6 :armor-bonus  5 :attack-bonus  2}
+                :woods         {:movement-cost 4 :armor-bonus  3 :attack-bonus  2}
+                :desert        {:movement-cost 4 :armor-bonus -1 :attack-bonus -1}
+                :tundra        {:movement-cost 4 :armor-bonus -1 :attack-bonus -1}
+                :swamp         {:movement-cost 6 :armor-bonus -2 :attack-bonus -2}
+                :ford          {:movement-cost 5 :armor-bonus -1 :attack-bonus -1}
+                :shallow-water {:movement-cost 7 :armor-bonus -2 :attack-bonus -2}
+                :base          {:movement-cost 2 :armor-bonus  3 :attack-bonus  2}
+                :seaport       {:movement-cost 2 :armor-bonus  0 :attack-bonus  0}}
+              :attack-strengths
+              {:personnel 5
+               :armored   2
+               :naval     3}
+              :zoc
+              [:personnel :armored]}
      ;; Armored
      :humvee {:description "Humvee"
               :cost 300
               :movement 15
               :can-capture false
               :can-repair #{}
+              :buildable-at #{:base}
               :min-range 1
               :max-range 1
               :armor-type :armored
@@ -381,16 +444,18 @@
               :state-map :free-attack-twice
               :image "tilesets/elite-command/units/humvee-COLOR.png"
               :terrain-effects
-              {:plains {:movement-cost 3  :armor-bonus  0 :attack-bonus  0}
-               :woods  {:movement-cost 6  :armor-bonus -2 :attack-bonus -2}
-               :desert {:movement-cost 3  :armor-bonus  0 :attack-bonus  0}
-               :tundra {:movement-cost 6  :armor-bonus  0 :attack-bonus  0}
-               :swamp  {:movement-cost 12 :armor-bonus -3 :attack-bonus -3}
-               :ford   {:movement-cost 12 :armor-bonus -1 :attack-bonus -1}
-               :base   {:movement-cost 2  :armor-bonus  0 :attack-bonus  0}}
+              {:plains  {:movement-cost 3  :armor-bonus  0 :attack-bonus  0}
+               :woods   {:movement-cost 6  :armor-bonus -2 :attack-bonus -2}
+               :desert  {:movement-cost 3  :armor-bonus  0 :attack-bonus  0}
+               :tundra  {:movement-cost 6  :armor-bonus  0 :attack-bonus  0}
+               :swamp   {:movement-cost 12 :armor-bonus -3 :attack-bonus -3}
+               :ford    {:movement-cost 12 :armor-bonus -1 :attack-bonus -1}
+               :base    {:movement-cost 2  :armor-bonus  0 :attack-bonus  0}
+               :seaport {:movement-cost 2  :armor-bonus  0 :attack-bonus  0}}
               :attack-strengths
               {:personnel 9
-               :armored   3}
+               :armored   3
+               :naval     6}
               :zoc
               [:personnel :armored]}
      :tank {:description "Tank"
@@ -398,24 +463,27 @@
             :movement 12
             :can-capture false
             :can-repair #{}
+            :buildable-at #{:base}
             :min-range 1
             :max-range 1
             :armor-type :armored
             :armor 12
             :repair 1
-            :state-map :move-attack
+            :state-map :move-attack-once
             :image "tilesets/elite-command/units/tank-COLOR.png"
             :terrain-effects
-            {:plains {:movement-cost 3 :armor-bonus  0 :attack-bonus 0}
-             :woods  {:movement-cost 6 :armor-bonus -3 :attack-bonus 0}
-             :desert {:movement-cost 4 :armor-bonus  0 :attack-bonus 0}
-             :tundra {:movement-cost 5 :armor-bonus  0 :attack-bonus 0}
-             :swamp  {:movement-cost 8 :armor-bonus -4 :attack-bonus 0}
-             :ford   {:movement-cost 8 :armor-bonus  0 :attack-bonus 0}
-             :base   {:movement-cost 2 :armor-bonus -2 :attack-bonus 0}}
+            {:plains  {:movement-cost 3 :armor-bonus  0 :attack-bonus 0}
+             :woods   {:movement-cost 6 :armor-bonus -3 :attack-bonus 0}
+             :desert  {:movement-cost 4 :armor-bonus  0 :attack-bonus 0}
+             :tundra  {:movement-cost 5 :armor-bonus  0 :attack-bonus 0}
+             :swamp   {:movement-cost 8 :armor-bonus -4 :attack-bonus 0}
+             :ford    {:movement-cost 8 :armor-bonus  0 :attack-bonus 0}
+             :base    {:movement-cost 2 :armor-bonus -2 :attack-bonus 0}
+             :seaport {:movement-cost 2 :armor-bonus  0 :attack-bonus 0}}
             :attack-strengths
             {:personnel 10
-             :armored   10}
+             :armored   10
+             :naval     9}
             :zoc
             [:personnel :armored]}
      :heavy-tank {:description "Heavy Tank"
@@ -423,24 +491,27 @@
                   :movement 12
                   :can-capture false
                   :can-repair #{}
+                  :buildable-at #{:base}
                   :min-range 1
                   :max-range 1
                   :armor-type :armored
                   :armor 15
                   :repair 1
-                  :state-map :move-attack
+                  :state-map :move-attack-once
                   :image "tilesets/elite-command/units/heavytank-COLOR.png"
                   :terrain-effects
-                  {:plains {:movement-cost 4 :armor-bonus  0 :attack-bonus 0}
-                   :woods  {:movement-cost 6 :armor-bonus -3 :attack-bonus 0}
-                   :desert {:movement-cost 5 :armor-bonus  0 :attack-bonus 0}
-                   :tundra {:movement-cost 7 :armor-bonus  0 :attack-bonus 0}
-                   :swamp  {:movement-cost 8 :armor-bonus -4 :attack-bonus 0}
-                   :ford   {:movement-cost 8 :armor-bonus -2 :attack-bonus 0}
-                   :base   {:movement-cost 3 :armor-bonus -2 :attack-bonus 0}}
+                  {:plains  {:movement-cost 4 :armor-bonus  0 :attack-bonus 0}
+                   :woods   {:movement-cost 6 :armor-bonus -3 :attack-bonus 0}
+                   :desert  {:movement-cost 5 :armor-bonus  0 :attack-bonus 0}
+                   :tundra  {:movement-cost 7 :armor-bonus  0 :attack-bonus 0}
+                   :swamp   {:movement-cost 8 :armor-bonus -4 :attack-bonus 0}
+                   :ford    {:movement-cost 8 :armor-bonus -2 :attack-bonus 0}
+                   :base    {:movement-cost 3 :armor-bonus -2 :attack-bonus 0}
+                   :seaport {:movement-cost 3 :armor-bonus  0 :attack-bonus 0}}
                   :attack-strengths
                   {:personnel 15
-                   :armored   12}
+                   :armored   12
+                   :naval     14}
                   :zoc
                   [:personnel :armored]}
      :artillery {:description "Artillery"
@@ -448,6 +519,7 @@
                  :movement 8
                  :can-capture false
                  :can-repair #{}
+                 :buildable-at #{:base}
                  :min-range 3
                  :max-range 4
                  :armor-type :armored
@@ -456,21 +528,24 @@
                  :state-map :exclusive
                  :image "tilesets/elite-command/units/artillery-COLOR.png"
                  :terrain-effects
-                 {:plains {:movement-cost 4 :armor-bonus  0 :attack-bonus  0}
-                  :woods  {:movement-cost 6 :armor-bonus -3 :attack-bonus -3}
-                  :desert {:movement-cost 5 :armor-bonus  0 :attack-bonus  0}
-                  :tundra {:movement-cost 5 :armor-bonus  0 :attack-bonus  0}
-                  :swamp  {:movement-cost 6 :armor-bonus -3 :attack-bonus -3}
-                  :ford   {:movement-cost 6 :armor-bonus -2 :attack-bonus  0}
-                  :base   {:movement-cost 2 :armor-bonus  0 :attack-bonus  0}}
+                 {:plains  {:movement-cost 4 :armor-bonus  0 :attack-bonus  0}
+                  :woods   {:movement-cost 6 :armor-bonus -3 :attack-bonus -3}
+                  :desert  {:movement-cost 5 :armor-bonus  0 :attack-bonus  0}
+                  :tundra  {:movement-cost 5 :armor-bonus  0 :attack-bonus  0}
+                  :swamp   {:movement-cost 6 :armor-bonus -3 :attack-bonus -3}
+                  :ford    {:movement-cost 6 :armor-bonus -2 :attack-bonus  0}
+                  :base    {:movement-cost 2 :armor-bonus  0 :attack-bonus  0}
+                  :seaport {:movement-cost 2 :armor-bonus  0 :attack-bonus  0}}
                  :attack-strengths
                  {:personnel 12
-                  :armored   13}}
+                  :armored   13
+                  :naval     14}}
      :heavy-artillery {:description "Heavy Artillery"
                        :cost 1250
                        :movement 2
                        :can-capture false
                        :can-repair #{}
+                       :buildable-at #{:base}
                        :min-range 4
                        :max-range 6
                        :armor-type :armored
@@ -479,16 +554,86 @@
                        :state-map :exclusive
                        :image "tilesets/elite-command/units/heavyartillery-COLOR.png"
                        :terrain-effects
-                       {:plains {:movement-cost 2 :armor-bonus  0 :attack-bonus  0}
-                        :woods  {:movement-cost 2 :armor-bonus -3 :attack-bonus -5}
-                        :desert {:movement-cost 2 :armor-bonus  0 :attack-bonus  0}
-                        :tundra {:movement-cost 2 :armor-bonus  0 :attack-bonus  0}
-                        :swamp  {:movement-cost 2 :armor-bonus -3 :attack-bonus -5}
-                        :ford   {:movement-cost 2 :armor-bonus -2 :attack-bonus  0}
-                        :base   {:movement-cost 1 :armor-bonus  0 :attack-bonus  0}}
+                       {:plains  {:movement-cost 2 :armor-bonus  0 :attack-bonus  0}
+                        :woods   {:movement-cost 2 :armor-bonus -3 :attack-bonus -5}
+                        :desert  {:movement-cost 2 :armor-bonus  0 :attack-bonus  0}
+                        :tundra  {:movement-cost 2 :armor-bonus  0 :attack-bonus  0}
+                        :swamp   {:movement-cost 2 :armor-bonus -3 :attack-bonus -5}
+                        :ford    {:movement-cost 2 :armor-bonus -2 :attack-bonus  0}
+                        :base    {:movement-cost 1 :armor-bonus  0 :attack-bonus  0}
+                        :seaport {:movement-cost 1 :armor-bonus  0 :attack-bonus  0}}
                        :attack-strengths
                        {:personnel 14
-                        :armored   15}}}}})
+                        :armored   15
+                        :naval     15}}
+     ;; Naval
+     :frigate {:description "Frigate"
+               :cost 300
+               :movement 8
+               :can-capture false
+               :can-repair #{}
+               :buildable-at #{:seaport}
+               :min-range 1
+               :max-range 1
+               :armor-type :naval
+               :armor 8
+               :repair 1
+               :state-map :free-attack-twice
+               :image "tilesets/elite-command/units/frigate-COLOR.png"
+               :terrain-effects
+               {:deep-water    {:movement-cost 1 :armor-bonus 0 :attack-bonus 0}
+                :shallow-water {:movement-cost 1 :armor-bonus 0 :attack-bonus 0}
+                :seaport       {:movement-cost 1 :armor-bonus 0 :attack-bonus 0}}
+               :attack-strengths
+               {:personnel 9
+                :armored   9
+                :naval     8}
+               :zoc
+               [:personnel :armored]}
+     :destroyer {:description "Destroyer"
+                 :cost 600
+                 :movement 5
+                 :can-capture false
+                 :can-repair #{}
+                 :buildable-at #{:seaport}
+                 :min-range 1
+                 :max-range 4
+                 :armor-type :naval
+                 :armor 12
+                 :repair 1
+                 :state-map :free-attack-once
+                 :image "tilesets/elite-command/units/destroyer-COLOR.png"
+                 :terrain-effects
+                 {:deep-water {:movement-cost 1 :armor-bonus 0 :attack-bonus 0}
+                  :seaport    {:movement-cost 1 :armor-bonus 0 :attack-bonus 0}}
+                 :attack-strengths
+                 {:personnel 10
+                  :armored   12
+                  :naval     8}
+                 :zoc
+                 [:personnel :armored]}
+     :cruiser {:description "Cruiser"
+               :cost 1000
+               :movement 4
+               :can-capture false
+               :can-repair #{}
+               :buildable-at #{:seaport}
+               :min-range 1
+               :max-range 3
+               :armor-type :naval
+               :armor 15
+               :repair 1
+               :state-map :move-attack-twice
+               :image "tilesets/elite-command/units/cruiser-COLOR.png"
+               :terrain-effects
+               {:deep-water {:movement-cost 1 :armor-bonus 0 :attack-bonus 0}
+                :seaport    {:movement-cost 1 :armor-bonus 0 :attack-bonus 0}}
+               :attack-strengths
+               {:personnel 14
+                :armored   16
+                :naval     12}
+               :zoc
+               [:personnel :armored]}}}})
 
 ;; TODO: remove redundant id keys (?)
 (def maps
@@ -602,6 +747,7 @@
      {:q 0
       :r 4
       :terrain-type :deep-water}
+     ;; Multiplayer base location
      {:q 1
       :r 4
       :terrain-type :mountains}
@@ -722,6 +868,7 @@
      {:q 4
       :r 8
       :terrain-type :deep-water}
+     ;; Multiplayer base location
      {:q 5
       :r 8
       :terrain-type :mountains}
@@ -1402,10 +1549,12 @@
     :max-count-per-unit 10
     :credits-per-base 100
     :bases
-    [{:q 1 :r 2}
-     {:q 2 :r 1}
-     {:q 5 :r 7}
-     {:q 7 :r 6}]
+    [{:q 1 :r 2 :base-type :base}
+     {:q 1 :r 4 :base-type :seaport}
+     {:q 2 :r 1 :base-type :base}
+     {:q 5 :r 7 :base-type :base}
+     {:q 5 :r 8 :base-type :seaport}
+     {:q 7 :r 6 :base-type :base}]
     :factions
     [{:color :blue
       :credits 300

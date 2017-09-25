@@ -170,8 +170,7 @@
   (contains? x :terrain/type))
 
 (defn base? [x]
-  (= :terrain-type.id/base
-     (get-in x [:terrain/type :terrain-type/id])))
+  (not (empty? (get-in x [:terrain/type :terrain-type/can-build]))))
 
 (defn terrain-hex [terrain]
   [(:terrain/q terrain)
@@ -229,6 +228,11 @@
   (->> armor-type-name
        name
        (keyword 'unit-type.armor-type)))
+
+(defn to-buildable-at [buildable-at-name]
+  (->> buildable-at-name
+       name
+       (keyword 'unit-type.buildable-at)))
 
 (defn unit? [x]
   (contains? x :unit/type))
@@ -1249,6 +1253,16 @@
                 :terrain-effect/armor-bonus armor-bonus})))
           terrain-effects-def)))
 
+(defn terrain-build-tx [db game-id unit-type-eid buildable-at-def]
+  (let [game (game-by-id db game-id)]
+    (into []
+          (map
+           (fn [terrain-type-name]
+             (let [terrain-type-idx (->> terrain-type-name to-terrain-type-id (game-id-idx game-id))]
+               {:db/id [:terrain-type/game-id-idx terrain-type-idx]
+                :terrain-type/can-build unit-type-eid})))
+          buildable-at-def)))
+
 (defn unit-types-tx [db game-id units-def]
   (let [game (game-by-id db game-id)]
     (into []
@@ -1275,7 +1289,8 @@
                      :unit-type/image (:image unit-def)
                      :unit-type/zoc-armor-types (map #(to-armor-type %) (:zoc unit-def))}]
                    (into (attack-strengths-tx db game-id unit-type-eid (:attack-strengths unit-def)))
-                   (into (terrain-effects-tx db game-id unit-type-eid (:terrain-effects unit-def)))))))
+                   (into (terrain-effects-tx db game-id unit-type-eid (:terrain-effects unit-def)))
+                   (into (terrain-build-tx db game-id unit-type-eid (:buildable-at unit-def)))))))
           units-def)))
 
 (defn unit-states-tx [db game-id state-map-eid state-map-name states]
@@ -1367,11 +1382,11 @@
 (defn bases-tx [db game-id scenario-def]
   (let [game (game-by-id db game-id)]
     (for [base (:bases scenario-def)]
-      (let [{:keys [q r]} base]
+      (let [{:keys [q r base-type]} base]
         {:terrain/game-pos-idx (game-pos-idx game q r)
          :terrain/q q
          :terrain/r r
-         :terrain/type [:terrain-type/game-id-idx (game-id-idx game-id :terrain-type.id/base)]
+         :terrain/type [:terrain-type/game-id-idx (game-id-idx game-id (to-terrain-type-id base-type))]
          :map/_terrains (e (:game/map game))}))))
 
 (defn factions-tx [db game-id factions]
