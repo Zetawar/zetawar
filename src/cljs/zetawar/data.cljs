@@ -905,8 +905,7 @@
       :terrain-type :mountains}
      {:q 2
       :r 4
-      :terrain-type :plains
-      }
+      :terrain-type :plains}
      {:q 3
       :r 4
       :terrain-type :plains}
