@@ -5,12 +5,14 @@
    [zetawar.router :as router]))
 
 (defmethod ig/init-key :zetawar.system/router [_ opts]
-  (let [{:keys [datascript players]} opts
+  (let [{:keys [datascript renderer players]} opts
         {:keys [conn]} datascript
+        {:keys [handler-wrapper-fn]} renderer
         ev-chan (async/chan 100)
         notify-chan (async/chan)
         notify-pub (async/pub notify-chan #(nth % 1))]
     (router/start {:ev-chan ev-chan
+                   :handler-wrapper-fn handler-wrapper-fn
                    :max-render-interval 200
                    :notify-chan notify-chan
                    :notify-pub notify-pub
