@@ -985,32 +985,32 @@
     :max-count-per-unit 10
     :credits-per-base 50
     :bases
-    [{:q 4  :r 2}
-     {:q 12 :r 2}
-     {:q 3  :r 3}
-     {:q 5  :r 3}
-     {:q 10 :r 3}
-     {:q 2  :r 4}
-     {:q 4  :r 4}
-     {:q 12 :r 4}
-     {:q 7  :r 5}
-     {:q 11 :r 5}
-     {:q 13 :r 5}
-     {:q 5  :r 7}
-     {:q 7  :r 7}
-     {:q 9  :r 7}
-     {:q 7  :r 8}
-     {:q 12 :r 9}
-     {:q 2  :r 10}
-     {:q 7  :r 10}
-     {:q 11 :r 10}
-     {:q 2  :r 11}
-     {:q 3  :r 11}
-     {:q 4  :r 11}
-     {:q 9  :r 11}
-     {:q 11 :r 11}
-     {:q 3  :r 13}
-     {:q 10 :r 13}]
+    [{:q 4  :r 2 :base-type :base}
+     {:q 12 :r 2 :base-type :base}
+     {:q 3  :r 3 :base-type :base}
+     {:q 5  :r 3 :base-type :base}
+     {:q 10 :r 3 :base-type :base}
+     {:q 2  :r 4 :base-type :base}
+     {:q 4  :r 4 :base-type :base}
+     {:q 12 :r 4 :base-type :base}
+     {:q 7  :r 5 :base-type :base}
+     {:q 11 :r 5 :base-type :base}
+     {:q 13 :r 5 :base-type :base}
+     {:q 5  :r 7 :base-type :base}
+     {:q 7  :r 7 :base-type :base}
+     {:q 9  :r 7 :base-type :base}
+     {:q 7  :r 8 :base-type :base}
+     {:q 12 :r 9 :base-type :base}
+     {:q 2  :r 10 :base-type :base}
+     {:q 7  :r 10 :base-type :base}
+     {:q 11 :r 10 :base-type :base}
+     {:q 2  :r 11 :base-type :base}
+     {:q 3  :r 11 :base-type :base}
+     {:q 4  :r 11 :base-type :base}
+     {:q 9  :r 11 :base-type :base}
+     {:q 11 :r 11 :base-type :base}
+     {:q 3  :r 13 :base-type :base}
+     {:q 10 :r 13 :base-type :base}]
     ;; TODO: determine best faction order
     :factions
     [{:color :red
