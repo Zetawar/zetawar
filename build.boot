@@ -12,11 +12,11 @@
    [crisptrutski/boot-cljs-test "0.3.0" :scope "test"]
    [deraen/boot-sass "0.3.0" :scope "test"]
    [devcards "0.2.2" :scope "test"]
+   [metosin/boot-alt-http "0.1.2" :scope "test"]
    [org.clojars.micha/boot-cp "1.0.1" :scope "test"]
    [org.clojure/tools.nrepl "0.2.12" :scope "test"]
    [org.martinklepsch/boot-gzip "0.1.3" :scope "test"]
    [org.slf4j/slf4j-nop "1.7.21" :scope "test"]
-   [pandeiro/boot-http "0.7.6" :scope "test"]
    [perun "0.4.1-SNAPSHOT" :scope "test"]
    [weasel "0.7.0" :scope "test"]
 
@@ -56,7 +56,7 @@
  '[deraen.boot-sass :refer :all]
  '[io.perun :refer :all]
  '[org.martinklepsch.boot-gzip :refer [gzip]]
- '[pandeiro.boot-http :refer :all]
+ '[metosin.boot-alt-http :refer [serve]]
  '[zetawar.site]
  '[integrant.core])
 
@@ -144,11 +144,19 @@
 
 (deftask dev
   "Run Zetawar dev environment."
-  [_ reload-host    HOST str "Reload WebSocket host"
+  [_ http-host      HOST str "HTTP server host"
+   _ http-port      HOST str "HTTP server port"
+   _ reload-host    HOST str "Reload WebSocket host"
    _ reload-port    PORT int "Reload WebSocket port"
    _ cljs-repl-host HOST str "ClojureScript REPL host"
    _ cljs-repl-port PORT int "ClojureScript REPL port"]
-  (comp (serve)
+  (comp (serve :ip (or http-host
+                       (System/getenv "ZETAWAR_DEV_HOST")
+                       "127.0.0.1")
+               :port (Integer. (or http-port
+                                   (System/getenv "ZETAWAR_HTTP_PORT")
+                                   3000))
+               :prefixes #{"."})
         (repl)
         (watch)
         (notify :visual true)
