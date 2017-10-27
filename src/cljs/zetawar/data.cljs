@@ -642,902 +642,311 @@
     :description "Sterling's Aruba"
     :terrains
     [;; Row 1
-     {:q 1
-      :r 0
-      :terrain-type :plains}
-     {:q 2
-      :r 0
-      :terrain-type :plains}
-     {:q 3
-      :r 0
-      :terrain-type :mountains}
-     {:q 4
-      :r 0
-      :terrain-type :deep-water}
-     {:q 5
-      :r 0
-      :terrain-type :deep-water}
-     {:q 6
-      :r 0
-      :terrain-type :deep-water}
+     {:q 1 :r 0 :terrain-type :plains}
+     {:q 2 :r 0 :terrain-type :plains}
+     {:q 3 :r 0 :terrain-type :mountains}
+     {:q 4 :r 0 :terrain-type :deep-water}
+     {:q 5 :r 0 :terrain-type :deep-water}
+     {:q 6 :r 0 :terrain-type :deep-water}
      ;; Row 2
-     {:q 0
-      :r 1
-      :terrain-type :plains}
-     {:q 1
-      :r 1
-      :terrain-type :mountains}
-     ;; Multiplayer base location
-     {:q 2
-      :r 1
-      :terrain-type :plains}
-     {:q 3
-      :r 1
-      :terrain-type :plains}
-     {:q 4
-      :r 1
-      :terrain-type :mountains}
-     {:q 5
-      :r 1
-      :terrain-type :woods}
-     {:q 6
-      :r 1
-      :terrain-type :deep-water}
-     {:q 7
-      :r 1
-      :terrain-type :deep-water}
+     {:q 0 :r 1 :terrain-type :plains}
+     {:q 1 :r 1 :terrain-type :mountains}
+     {:q 2 :r 1 :terrain-type :plains} ;; Multiplayer base location
+     {:q 3 :r 1 :terrain-type :plains}
+     {:q 4 :r 1 :terrain-type :mountains}
+     {:q 5 :r 1 :terrain-type :woods}
+     {:q 6 :r 1 :terrain-type :deep-water}
+     {:q 7 :r 1 :terrain-type :deep-water}
      ;; Row 3
-     {:q 0
-      :r 2
-      :terrain-type :mountains}
-     ;; Multiplayer base location
-     {:q 1
-      :r 2
-      :terrain-type :plains}
-     {:q 2
-      :r 2
-      :terrain-type :plains}
-     {:q 3
-      :r 2
-      :terrain-type :plains}
-     {:q 4
-      :r 2
-      :terrain-type :plains}
-     {:q 5
-      :r 2
-      :terrain-type :woods}
-     {:q 6
-      :r 2
-      :terrain-type :mountains}
-     {:q 7
-      :r 2
-      :terrain-type :mountains}
-     {:q 8
-      :r 2
-      :terrain-type :deep-water}
+     {:q 0 :r 2 :terrain-type :mountains}
+     {:q 1 :r 2 :terrain-type :plains} ;; Multiplayer base location
+     {:q 2 :r 2 :terrain-type :plains}
+     {:q 3 :r 2 :terrain-type :plains}
+     {:q 4 :r 2 :terrain-type :plains}
+     {:q 5 :r 2 :terrain-type :woods}
+     {:q 6 :r 2 :terrain-type :mountains}
+     {:q 7 :r 2 :terrain-type :mountains}
+     {:q 8 :r 2 :terrain-type :deep-water}
      ;; Row 4
-     {:q 0
-      :r 3
-      :terrain-type :plains}
-     {:q 1
-      :r 3
-      :terrain-type :plains}
-     {:q 2
-      :r 3
-      :terrain-type :plains}
-     {:q 3
-      :r 3
-      :terrain-type :plains}
-     {:q 4
-      :r 3
-      :terrain-type :woods}
-     {:q 5
-      :r 3
-      :terrain-type :plains}
-     {:q 6
-      :r 3
-      :terrain-type :plains}
-     {:q 7
-      :r 3
-      :terrain-type :mountains}
-     {:q 8
-      :r 3
-      :terrain-type :deep-water}
+     {:q 0 :r 3 :terrain-type :plains}
+     {:q 1 :r 3 :terrain-type :plains}
+     {:q 2 :r 3 :terrain-type :plains}
+     {:q 3 :r 3 :terrain-type :plains}
+     {:q 4 :r 3 :terrain-type :woods}
+     {:q 5 :r 3 :terrain-type :plains}
+     {:q 6 :r 3 :terrain-type :plains}
+     {:q 7 :r 3 :terrain-type :mountains}
+     {:q 8 :r 3 :terrain-type :deep-water}
      ;; Row 5
-     {:q 0
-      :r 4
-      :terrain-type :deep-water}
-     ;; Multiplayer base location
-     {:q 1
-      :r 4
-      :terrain-type :mountains}
-     {:q 2
-      :r 4
-      :terrain-type :plains}
-     {:q 3
-      :r 4
-      :terrain-type :plains}
-     {:q 4
-      :r 4
-      :terrain-type :plains}
-     {:q 5
-      :r 4
-      :terrain-type :plains}
-     {:q 6
-      :r 4
-      :terrain-type :plains}
-     {:q 7
-      :r 4
-      :terrain-type :plains}
-     {:q 8
-      :r 4
-      :terrain-type :deep-water}
+     {:q 0 :r 4 :terrain-type :deep-water}
+     {:q 1 :r 4 :terrain-type :mountains} ;; Multiplayer base location
+     {:q 2 :r 4 :terrain-type :plains}
+     {:q 3 :r 4 :terrain-type :plains}
+     {:q 4 :r 4 :terrain-type :plains}
+     {:q 5 :r 4 :terrain-type :plains}
+     {:q 6 :r 4 :terrain-type :plains}
+     {:q 7 :r 4 :terrain-type :plains}
+     {:q 8 :r 4 :terrain-type :deep-water}
      ;; Row 6
-     {:q 0
-      :r 5
-      :terrain-type :deep-water}
-     {:q 1
-      :r 5
-      :terrain-type :plains}
-     {:q 2
-      :r 5
-      :terrain-type :plains}
-     {:q 3
-      :r 5
-      :terrain-type :woods}
-     {:q 4
-      :r 5
-      :terrain-type :plains}
-     {:q 5
-      :r 5
-      :terrain-type :plains}
-     {:q 6
-      :r 5
-      :terrain-type :plains}
-     {:q 7
-      :r 5
-      :terrain-type :plains}
-     {:q 8
-      :r 5
-      :terrain-type :deep-water}
+     {:q 0 :r 5 :terrain-type :deep-water}
+     {:q 1 :r 5 :terrain-type :plains}
+     {:q 2 :r 5 :terrain-type :plains}
+     {:q 3 :r 5 :terrain-type :woods}
+     {:q 4 :r 5 :terrain-type :plains}
+     {:q 5 :r 5 :terrain-type :plains}
+     {:q 6 :r 5 :terrain-type :plains}
+     {:q 7 :r 5 :terrain-type :plains}
+     {:q 8 :r 5 :terrain-type :deep-water}
      ;; Row 7
-     {:q 0
-      :r 6
-      :terrain-type :deep-water}
-     {:q 1
-      :r 6
-      :terrain-type :mountains}
-     {:q 2
-      :r 6
-      :terrain-type :plains}
-     {:q 3
-      :r 6
-      :terrain-type :woods}
-     {:q 4
-      :r 6
-      :terrain-type :plains}
-     {:q 5
-      :r 6
-      :terrain-type :plains}
-     {:q 6
-      :r 6
-      :terrain-type :plains}
-     ;; Multiplayer base location
-     {:q 7
-      :r 6
-      :terrain-type :plains}
-     {:q 8
-      :r 6
-      :terrain-type :mountains}
+     {:q 0 :r 6 :terrain-type :deep-water}
+     {:q 1 :r 6 :terrain-type :mountains}
+     {:q 2 :r 6 :terrain-type :plains}
+     {:q 3 :r 6 :terrain-type :woods}
+     {:q 4 :r 6 :terrain-type :plains}
+     {:q 5 :r 6 :terrain-type :plains}
+     {:q 6 :r 6 :terrain-type :plains}
+     {:q 7 :r 6 :terrain-type :plains} ;; Multiplayer base location
+     {:q 8 :r 6 :terrain-type :mountains}
      ;; Row 8
-     {:q 0
-      :r 7
-      :terrain-type :deep-water}
-     {:q 1
-      :r 7
-      :terrain-type :mountains}
-     {:q 2
-      :r 7
-      :terrain-type :woods}
-     {:q 3
-      :r 7
-      :terrain-type :mountains}
-     {:q 4
-      :r 7
-      :terrain-type :plains}
-     ;; Multiplayer base location
-     {:q 5
-      :r 7
-      :terrain-type :plains}
-     {:q 6
-      :r 7
-      :terrain-type :mountains}
-     {:q 7
-      :r 7
-      :terrain-type :plains}
+     {:q 0 :r 7 :terrain-type :deep-water}
+     {:q 1 :r 7 :terrain-type :mountains}
+     {:q 2 :r 7 :terrain-type :woods}
+     {:q 3 :r 7 :terrain-type :mountains}
+     {:q 4 :r 7 :terrain-type :plains}
+     {:q 5 :r 7 :terrain-type :plains} ;; Multiplayer base location
+     {:q 6 :r 7 :terrain-type :mountains}
+     {:q 7 :r 7 :terrain-type :plains}
      ;; Row 9
-     {:q 1
-      :r 8
-      :terrain-type :deep-water}
-     {:q 2
-      :r 8
-      :terrain-type :deep-water}
-     {:q 3
-      :r 8
-      :terrain-type :deep-water}
-     {:q 4
-      :r 8
-      :terrain-type :deep-water}
-     ;; Multiplayer base location
-     {:q 5
-      :r 8
-      :terrain-type :mountains}
-     {:q 6
-      :r 8
-      :terrain-type :plains}
-     {:q 7
-      :r 8
-      :terrain-type :plains}
-     ]
-    }
+     {:q 1 :r 8 :terrain-type :deep-water}
+     {:q 2 :r 8 :terrain-type :deep-water}
+     {:q 3 :r 8 :terrain-type :deep-water}
+     {:q 4 :r 8 :terrain-type :deep-water}
+     {:q 5 :r 8 :terrain-type :mountains} ;; Multiplayer base location
+     {:q 6 :r 8 :terrain-type :plains}
+     {:q 7 :r 8 :terrain-type :plains}]}
+
    :city-sprawl
    {:id :city-sprawl
     :description "City Sprawl"
     :terrains
     [;; Row 1
-     {:q 2
-      :r 0
-      :terrain-type :woods}
-     {:q 3
-      :r 0
-      :terrain-type :woods}
-     {:q 4
-      :r 0
-      :terrain-type :woods}
-     {:q 5
-      :r 0
-      :terrain-type :woods}
-     {:q 6
-      :r 0
-      :terrain-type :woods}
-     {:q 10
-      :r 0
-      :terrain-type :woods}
-     {:q 11
-      :r 0
-      :terrain-type :woods}
-     {:q 12
-      :r 0
-      :terrain-type :woods}
+     {:q 2 :r 0 :terrain-type :woods}
+     {:q 3 :r 0 :terrain-type :woods}
+     {:q 4 :r 0 :terrain-type :woods}
+     {:q 5 :r 0 :terrain-type :woods}
+     {:q 6 :r 0 :terrain-type :woods}
+     {:q 10 :r 0 :terrain-type :woods}
+     {:q 11 :r 0 :terrain-type :woods}
+     {:q 12 :r 0 :terrain-type :woods}
      ;; Row 2
-     {:q 1
-      :r 1
-      :terrain-type :woods}
-     {:q 2
-      :r 1
-      :terrain-type :plains}
-     {:q 3
-      :r 1
-      :terrain-type :plains}
-     {:q 4
-      :r 1
-      :terrain-type :plains}
-     {:q 5
-      :r 1
-      :terrain-type :plains}
-     {:q 6
-      :r 1
-      :terrain-type :woods}
-     {:q 8
-      :r 1
-      :terrain-type :woods}
-     {:q 9
-      :r 1
-      :terrain-type :plains}
-     {:q 10
-      :r 1
-      :terrain-type :plains}
-     {:q 11
-      :r 1
-      :terrain-type :plains}
-     {:q 12
-      :r 1
-      :terrain-type :woods}
-     {:q 13
-      :r 1
-      :terrain-type :woods}
+     {:q 1 :r 1 :terrain-type :woods}
+     {:q 2 :r 1 :terrain-type :plains}
+     {:q 3 :r 1 :terrain-type :plains}
+     {:q 4 :r 1 :terrain-type :plains}
+     {:q 5 :r 1 :terrain-type :plains}
+     {:q 6 :r 1 :terrain-type :woods}
+     {:q 8 :r 1 :terrain-type :woods}
+     {:q 9 :r 1 :terrain-type :plains}
+     {:q 10 :r 1 :terrain-type :plains}
+     {:q 11 :r 1 :terrain-type :plains}
+     {:q 12 :r 1 :terrain-type :woods}
+     {:q 13 :r 1 :terrain-type :woods}
      ;; Row 3
-     {:q 1
-      :r 2
-      :terrain-type :woods}
-     {:q 2
-      :r 2
-      :terrain-type :plains}
-     {:q 3
-      :r 2
-      :terrain-type :mountains}
-     ;; Multiplayer base location (unowned)
-     {:q 4
-      :r 2
-      :terrain-type :plains}
-     {:q 5
-      :r 2
-      :terrain-type :plains}
-     {:q 6
-      :r 2
-      :terrain-type :plains}
-     {:q 7
-      :r 2
-      :terrain-type :woods}
-     {:q 8
-      :r 2
-      :terrain-type :woods}
-     {:q 9
-      :r 2
-      :terrain-type :plains}
-     {:q 10
-      :r 2
-      :terrain-type :plains}
-     {:q 11
-      :r 2
-      :terrain-type :plains}
-     ;; Multiplayer base location (unowned)
-     {:q 12
-      :r 2
-      :terrain-type :plains}
-     {:q 13
-      :r 2
-      :terrain-type :plains}
-     {:q 14
-      :r 2
-      :terrain-type :woods}
+     {:q 1 :r 2 :terrain-type :woods}
+     {:q 2 :r 2 :terrain-type :plains}
+     {:q 3 :r 2 :terrain-type :mountains}
+     {:q 4 :r 2 :terrain-type :plains} ;; Multiplayer base location (unowned)
+     {:q 5 :r 2 :terrain-type :plains}
+     {:q 6 :r 2 :terrain-type :plains}
+     {:q 7 :r 2 :terrain-type :woods}
+     {:q 8 :r 2 :terrain-type :woods}
+     {:q 9 :r 2 :terrain-type :plains}
+     {:q 10 :r 2 :terrain-type :plains}
+     {:q 11 :r 2 :terrain-type :plains}
+     {:q 12 :r 2 :terrain-type :plains} ;; Multiplayer base location (unowned)
+     {:q 13 :r 2 :terrain-type :plains}
+     {:q 14 :r 2 :terrain-type :woods}
      ;; Row 4
-     {:q 0
-      :r 3
-      :terrain-type :plains}
-     {:q 1
-      :r 3
-      :terrain-type :plains}
-     {:q 2
-      :r 3
-      :terrain-type :mountains}
-     ;; Multiplayer base location (red owned)
-     {:q 3
-      :r 3
-      :terrain-type :plains}
-     {:q 4
-      :r 3
-      :terrain-type :mountains}
-     ;; Multiplayer base location (unowned)
-     {:q 5
-      :r 3
-      :terrain-type :plains}
-     {:q 6
-      :r 3
-      :terrain-type :woods}
-     {:q 7
-      :r 3
-      :terrain-type :mountains}
-     {:q 8
-      :r 3
-      :terrain-type :mountains}
-     {:q 9
-      :r 3
-      :terrain-type :plains}
-     ;; Multiplayer base location (unowned)
-     {:q 10
-      :r 3
-      :terrain-type :plains}
-     {:q 11
-      :r 3
-      :terrain-type :desert}
-     {:q 12
-      :r 3
-      :terrain-type :woods}
-     {:q 13
-      :r 3
-      :terrain-type :plains}
-     {:q 14
-      :r 3
-      :terrain-type :woods}
+     {:q 0 :r 3 :terrain-type :plains}
+     {:q 1 :r 3 :terrain-type :plains}
+     {:q 2 :r 3 :terrain-type :mountains}
+     {:q 3 :r 3 :terrain-type :plains} ;; Multiplayer base location (red owned)
+     {:q 4 :r 3 :terrain-type :mountains}
+     {:q 5 :r 3 :terrain-type :plains} ;; Multiplayer base location (unowned)
+     {:q 6 :r 3 :terrain-type :woods}
+     {:q 7 :r 3 :terrain-type :mountains}
+     {:q 8 :r 3 :terrain-type :mountains}
+     {:q 9 :r 3 :terrain-type :plains}
+     {:q 10 :r 3 :terrain-type :plains} ;; Multiplayer base location (unowned)
+     {:q 11 :r 3 :terrain-type :desert}
+     {:q 12 :r 3 :terrain-type :woods}
+     {:q 13 :r 3 :terrain-type :plains}
+     {:q 14 :r 3 :terrain-type :woods}
      ;; Row 5
-     {:q 0
-      :r 4
-      :terrain-type :woods}
-     {:q 1
-      :r 4
-      :terrain-type :plains}
-     ;; Multiplayer base location (red)
-     {:q 2
-      :r 4
-      :terrain-type :plains}
-     {:q 3
-      :r 4
-      :terrain-type :desert}
-     ;; Multiplayer base location (unknown)
-     {:q 4
-      :r 4
-      :terrain-type :plains}
-     {:q 5
-      :r 4
-      :terrain-type :desert}
-     {:q 6
-      :r 4
-      :terrain-type :plains}
-     {:q 7
-      :r 4
-      :terrain-type :woods}
-     {:q 8
-      :r 4
-      :terrain-type :mountains}
-     {:q 9
-      :r 4
-      :terrain-type :plains}
-     {:q 10
-      :r 4
-      :terrain-type :mountains}
-     {:q 11
-      :r 4
-      :terrain-type :desert}
-     ;; Multiplayer base location (unowned)
-     {:q 12
-      :r 4
-      :terrain-type :plains}
-     {:q 13
-      :r 4
-      :terrain-type :mountains}
-     {:q 14
-      :r 4
-      :terrain-type :plains}
+     {:q 0 :r 4 :terrain-type :woods}
+     {:q 1 :r 4 :terrain-type :plains}
+     {:q 2 :r 4 :terrain-type :plains} ;; Multiplayer base location (red)
+     {:q 3 :r 4 :terrain-type :desert}
+     {:q 4 :r 4 :terrain-type :plains} ;; Multiplayer base location (unknown)
+     {:q 5 :r 4 :terrain-type :desert}
+     {:q 6 :r 4 :terrain-type :plains}
+     {:q 7 :r 4 :terrain-type :woods}
+     {:q 8 :r 4 :terrain-type :mountains}
+     {:q 9 :r 4 :terrain-type :plains}
+     {:q 10 :r 4 :terrain-type :mountains}
+     {:q 11 :r 4 :terrain-type :desert}
+     {:q 12 :r 4 :terrain-type :plains} ;; Multiplayer base location (unowned)
+     {:q 13 :r 4 :terrain-type :mountains}
+     {:q 14 :r 4 :terrain-type :plains}
      ;; Row 6
-     {:q 0
-      :r 5
-      :terrain-type :woods}
-     {:q 1
-      :r 5
-      :terrain-type :plains}
-     {:q 2
-      :r 5
-      :terrain-type :plains}
-     {:q 3
-      :r 5
-      :terrain-type :plains}
-     {:q 4
-      :r 5
-      :terrain-type :woods}
-     {:q 5
-      :r 5
-      :terrain-type :plains}
-     {:q 6
-      :r 5
-      :terrain-type :plains}
-     ;; Multiplayer base location (unowned)
-     {:q 7
-      :r 5
-      :terrain-type :plains}
-     {:q 8
-      :r 5
-      :terrain-type :plains}
-     {:q 9
-      :r 5
-      :terrain-type :plains}
-     {:q 10
-      :r 5
-      :terrain-type :plains}
-     ;; Multiplayer base location (unowned)
-     {:q 11
-      :r 5
-      :terrain-type :plains}
-     {:q 12
-      :r 5
-      :terrain-type :desert}
-     ;; Multiplayer base location (blue)
-     {:q 13
-      :r 5
-      :terrain-type :plains}
-     {:q 14
-      :r 5
-      :terrain-type :woods}
+     {:q 0 :r 5 :terrain-type :woods}
+     {:q 1 :r 5 :terrain-type :plains}
+     {:q 2 :r 5 :terrain-type :plains}
+     {:q 3 :r 5 :terrain-type :plains}
+     {:q 4 :r 5 :terrain-type :woods}
+     {:q 5 :r 5 :terrain-type :plains}
+     {:q 6 :r 5 :terrain-type :plains}
+     {:q 7 :r 5 :terrain-type :plains} ;; Multiplayer base location (unowned)
+     {:q 8 :r 5 :terrain-type :plains}
+     {:q 9 :r 5 :terrain-type :plains}
+     {:q 10 :r 5 :terrain-type :plains}
+     {:q 11 :r 5 :terrain-type :plains} ;; Multiplayer base location (unowned)
+     {:q 12 :r 5 :terrain-type :desert}
+     {:q 13 :r 5 :terrain-type :plains} ;; Multiplayer base location (blue)
+     {:q 14 :r 5 :terrain-type :woods}
      ;; Row 7
-     {:q 1
-      :r 6
-      :terrain-type :woods}
-     {:q 2
-      :r 6
-      :terrain-type :woods}
-     {:q 3
-      :r 6
-      :terrain-type :plains}
-     {:q 4
-      :r 6
-      :terrain-type :woods}
-     {:q 5
-      :r 6
-      :terrain-type :mountains}
-     {:q 6
-      :r 6
-      :terrain-type :plains}
-     {:q 7
-      :r 6
-      :terrain-type :plains}
-     {:q 8
-      :r 6
-      :terrain-type :woods}
-     {:q 9
-      :r 6
-      :terrain-type :plains}
-     {:q 10
-      :r 6
-      :terrain-type :mountains}
-     {:q 11
-      :r 6
-      :terrain-type :plains}
-     {:q 12
-      :r 6
-      :terrain-type :plains}
-     {:q 13
-      :r 6
-      :terrain-type :mountains}
-     {:q 14
-      :r 6
-      :terrain-type :plains}
+     {:q 1 :r 6 :terrain-type :woods}
+     {:q 2 :r 6 :terrain-type :woods}
+     {:q 3 :r 6 :terrain-type :plains}
+     {:q 4 :r 6 :terrain-type :woods}
+     {:q 5 :r 6 :terrain-type :mountains}
+     {:q 6 :r 6 :terrain-type :plains}
+     {:q 7 :r 6 :terrain-type :plains}
+     {:q 8 :r 6 :terrain-type :woods}
+     {:q 9 :r 6 :terrain-type :plains}
+     {:q 10 :r 6 :terrain-type :mountains}
+     {:q 11 :r 6 :terrain-type :plains}
+     {:q 12 :r 6 :terrain-type :plains}
+     {:q 13 :r 6 :terrain-type :mountains}
+     {:q 14 :r 6 :terrain-type :plains}
      ;; Row 8
-     {:q 1
-      :r 7
-      :terrain-type :woods}
-     {:q 2
-      :r 7
-      :terrain-type :woods}
-     {:q 3
-      :r 7
-      :terrain-type :plains}
-     {:q 4
-      :r 7
-      :terrain-type :plains}
-     ;; Multiplayer base location (unowned)
-     {:q 5
-      :r 7
-      :terrain-type :plains}
-     {:q 6
-      :r 7
-      :terrain-type :mountains}
-     ;; Multiplayer base location (unowned)
-     {:q 7
-      :r 7
-      :terrain-type :plains}
-     {:q 8
-      :r 7
-      :terrain-type :mountains}
-     ;; Multiplayer base location (unowned)
-     {:q 9
-      :r 7
-      :terrain-type :plains}
-     {:q 10
-      :r 7
-      :terrain-type :plains}
-     {:q 11
-      :r 7
-      :terrain-type :plains}
-     {:q 12
-      :r 7
-      :terrain-type :mountains}
-     {:q 13
-      :r 7
-      :terrain-type :plains}
-     {:q 14
-      :r 7
-      :terrain-type :woods}
+     {:q 1 :r 7 :terrain-type :woods}
+     {:q 2 :r 7 :terrain-type :woods}
+     {:q 3 :r 7 :terrain-type :plains}
+     {:q 4 :r 7 :terrain-type :plains}
+     {:q 5 :r 7 :terrain-type :plains} ;; Multiplayer base location (unowned)
+     {:q 6 :r 7 :terrain-type :mountains}
+     {:q 7 :r 7 :terrain-type :plains} ;; Multiplayer base location (unowned)
+     {:q 8 :r 7 :terrain-type :mountains}
+     {:q 9 :r 7 :terrain-type :plains} ;; Multiplayer base location (unowned)
+     {:q 10 :r 7 :terrain-type :plains}
+     {:q 11 :r 7 :terrain-type :plains}
+     {:q 12 :r 7 :terrain-type :mountains}
+     {:q 13 :r 7 :terrain-type :plains}
+     {:q 14 :r 7 :terrain-type :woods}
      ;; Row 9
-     {:q 1
-      :r 8
-      :terrain-type :woods}
-     {:q 2
-      :r 8
-      :terrain-type :woods}
-     {:q 3
-      :r 8
-      :terrain-type :plains}
-     {:q 4
-      :r 8
-      :terrain-type :mountains}
-     {:q 5
-      :r 8
-      :terrain-type :plains}
-     {:q 6
-      :r 8
-      :terrain-type :plains}
-     ;; Multiplayer base location (unowned)
-     {:q 7
-      :r 8
-      :terrain-type :plains}
-     {:q 8
-      :r 8
-      :terrain-type :plains}
-     {:q 9
-      :r 8
-      :terrain-type :plains}
-     {:q 10
-      :r 8
-      :terrain-type :mountains}
-     {:q 11
-      :r 8
-      :terrain-type :plains}
-     {:q 12
-      :r 8
-      :terrain-type :plains}
-     {:q 13
-      :r 8
-      :terrain-type :plains}
-     {:q 14
-      :r 8
-      :terrain-type :woods}
+     {:q 1 :r 8 :terrain-type :woods}
+     {:q 2 :r 8 :terrain-type :woods}
+     {:q 3 :r 8 :terrain-type :plains}
+     {:q 4 :r 8 :terrain-type :mountains}
+     {:q 5 :r 8 :terrain-type :plains}
+     {:q 6 :r 8 :terrain-type :plains}
+     {:q 7 :r 8 :terrain-type :plains} ;; Multiplayer base location (unowned)
+     {:q 8 :r 8 :terrain-type :plains}
+     {:q 9 :r 8 :terrain-type :plains}
+     {:q 10 :r 8 :terrain-type :mountains}
+     {:q 11 :r 8 :terrain-type :plains}
+     {:q 12 :r 8 :terrain-type :plains}
+     {:q 13 :r 8 :terrain-type :plains}
+     {:q 14 :r 8 :terrain-type :woods}
      ;; Row 10
-     {:q 0
-      :r 9
-      :terrain-type :woods}
-     {:q 1
-      :r 9
-      :terrain-type :plains}
-     {:q 2
-      :r 9
-      :terrain-type :plains}
-     {:q 3
-      :r 9
-      :terrain-type :desert}
-     ;; Multiplayer base location (unowned)
-     {:q 4
-      :r 9
-      :terrain-type :woods}
-     {:q 5
-      :r 9
-      :terrain-type :plains}
-     {:q 6
-      :r 9
-      :terrain-type :plains}
-     {:q 7
-      :r 9
-      :terrain-type :mountains}
-     {:q 8
-      :r 9
-      :terrain-type :plains}
-     {:q 9
-      :r 9
-      :terrain-type :desert}
-     {:q 10
-      :r 9
-      :terrain-type :woods}
-     {:q 11
-      :r 9
-      :terrain-type :woods}
-     ;; Multiplayer base location (unowned)
-     {:q 12
-      :r 9
-      :terrain-type :plains}
-     {:q 13
-      :r 9
-      :terrain-type :plains}
-     {:q 14
-      :r 9
-      :terrain-type :woods}
+     {:q 0 :r 9 :terrain-type :woods}
+     {:q 1 :r 9 :terrain-type :plains}
+     {:q 2 :r 9 :terrain-type :plains}
+     {:q 3 :r 9 :terrain-type :desert}
+     {:q 4 :r 9 :terrain-type :woods} ;; Multiplayer base location (unowned)
+     {:q 5 :r 9 :terrain-type :plains}
+     {:q 6 :r 9 :terrain-type :plains}
+     {:q 7 :r 9 :terrain-type :mountains}
+     {:q 8 :r 9 :terrain-type :plains}
+     {:q 9 :r 9 :terrain-type :desert}
+     {:q 10 :r 9 :terrain-type :woods}
+     {:q 11 :r 9 :terrain-type :woods}
+     {:q 12 :r 9 :terrain-type :plains} ;; Multiplayer base location (unowned)
+     {:q 13 :r 9 :terrain-type :plains}
+     {:q 14 :r 9 :terrain-type :woods}
      ;; Row 11
-     {:q 0
-      :r 10
-      :terrain-type :woods}
-     {:q 1
-      :r 10
-      :terrain-type :plains}
-     ;; Multiplayer base location (unowned)
-     {:q 2
-      :r 10
-      :terrain-type :plains}
-     {:q 3
-      :r 10
-      :terrain-type :desert}
-     {:q 4
-      :r 10
-      :terrain-type :desert}
-     {:q 5
-      :r 10
-      :terrain-type :plains}
-     {:q 6
-      :r 10
-      :terrain-type :plains}
-     ;; Multiplayer base location (unowned)
-     {:q 7
-      :r 10
-      :terrain-type :plains}
-     {:q 8
-      :r 10
-      :terrain-type :woods}
-     {:q 9
-      :r 10
-      :terrain-type :plains}
-     {:q 10
-      :r 10
-      :terrain-type :desert}
-     ;; Multiplayer base location (unowned)
-     {:q 11
-      :r 10
-      :terrain-type :plains}
-     {:q 12
-      :r 10
-      :terrain-type :desert}
-     {:q 13
-      :r 10
-      :terrain-type :plains}
-     {:q 14
-      :r 10
-      :terrain-type :plains}
+     {:q 0 :r 10 :terrain-type :woods}
+     {:q 1 :r 10 :terrain-type :plains}
+     {:q 2 :r 10 :terrain-type :plains} ;; Multiplayer base location (unowned)
+     {:q 3 :r 10 :terrain-type :desert}
+     {:q 4 :r 10 :terrain-type :desert}
+     {:q 5 :r 10 :terrain-type :plains}
+     {:q 6 :r 10 :terrain-type :plains}
+     {:q 7 :r 10 :terrain-type :plains} ;; Multiplayer base location (unowned)
+     {:q 8 :r 10 :terrain-type :woods}
+     {:q 9 :r 10 :terrain-type :plains}
+     {:q 10 :r 10 :terrain-type :desert}
+     {:q 11 :r 10 :terrain-type :plains} ;; Multiplayer base location (unowned)
+     {:q 12 :r 10 :terrain-type :desert}
+     {:q 13 :r 10 :terrain-type :plains}
+     {:q 14 :r 10 :terrain-type :plains}
      ;; Row 12
-     {:q 0
-      :r 11
-      :terrain-type :plains}
-     {:q 1
-      :r 11
-      :terrain-type :plains}
-     ;; Multiplayer base location (unowned)
-     {:q 2
-      :r 11
-      :terrain-type :plains}
-     ;; Multiplayer base location (yellow)
-     {:q 3
-      :r 11
-      :terrain-type :plains}
-     ;; Multiplayer base location (unowned)
-     {:q 4
-      :r 11
-      :terrain-type :plains}
-     {:q 5
-      :r 11
-      :terrain-type :plains}
-     {:q 6
-      :r 11
-      :terrain-type :mountains}
-     {:q 7
-      :r 11
-      :terrain-type :mountains}
-     {:q 8
-      :r 11
-      :terrain-type :woods}
-     ;; Multiplayer base location (unowned)
-     {:q 9
-      :r 11
-      :terrain-type :plains}
-     {:q 10
-      :r 11
-      :terrain-type :mountains}
-     ;; Multiplayer base location (pink)
-     {:q 11
-      :r 11
-      :terrain-type :plains}
-     {:q 12
-      :r 11
-      :terrain-type :plains}
-     {:q 13
-      :r 11
-      :terrain-type :plains}
-     {:q 14
-      :r 11
-      :terrain-type :woods}
+     {:q 0 :r 11 :terrain-type :plains}
+     {:q 1 :r 11 :terrain-type :plains}
+     {:q 2 :r 11 :terrain-type :plains} ;; Multiplayer base location (unowned)
+     {:q 3 :r 11 :terrain-type :plains} ;; Multiplayer base location (yellow)
+     {:q 4 :r 11 :terrain-type :plains} ;; Multiplayer base location (unowned)
+     {:q 5 :r 11 :terrain-type :plains}
+     {:q 6 :r 11 :terrain-type :mountains}
+     {:q 7 :r 11 :terrain-type :mountains}
+     {:q 8 :r 11 :terrain-type :woods}
+     {:q 9 :r 11 :terrain-type :plains} ;; Multiplayer base location (unowned)
+     {:q 10 :r 11 :terrain-type :mountains}
+     {:q 11 :r 11 :terrain-type :plains} ;; Multiplayer base location (pink)
+     {:q 12 :r 11 :terrain-type :plains}
+     {:q 13 :r 11 :terrain-type :plains}
+     {:q 14 :r 11 :terrain-type :woods}
      ;; Row 13
-     {:q 0
-      :r 12
-      :terrain-type :woods}
-     {:q 1
-      :r 12
-      :terrain-type :woods}
-     {:q 2
-      :r 12
-      :terrain-type :woods}
-     {:q 3
-      :r 12
-      :terrain-type :mountains}
-     {:q 4
-      :r 12
-      :terrain-type :desert}
-     {:q 5
-      :r 12
-      :terrain-type :mountains}
-     {:q 6
-      :r 12
-      :terrain-type :plains}
-     {:q 7
-      :r 12
-      :terrain-type :plains}
-     {:q 8
-      :r 12
-      :terrain-type :plains}
-     {:q 9
-      :r 12
-      :terrain-type :plains}
-     {:q 10
-      :r 12
-      :terrain-type :plains}
-     {:q 11
-      :r 12
-      :terrain-type :desert}
-     {:q 12
-      :r 12
-      :terrain-type :plains}
-     {:q 13
-      :r 12
-      :terrain-type :woods}
-     {:q 14
-      :r 12
-      :terrain-type :woods}
+     {:q 0 :r 12 :terrain-type :woods}
+     {:q 1 :r 12 :terrain-type :woods}
+     {:q 2 :r 12 :terrain-type :woods}
+     {:q 3 :r 12 :terrain-type :mountains}
+     {:q 4 :r 12 :terrain-type :desert}
+     {:q 5 :r 12 :terrain-type :mountains}
+     {:q 6 :r 12 :terrain-type :plains}
+     {:q 7 :r 12 :terrain-type :plains}
+     {:q 8 :r 12 :terrain-type :plains}
+     {:q 9 :r 12 :terrain-type :plains}
+     {:q 10 :r 12 :terrain-type :plains}
+     {:q 11 :r 12 :terrain-type :desert}
+     {:q 12 :r 12 :terrain-type :plains}
+     {:q 13 :r 12 :terrain-type :woods}
+     {:q 14 :r 12 :terrain-type :woods}
      ;; Row 14
-     {:q 1
-      :r 13
-      :terrain-type :woods}
-     {:q 2
-      :r 13
-      :terrain-type :plains}
-     ;; Multiplayer base location (yellow)
-     {:q 3
-      :r 13
-      :terrain-type :plains}
-     {:q 4
-      :r 13
-      :terrain-type :plains}
-     {:q 5
-      :r 13
-      :terrain-type :woods}
-     {:q 6
-      :r 13
-      :terrain-type :woods}
-     {:q 7
-      :r 13
-      :terrain-type :woods}
-     {:q 8
-      :r 13
-      :terrain-type :woods}
-     {:q 9
-      :r 13
-      :terrain-type :plains}
-     ;; Multiplayer base location (pink)
-     {:q 10
-      :r 13
-      :terrain-type :plains}
-     {:q 11
-      :r 13
-      :terrain-type :plains}
-     {:q 12
-      :r 13
-      :terrain-type :woods}
+     {:q 1 :r 13 :terrain-type :woods}
+     {:q 2 :r 13 :terrain-type :plains}
+     {:q 3 :r 13 :terrain-type :plains} ;; Multiplayer base location (yellow)
+     {:q 4 :r 13 :terrain-type :plains}
+     {:q 5 :r 13 :terrain-type :woods}
+     {:q 6 :r 13 :terrain-type :woods}
+     {:q 7 :r 13 :terrain-type :woods}
+     {:q 8 :r 13 :terrain-type :woods}
+     {:q 9 :r 13 :terrain-type :plains}
+     {:q 10 :r 13 :terrain-type :plains} ;; Multiplayer base location (pink)
+     {:q 11 :r 13 :terrain-type :plains}
+     {:q 12 :r 13 :terrain-type :woods}
      ;; Row 15
-     {:q 2
-      :r 14
-      :terrain-type :woods}
-     {:q 3
-      :r 14
-      :terrain-type :plains}
-     {:q 4
-      :r 14
-      :terrain-type :plains}
-     {:q 5
-      :r 14
-      :terrain-type :woods}
-     {:q 6
-      :r 14
-      :terrain-type :woods}
-     {:q 8
-      :r 14
-      :terrain-type :woods}
-     {:q 9
-      :r 14
-      :terrain-type :woods}
-     {:q 10
-      :r 14
-      :terrain-type :plains}
-     {:q 11
-      :r 14
-      :terrain-type :plains}
-     {:q 12
-      :r 14
-      :terrain-type :woods}
-     ]
-    }
-   })
+     {:q 2 :r 14 :terrain-type :woods}
+     {:q 3 :r 14 :terrain-type :plains}
+     {:q 4 :r 14 :terrain-type :plains}
+     {:q 5 :r 14 :terrain-type :woods}
+     {:q 6 :r 14 :terrain-type :woods}
+     {:q 8 :r 14 :terrain-type :woods}
+     {:q 9 :r 14 :terrain-type :woods}
+     {:q 10 :r 14 :terrain-type :plains}
+     {:q 11 :r 14 :terrain-type :plains}
+     {:q 12 :r 14 :terrain-type :woods}]}})
 
 ;; TODO: add support for :allowed-unit-types
 (def scenarios
@@ -1560,19 +969,13 @@
       :credits 300
       :ai false
       :bases [{:q 1 :r 2}]
-      :units [{:q 2
-               :r 2
-               :unit-type :infantry}]}
+      :units [{:q 2 :r 2 :unit-type :infantry}]}
      {:color :red
       :credits 300
       :ai true
       :bases [{:q 7 :r 6}]
-      :units [{:q 7
-               :r 7
-               :unit-type :infantry}
-              {:q 7
-               :r 8
-               :unit-type :infantry}]}]}
+      :units [{:q 7 :r 7 :unit-type :infantry}
+              {:q 7 :r 8 :unit-type :infantry}]}]}
 
    :city-sprawl-multiplayer
    {:id :city-sprawl-multiplayer
@@ -1615,34 +1018,26 @@
       :ai false
       :bases [{:q 3  :r 3}
               {:q 2  :r 4}]
-      :units [{:q 3 :r 2
-               :unit-type :infantry}
-              {:q 2 :r 3
-               :unit-type :infantry}]}
+      :units [{:q 3 :r 2 :unit-type :infantry}
+              {:q 2 :r 3 :unit-type :infantry}]}
      {:color :blue
       :credits 300
       :ai true
       :bases [{:q 12 :r 4}
               {:q 13 :r 5}]
-      :units [{:q 12 :r 3
-               :unit-type :infantry}
-              {:q 13 :r 4
-               :unit-type :infantry}]}
+      :units [{:q 12 :r 3 :unit-type :infantry}
+              {:q 13 :r 4 :unit-type :infantry}]}
      {:color :yellow
       :credits 300
       :ai true
       :bases [{:q 3 :r 11}
               {:q 3 :r 13}]
-      :units [{:q 2 :r 12
-               :unit-type :infantry}
-              {:q 3 :r 12
-               :unit-type :infantry}]}
+      :units [{:q 2 :r 12 :unit-type :infantry}
+              {:q 3 :r 12 :unit-type :infantry}]}
      {:color :pink
       :credits 300
       :ai true
       :bases [{:q 11 :r 11}
               {:q 10 :r 13}]
-      :units [{:q 10 :r 11
-               :unit-type :infantry}
-              {:q 11 :r 12
-               :unit-type :infantry}]}]}})
+      :units [{:q 10 :r 11 :unit-type :infantry}
+              {:q 11 :r 12 :unit-type :infantry}]}]}})
