@@ -1,7 +1,6 @@
 (ns zetawar.core
   (:require
    [integrant.core :as ig]
-   [integrant.core :as ig]
    [reagent.core :as r]
    [taoensso.timbre :as log]
    [zetawar.app :as app]
