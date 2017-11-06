@@ -330,8 +330,9 @@
 
 (def armor-type-abbrevs
   {:unit-type.armor-type/personnel "P"
-   :unit-type.armor-type/armored "A"
-   :unit-type.armor-type/naval "N"})
+   :unit-type.armor-type/armored "Ar"
+   :unit-type.armor-type/naval "N"
+   :unit-type.armor-type/air "Ai"})
 
 ;; TODO: cleanup unit-picker
 (defn unit-picker [{:as view-ctx :keys [conn dispatch translate]}]
@@ -409,6 +410,11 @@
 
                          :unit-type.armor-type/naval
                          [:abbr {:title (translate :naval-name)
+                                 :style {:cursor "inherit"}}
+                          armor-type-abbrev]
+
+                         :unit-type.armor-type/air
+                         [:abbr {:title (translate :air-name)
                                  :style {:cursor "inherit"}}
                           armor-type-abbrev])]
                   [:td movement]
