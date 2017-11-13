@@ -500,9 +500,12 @@
         (into [:select.form-control {:id "scenario-id"
                                      :selected (some-> @selected-scenario-id name)
                                      :on-change select-scenario}]
-              (for [[scenario-id {:keys [description]}] data/scenarios]
+              (for [[scenario-id {:keys [description notes]}] data/scenarios]
                 [:option {:value (name scenario-id)}
-                 description]))
+                 (if notes
+                   (str description ": " notes)
+                   description)]))
+        (:description (@selected-scenario-id data/scenarios))
         [:> js/ReactBootstrap.Modal.Footer
          [:button.btn.btn-primary {:on-click start-new-game}
           (translate :start-button)]
