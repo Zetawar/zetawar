@@ -42,8 +42,9 @@
       (players/notify notify-chan notify-msg))))
 
 (defn start [{:as router-ctx :keys [ev-chan handler-wrapper-fn max-render-interval]}]
-  ;; TODO: handler missing handler-wrapper
-  (let [handler-wrapper (handler-wrapper-fn router-ctx)]
+  (let [handler-wrapper (if handler-wrapper-fn
+                          (handler-wrapper-fn router-ctx)
+                          (fn [handler] (handler)))]
     (go-loop []
       (when-let [msg (<! ev-chan)]
         (<! (handler-wrapper

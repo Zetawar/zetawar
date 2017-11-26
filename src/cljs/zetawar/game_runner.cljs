@@ -22,6 +22,7 @@
 (nodejs/enable-util-print!)
 
 (defn -main [& args]
-  (println "Hello from the Zetawar game runner!"))
+  (let [system (ig/init cli-game-config)]
+    (println "Hello from the Zetawar game runner!")))
 
 (set! *main-cli-fn* -main)
