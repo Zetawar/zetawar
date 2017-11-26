@@ -2,8 +2,6 @@
   (:require
    [cognitect.transit :as transit]
    [datascript.core :as d]
-   [goog.crypt.base64 :as base64]
-   [lzw]
    [taoensso.timbre :as log]
    [zetawar.data :as data]
    [zetawar.db :refer [e find-by qe qes qess]]
@@ -30,29 +28,6 @@
 (defn targeted-hex [db]
   (let [{:keys [app/targeted-q app/targeted-r]} (root db)]
     [targeted-q targeted-r]))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; Game state encoding
-
-;; TODO: move to encoding or serialization ns
-;; TODO: document UTF-8 hack
-
-(defn encode-game-state [game-state]
-  (let [writer (transit/writer :json)]
-    (-> (transit/write writer game-state)
-        js/lzwEncode
-        js/encodeURIComponent
-        js/unescape
-        (base64/encodeString true))))
-
-(defn decode-game-state [encoded-game-state]
-  (let [reader (transit/reader :json)
-        transit-game-state (-> encoded-game-state
-                               (base64/decodeString true)
-                               js/escape
-                               js/decodeURIComponent
-                               js/lzwDecode)]
-    (transit/read reader transit-game-state)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Game setup
@@ -99,12 +74,11 @@
        (when players
          (create-players! app-ctx))))))
 
-(defn load-encoded-game-state!
-  ([{:as app-ctx :keys [conn players]} encoded-game-state]
-   (load-encoded-game-state! app-ctx data/rulesets data/maps data/scenarios encoded-game-state))
-  ([{:as app-ctx :keys [conn players]} rulesets map-defs scenario-defs encoded-game-state]
-   (let [game-state (decode-game-state encoded-game-state)
-         game-id (game/load-game-state! conn
+(defn load-game-state!
+  ([{:as app-ctx :keys [conn players]} game-state]
+   (load-game-state! app-ctx data/rulesets data/maps data/scenarios game-state))
+  ([{:as app-ctx :keys [conn players]} rulesets map-defs scenario-defs game-state]
+   (let [game-id (game/load-game-state! conn
                                         rulesets
                                         map-defs
                                         scenario-defs
@@ -119,10 +93,3 @@
      ;; Skip player creation for tests
      (when players
        (create-players! app-ctx)))))
-
-;; TODO: put URL in paste buffer automatically
-(defn set-url-game-state! [db]
-  (let [encoded-game-state (->> (current-game db)
-                                (game/get-game-state db)
-                                encode-game-state)]
-    (set! js/window.location.hash encoded-game-state)))

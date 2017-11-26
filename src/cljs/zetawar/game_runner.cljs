@@ -2,6 +2,7 @@
   (:require
    [cljs.nodejs :as nodejs]
    [integrant.core :as ig]
+   [zetawar.app :as app]
    [zetawar.db :as db]
    [zetawar.system.datascript]
    [zetawar.system.game]

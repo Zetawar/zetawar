@@ -8,6 +8,7 @@
    [zetawar.game :as game]
    [zetawar.players :as players]
    [zetawar.router :as router]
+   [zetawar.serialization :as serialization]
    [zetawar.util :refer [breakpoint inspect only oonly]]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -266,7 +267,7 @@
 
 (defmethod router/handle-event ::set-url-game-state
   [{:as handler-ctx :keys [ev-chan conn db]} _]
-  (app/set-url-game-state! @conn))
+  (serialization/set-url-game-state! @conn))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Copy link

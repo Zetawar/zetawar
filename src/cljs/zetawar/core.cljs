@@ -17,6 +17,7 @@
    [zetawar.players.ai.reference]
    [zetawar.players.human]
    [zetawar.router.reagent]
+   [zetawar.serialization :as serialization]
    [zetawar.site :as site]
    [zetawar.system :as system]
    [zetawar.system.datascript]
@@ -68,7 +69,7 @@
                                      not-empty
                                      (subs 1))]
       (if encoded-game-state
-        (app/load-encoded-game-state! game-cfg encoded-game-state)
+        (serialization/load-encoded-game-state! game-cfg encoded-game-state)
         (app/start-new-game! game-cfg :sterlings-aruba-multiplayer))
       (set! (.-onload js/window) run))))
 
