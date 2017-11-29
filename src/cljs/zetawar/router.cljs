@@ -6,7 +6,7 @@
    [taoensso.timbre :as log]
    [zetawar.players :as players])
   (:require-macros
-   [cljs.core.async.macros :refer [go-loop]]))
+   [cljs.core.async.macros :refer [go go-loop]]))
 
 (defmulti handle-event (fn [ev-ctx [ev-type & _]] ev-type))
 
@@ -44,7 +44,7 @@
 (defn start [{:as router-ctx :keys [ev-chan handler-wrapper-fn max-render-interval]}]
   (let [handler-wrapper (if handler-wrapper-fn
                           (handler-wrapper-fn router-ctx)
-                          (fn [handler] (handler)))]
+                          (fn [handler] (go (handler))))]
     (go-loop []
       (when-let [msg (<! ev-chan)]
         (<! (handler-wrapper
