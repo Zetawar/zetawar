@@ -6,6 +6,7 @@
    [zetawar.db :as db]
    [zetawar.events.game]
    [zetawar.events.player]
+   [zetawar.game :as game]
    [zetawar.players.ai.custom]
    [zetawar.players.ai.reference]
    [zetawar.players.human]
@@ -27,13 +28,28 @@
                                :players    (ig/ref :zetawar.system/players)}})
 (nodejs/enable-util-print!)
 
+(defn end-turn [system]
+  (let [ev-chan (-> system :zetawar.system/router :ev-chan)
+        db @(-> system :zetawar.system/datascript :conn)
+        game (app/current-game db)
+        cur-faction-color (game/current-faction-color game)]
+    (router/dispatch ev-chan [:zetawar.events.game/execute-action
+                              {:action/type :action.type/end-turn
+                               :action/faction-color cur-faction-color}])))
+
+;; TODO: switch to cljs require
+(def readline (js/require "readline"))
+
 (defn -main [& args]
-  (let [system (ig/init cli-game-config)]
+  (let [system (ig/init cli-game-config)
+        ev-chan (-> system :zetawar.system/router :ev-chan)
+        rl (.createInterface readline #js {"input" js/process.stdin
+                                           "output" js/process.stdout
+                                           "terminal" false})]
+    (.on rl "line" (fn [line] (end-turn system)))
     (println "Hello from the Zetawar game runner!")
     (app/start-new-game! (:zetawar.system/game system) :sterlings-aruba-multiplayer)
-    (router/dispatch (-> system :zetawar.system/router :ev-chan)
-                     [:zetawar.events.game/execute-action
-                      {:action/type :action.type/end-turn
-                       :action/faction-color :blue}])))
+    (router/dispatch ev-chan
+                     [:zetawar.events.player/send-game-state :faction.color/blue])))
 
 (set! *main-cli-fn* -main)

@@ -31,7 +31,7 @@
       (async/sub notify-pub faction-color player-chan)
       (go-loop [msg (<! player-chan)]
         (when msg
-          (log/debugf "Handling player event: %s" (pr-str msg))
+          (log/debugf "[%s] Handling player event: %s" (str faction-color) (pr-str msg))
           ;; TODO: validate event
           ;; TODO: validate handler return value
           ;; TODO: catch exceptions
