@@ -3,10 +3,16 @@
    [cljs.core.async :refer [<! >! chan offer!]]
    [cljsjs.raven]
    [datascript.core :as d]
+   [goog.object :as gobj]
    [taoensso.timbre :as log]
    [zetawar.players :as players])
   (:require-macros
    [cljs.core.async.macros :refer [go go-loop]]))
+
+(when-not (exists? js/Raven)
+  (let [stub #js {"captureMessage" #() "captureException" #()}
+        global (if (exists? js/window) js/window js/global)]
+    (gobj/set global "Raven" stub)))
 
 (defmulti handle-event (fn [ev-ctx [ev-type & _]] ev-type))
 
