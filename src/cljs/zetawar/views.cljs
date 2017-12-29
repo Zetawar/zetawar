@@ -483,6 +483,7 @@
 ;; TODO: move default-scenario-id to data ns?
 (defn new-game-settings [{:as view-ctx :keys [conn dispatch translate]}]
   (with-let [default-scenario-id (ffirst data/scenarios)
+             selected-scenario-id (r/atom default-scenario-id)
              hide-settings (fn [ev]
                              (when ev (.preventDefault ev))
                              (dispatch [::events.ui/hide-new-game-settings]))
