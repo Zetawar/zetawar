@@ -1196,6 +1196,7 @@
      {:q 14, :r 3, :terrain-type :plains}
      {:q 15, :r 3, :terrain-type :plains}
      {:q 16, :r 3, :terrain-type :ford}
+     {:q 17, :r 3, :terrain-type :shallow-water}
      {:q 18, :r 3, :terrain-type :shallow-water}
      {:q 19, :r 3, :terrain-type :deep-water}
      {:q 20, :r 3, :terrain-type :deep-water}
@@ -1214,7 +1215,9 @@
      {:q 10, :r 4, :terrain-type :shallow-water}
      {:q 11, :r 4, :terrain-type :woods}
      {:q 12, :r 4, :terrain-type :plains}
+     {:q 13, :r 4, :terrain-type :plains}
      {:q 14, :r 4, :terrain-type :plains}
+     {:q 15, :r 4, :terrain-type :plains}
      {:q 16, :r 4, :terrain-type :plains}
      {:q 17, :r 4, :terrain-type :ford}
      {:q 18, :r 4, :terrain-type :swamp}
@@ -1229,6 +1232,7 @@
      {:q 3, :r 5, :terrain-type :deep-water}
      {:q 4, :r 5, :terrain-type :shallow-water}
      {:q 5, :r 5, :terrain-type :plains}
+     {:q 6, :r 5, :terrain-type :plains}
      {:q 7, :r 5, :terrain-type :plains}
      {:q 8, :r 5, :terrain-type :woods}
      {:q 9, :r 5, :terrain-type :woods}
@@ -1250,6 +1254,7 @@
      {:q 2, :r 6, :terrain-type :deep-water}
      {:q 3, :r 6, :terrain-type :deep-water}
      {:q 4, :r 6, :terrain-type :shallow-water}
+     {:q 5, :r 6, :terrain-type :plains}
      {:q 6, :r 6, :terrain-type :plains}
      {:q 7, :r 6, :terrain-type :plains}
      {:q 8, :r 6, :terrain-type :woods}
@@ -1272,6 +1277,7 @@
      {:q 1, :r 7, :terrain-type :deep-water}
      {:q 2, :r 7, :terrain-type :deep-water}
      {:q 3, :r 7, :terrain-type :deep-water}
+     {:q 4, :r 7, :terrain-type :deep-water}
      {:q 5, :r 7, :terrain-type :plains}
      {:q 6, :r 7, :terrain-type :plains}
      {:q 7, :r 7, :terrain-type :woods}
@@ -1303,6 +1309,7 @@
      {:q 10, :r 8, :terrain-type :plains}
      {:q 11, :r 8, :terrain-type :plains}
      {:q 12, :r 8, :terrain-type :shallow-water}
+     {:q 13, :r 8, :terrain-type :shallow-water}
      {:q 14, :r 8, :terrain-type :swamp}
      {:q 15, :r 8, :terrain-type :shallow-water}
      {:q 16, :r 8, :terrain-type :woods}
@@ -1345,6 +1352,7 @@
      {:q 6, :r 10, :terrain-type :plains}
      {:q 7, :r 10, :terrain-type :plains}
      {:q 8, :r 10, :terrain-type :plains}
+     {:q 9, :r 10, :terrain-type :woods}
      {:q 10, :r 10, :terrain-type :woods}
      {:q 11, :r 10, :terrain-type :plains}
      {:q 12, :r 10, :terrain-type :plains}
@@ -1396,6 +1404,7 @@
      {:q 11, :r 12, :terrain-type :plains}
      {:q 12, :r 12, :terrain-type :plains}
      {:q 13, :r 12, :terrain-type :woods}
+     {:q 14, :r 12, :terrain-type :plains}
      {:q 15, :r 12, :terrain-type :plains}
      {:q 16, :r 12, :terrain-type :plains}
      {:q 17, :r 12, :terrain-type :plains}
@@ -1438,6 +1447,7 @@
      {:q 7, :r 14, :terrain-type :woods}
      {:q 8, :r 14, :terrain-type :shallow-water}
      {:q 9, :r 14, :terrain-type :swamp}
+     {:q 10, :r 14, :terrain-type :shallow-water}
      {:q 11, :r 14, :terrain-type :shallow-water}
      {:q 12, :r 14, :terrain-type :plains}
      {:q 13, :r 14, :terrain-type :plains}
@@ -1469,6 +1479,7 @@
      {:q 15, :r 15, :terrain-type :woods}
      {:q 16, :r 15, :terrain-type :plains}
      {:q 17, :r 15, :terrain-type :plains}
+     {:q 18, :r 15, :terrain-type :plains}
      {:q 19, :r 15, :terrain-type :deep-water}
      {:q 20, :r 15, :terrain-type :deep-water}
      {:q 21, :r 15, :terrain-type :deep-water}
@@ -1491,6 +1502,7 @@
      {:q 15, :r 16, :terrain-type :woods}
      {:q 16, :r 16, :terrain-type :plains}
      {:q 17, :r 16, :terrain-type :plains}
+     {:q 18, :r 16, :terrain-type :plains}
      {:q 19, :r 16, :terrain-type :shallow-water}
      {:q 20, :r 16, :terrain-type :deep-water}
      {:q 21, :r 16, :terrain-type :deep-water}
@@ -1512,6 +1524,7 @@
      {:q 13, :r 17, :terrain-type :woods}
      {:q 14, :r 17, :terrain-type :woods}
      {:q 15, :r 17, :terrain-type :plains}
+     {:q 16, :r 17, :terrain-type :plains}
      {:q 17, :r 17, :terrain-type :plains}
      {:q 18, :r 17, :terrain-type :shallow-water}
      {:q 19, :r 17, :terrain-type :deep-water}
@@ -1526,7 +1539,9 @@
      {:q 5, :r 18, :terrain-type :swamp}
      {:q 6, :r 18, :terrain-type :ford}
      {:q 7, :r 18, :terrain-type :plains}
+     {:q 8, :r 18, :terrain-type :plains}
      {:q 9, :r 18, :terrain-type :plains}
+     {:q 10, :r 18, :terrain-type :plains}
      {:q 11, :r 18, :terrain-type :plains}
      {:q 12, :r 18, :terrain-type :woods}
      {:q 13, :r 18, :terrain-type :shallow-water}
@@ -1545,6 +1560,7 @@
      {:q 2, :r 19, :terrain-type :deep-water}
      {:q 3, :r 19, :terrain-type :deep-water}
      {:q 4, :r 19, :terrain-type :shallow-water}
+     {:q 5, :r 19, :terrain-type :shallow-water}
      {:q 6, :r 19, :terrain-type :ford}
      {:q 7, :r 19, :terrain-type :plains}
      {:q 8, :r 19, :terrain-type :plains}
