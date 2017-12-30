@@ -37,9 +37,12 @@
                               {:action/type :action.type/end-turn
                                :action/faction-color cur-faction-color}])))
 
+(.install (js/require "source-map-support"))
+
 ;; TODO: switch to cljs require
 (def readline (js/require "readline"))
 
+;; TODO: add ability to pass in scenario
 (defn -main [& args]
   (let [system (ig/init cli-game-config)
         ev-chan (-> system :zetawar.system/router :ev-chan)

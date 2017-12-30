@@ -1,14 +1,17 @@
 {
   "name": "zetawar",
   "description": "A turn based strategy game and AI platform",
-  "repository" : {
+  "repository": {
     "type": "git",
-    "url" : "https://github.com/Zetawar/zetawar.git"
+    "url": "https://github.com/Zetawar/zetawar.git"
   },
   "license": "MIT",
   "version": "0.1.0",
   "devDependencies": {
     "postcss-cli": "~2",
     "autoprefixer": "~6"
+  },
+  "dependencies": {
+    "source-map-support": "https://registry.npmjs.org/source-map-support/-/source-map-support-0.5.0.tgz"
   }
 }
