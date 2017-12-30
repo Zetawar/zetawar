@@ -10,7 +10,9 @@
    [cljs.core.async.macros :refer [go go-loop]]))
 
 (when-not (exists? js/Raven)
-  (let [stub #js {"captureMessage" #() "captureException" #()}
+  (let [stub #js {"captureMessage" #()
+                  ;; TODO: something better than js/console.trace
+                  "captureException" #(js/console.trace)}
         global (if (exists? js/window) js/window js/global)]
     (gobj/set global "Raven" stub)))
 
