@@ -1,4 +1,4 @@
-(ns zetawar.game-runner
+(ns zetawar.cli
   (:require
    [cljs.nodejs :as nodejs]
    [integrant.core :as ig]
@@ -43,7 +43,7 @@
 (def readline (js/require "readline"))
 
 ;; TODO: add ability to pass in scenario
-(defn -main [& args]
+(defn ^:export -main [& args]
   (let [system (ig/init cli-game-config)
         ev-chan (-> system :zetawar.system/router :ev-chan)
         rl (.createInterface readline #js {"input" js/process.stdin

@@ -1,2 +1,2 @@
-{:require [zetawar.game-runner]
+{:require [zetawar.cli]
  :compiler-options {:target :nodejs}}

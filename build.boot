@@ -134,10 +134,10 @@
         (codox :name "Zetawar" :language :clojurescript)
         (target :dir (when target-dir #{target-dir}))))
 
-(deftask build-game-runner
-  "Build Zetawar CLI game runner."
+(deftask build-cli
+  "Build Zetawar CLI."
   []
-  (comp (cljs :ids ["js/game-runner"]
+  (comp (cljs :ids ["js/cli"]
               :optimizations :simple
               :source-map true)
         (target)))
