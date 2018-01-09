@@ -180,6 +180,15 @@
                                  :parallel-build true})
         (target)))
 
+(deftask dev-cli
+  "Build Zetawar CLI dev environment."
+  []
+  (comp (watch)
+        (cljs :ids ["js/cli"]
+              :optimizations :none
+              :source-map true)
+        (target)))
+
 (deftask run-tests
   "Run Zetawar tests."
   []
