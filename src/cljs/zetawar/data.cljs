@@ -792,7 +792,7 @@
   {:sterlings-aruba
    {:id :sterlings-aruba
     :description "Sterling's Aruba"
-    :created-by "David Whittington"
+    :created-by "Weewar"
     :terrains
     [;; Row 1
      {:q 1 :r 0 :terrain-type :plains}
@@ -881,7 +881,7 @@
    :city-sprawl
    {:id :city-sprawl
     :description "City Sprawl"
-    :created-by "David Whittington"
+    :created-by "Weewar"
     :terrains
     [;; Row 1
      {:q 2 :r 0 :terrain-type :woods}
@@ -1655,7 +1655,7 @@
   {:sterlings-aruba-multiplayer
    {:id :sterlings-aruba-multiplayer
     :description "Sterling's Aruba Multiplayer"
-    :created-by "David Whittington"
+    :created-by "Weewar"
     :ruleset-id :zetawar
     :map-id :sterlings-aruba
     :max-count-per-unit 10
@@ -1685,7 +1685,7 @@
    :city-sprawl-multiplayer
    {:id :city-sprawl-multiplayer
     :description "City Sprawl Multiplayer"
-    :created-by "David Whittington"
+    :created-by "Weewar"
     :ruleset-id :zetawar
     :map-id :city-sprawl
     :max-count-per-unit 10
