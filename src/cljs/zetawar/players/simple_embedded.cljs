@@ -2,7 +2,7 @@
   (:require
    [cljs.core.async :as async]
    [datascript.core :as d]
-   [taoensso.timbre :as log]
+   [zetawar.logging :as log]
    [zetawar.app :as app]
    [zetawar.db :as db]
    [zetawar.game :as game]
@@ -15,11 +15,11 @@
 
 (defmethod handle-event :default
   [_ msg]
-  (log/debugf "Unhandled player event: %s" (pr-str msg)))
+  (log/debug "Unhandled player event:" (pr-str msg)))
 
 (defn handle-event* [{:as player :keys [ev-chan]} msg]
   (let [{:as ret :keys [tx]} (handle-event player msg)]
-    (log/tracef "Player handler returned: %s" (pr-str ret))
+    (log/trace "Player handler returned:" (pr-str ret))
     (doseq [new-msg (:dispatch ret)]
       (router/dispatch ev-chan new-msg))))
 
@@ -31,7 +31,7 @@
       (async/sub notify-pub faction-color player-chan)
       (go-loop [msg (<! player-chan)]
         (when msg
-          (log/debugf "[%s] Handling player event: %s" (str faction-color) (pr-str msg))
+          (log/debug (str "[" faction-color "]") "Handling player event:"  (pr-str msg))
           ;; TODO: validate event
           ;; TODO: validate handler return value
           ;; TODO: catch exceptions

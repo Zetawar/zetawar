@@ -2,9 +2,9 @@
   (:require
    [integrant.core :as ig]
    [posh.reagent :as posh]
-   [taoensso.timbre :as log]
    [tongue.core :as tongue]
    [zetawar.data :as data]
+   [zetawar.logging :as log]
    [zetawar.router :as router]))
 
 ;; TODO: start Reagent components when running in the browser

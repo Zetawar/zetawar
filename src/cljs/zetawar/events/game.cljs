@@ -1,9 +1,9 @@
 (ns zetawar.events.game
   (:require
    [datascript.core :as d]
-   [taoensso.timbre :as log]
    [zetawar.app :as app]
    [zetawar.game :as game]
+   [zetawar.logging :as log]
    [zetawar.router :as router]))
 
 ;; TODO: simplify

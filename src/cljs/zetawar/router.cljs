@@ -4,7 +4,7 @@
    [cljsjs.raven]
    [datascript.core :as d]
    [goog.object :as gobj]
-   [taoensso.timbre :as log]
+   [zetawar.logging :as log]
    [zetawar.players :as players])
   (:require-macros
    [cljs.core.async.macros :refer [go go-loop]]))
@@ -28,7 +28,7 @@
 (defn dispatch [ch msg]
   (if msg
     (if (offer! ch msg)
-      (log/debugf "Dispatching event: %s" (pr-str msg))
+      (log/info "Dispatching event:" (pr-str msg))
       (let [log-msg (str "Failed to dispatch event (buffer full?): " (pr-str msg))]
         (js/Raven.captureMessage log-msg)
         (log/error log-msg)))
@@ -39,9 +39,9 @@
 (defn handle-event* [{:as router-ctx :keys [conn ev-chan notify-chan]} msg]
   (let [ev-ctx (assoc router-ctx :db @conn)
         {:as ret :keys [tx]} (handle-event ev-ctx msg)]
-    (log/tracef "Handler returned: %s" (pr-str ret))
+    (log/trace "Handler returned:" (pr-str ret))
     (when tx
-      (log/debugf "Transacting: %s" (pr-str tx))
+      (log/debug "Transacting:" (pr-str tx))
       (d/transact! conn tx))
     (doseq [new-msg (:dispatch ret)]
       (dispatch ev-chan new-msg))
@@ -58,9 +58,10 @@
         (<! (handler-wrapper
              ;; Handle event
              #(try
-                (log/debugf "Handling event: %s" (pr-str msg))
+                (log/debug "Handling event:" (pr-str msg))
                 (handle-event* router-ctx msg)
                 (catch :default ex
                   (js/Raven.captureException ex)
-                  (log/errorf ex "Error handling event: %s" (pr-str msg))))))
+                  (log/error ex "Error handling event:" (pr-str msg))
+                  ))))
         (recur)))))

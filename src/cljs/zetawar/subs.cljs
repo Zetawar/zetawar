@@ -3,10 +3,10 @@
    [datascript.core :as d]
    [posh.reagent :as posh]
    [reagent.core :as r]
-   [taoensso.timbre :as log]
    [zetawar.db :refer [e qe]]
    [zetawar.game :as game]
    [zetawar.hex :as hex]
+   [zetawar.logging :as log]
    [zetawar.tiles :as tiles]
    [zetawar.util :refer [breakpoint inspect select-values]])
   (:require-macros

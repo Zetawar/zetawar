@@ -2,11 +2,11 @@
   (:require
    [cljs.core.async :as async]
    [datascript.core :as d]
-   [taoensso.timbre :as log]
    [zetawar.app :as app]
    [zetawar.db :as db]
    [zetawar.game :as game]
    [zetawar.hex :as hex]
+   [zetawar.logging :as log]
    [zetawar.players :as players]
    [zetawar.players.simple-embedded :refer [simple-embedded-player]]))
 

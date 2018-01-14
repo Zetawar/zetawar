@@ -3,10 +3,10 @@
    [cognitect.transit :as transit]
    [goog.crypt.base64 :as base64]
    [lzw]
-   [taoensso.timbre :as log]
    [zetawar.app :as app]
    [zetawar.data :as data]
    [zetawar.game :as game]
+   [zetawar.logging :as log]
    [zetawar.util :as util :refer [breakpoint inspect]]))
 
 ;; TODO: rename ns to encodeing or codecs?

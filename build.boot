@@ -29,7 +29,6 @@
    [cljsjs/react-dom-server "15.4.2-2"]
    [com.cognitect/transit-cljs "0.8.239"]
    [com.gfredericks/test.chuck "0.2.7"]
-   [com.taoensso/timbre "4.8.0"]
    [danielsz/boot-autoprefixer "0.0.9"]
    [datascript "0.15.5"]
    [hiccup "1.0.5"]

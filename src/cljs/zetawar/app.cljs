@@ -2,10 +2,10 @@
   (:require
    [cognitect.transit :as transit]
    [datascript.core :as d]
-   [taoensso.timbre :as log]
    [zetawar.data :as data]
    [zetawar.db :refer [e find-by qe qes qess]]
    [zetawar.game :as game]
+   [zetawar.logging :as log]
    [zetawar.players :as players]
    [zetawar.util :as util :refer [breakpoint inspect]]))
 

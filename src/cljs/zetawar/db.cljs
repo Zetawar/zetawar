@@ -1,7 +1,7 @@
 (ns zetawar.db
   (:require
    [datascript.core :as d]
-   [taoensso.timbre :as log]
+   [zetawar.logging :as log]
    [zetawar.util :refer [breakpoint inspect solo ssolo]]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

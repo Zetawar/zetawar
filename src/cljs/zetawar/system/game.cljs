@@ -1,7 +1,7 @@
 (ns zetawar.system.game
   (:require
    [integrant.core :as ig]
-   [taoensso.timbre :as log]
+   [zetawar.logging :as log]
    [zetawar.router :as router]))
 
 ;; TODO: setup initial game + load game state (move from core)

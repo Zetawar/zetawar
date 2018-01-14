@@ -2,10 +2,10 @@
   (:require
    [clojure.string :as string]
    [datascript.core :as d]
-   [taoensso.timbre :as log]
    [zetawar.data :as data]
    [zetawar.db :as db :refer [e find-by qe qes qess]]
    [zetawar.hex :as hex]
+   [zetawar.logging :as log]
    [zetawar.util :refer [breakpoint inspect oonly only]]))
 
 ;; TODO: improve exception data

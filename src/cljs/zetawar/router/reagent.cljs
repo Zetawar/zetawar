@@ -2,7 +2,7 @@
   (:require
    [cljs.core.async :refer [<! >! chan offer!]]
    [reagent.core :as r]
-   [taoensso.timbre :as log])
+   [zetawar.logging :as log])
   (:require-macros
    [cljs.core.async.macros :refer [go]]))
 
@@ -18,7 +18,7 @@
         (when (< @timer-start @last-render)
           (let [now (.getTime (js/Date.))]
             (reset! timer-start now)
-            (log/spy :trace @timer-start)))
+            (log/trace "@timer-start:" @timer-start)))
 
         ;; Queue notification of render
         (when-not @render-queued?
@@ -27,14 +27,14 @@
                           (offer! render-chan :rendered)
                           (when (> now @last-render)
                             (reset! last-render now)
-                            (log/spy :trace @last-render)
+                            (log/trace "@last-render:" @last-render)
                             (reset! render-queued? false)))))
 
         (event-handler)
 
         ;; Block till render if max-render-interval has been exceeded
         (let [since-last-render (- (.getTime (js/Date.)) @timer-start)]
-          (log/spy :trace since-last-render)
+          (log/trace "since-last-render:" since-last-render)
           (when (> since-last-render max-render-interval)
             (log/trace "Blocking till next render...")
             (<! render-chan)

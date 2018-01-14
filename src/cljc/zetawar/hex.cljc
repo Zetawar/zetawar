@@ -1,6 +1,5 @@
 (ns zetawar.hex
   (:require
-   [taoensso.timbre :as log]
    [zetawar.util :refer [abs]]))
 
 (def min-q 0)

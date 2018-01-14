@@ -1,9 +1,9 @@
 (ns zetawar.players
   (:require
    [cljs.core.async :as async]
-   [taoensso.timbre :as log]
    [zetawar.data :as data]
-   [zetawar.game :as game]))
+   [zetawar.game :as game]
+   [zetawar.logging :as log]))
 
 ;; TODO: move to data ns?
 ;; TODO: namespace keys?
@@ -26,7 +26,7 @@
 (defmulti new-player (fn [player-ctx player-type faction-color] player-type))
 
 (defn notify [notify-chan msg]
-  (log/debugf "Notifying player: %s" (pr-str msg))
+  (log/debug "Notifying player:" (pr-str msg))
   (async/put! notify-chan msg))
 
 (defn load-player-game-state! [conn game-state]

@@ -3,12 +3,12 @@
    [clojure.string :as string]
    [datascript.core :as d]
    [reagent.core :as r]
-   [taoensso.timbre :as log]
    [zetawar.app :as app]
    [zetawar.data :as data]
    [zetawar.db :as db :refer [qe]]
    [zetawar.game :as game]
-   [zetawar.hex :as hex]))
+   [zetawar.hex :as hex]
+   [zetawar.logging :as log]))
 
 (defn setup-conn []
   (let [conn (d/create-conn db/schema)]

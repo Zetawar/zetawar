@@ -13,13 +13,11 @@
    [zetawar.router :as router]
    [zetawar.system.datascript]
    [zetawar.system.game]
-   [zetawar.system.logger]
    [zetawar.system.players]
    [zetawar.system.router]))
 
 (def cli-game-config
-  {:zetawar.system/logger     {}
-   :zetawar.system/datascript {:schema     db/schema}
+  {:zetawar.system/datascript {:schema     db/schema}
    :zetawar.system/players    {}
    :zetawar.system/router     {:datascript (ig/ref :zetawar.system/datascript)
                                :players    (ig/ref :zetawar.system/players)}

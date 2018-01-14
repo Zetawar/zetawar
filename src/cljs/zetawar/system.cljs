@@ -5,8 +5,7 @@
 
 ;; TODO: rename to browser-cfg
 (def game-config
-  {:zetawar.system/logger     {}
-   :zetawar.system/datascript {:schema     db/schema}
+  {:zetawar.system/datascript {:schema     db/schema}
    :zetawar.system/reagent    {}
    :zetawar.system/players    {}
    :zetawar.system/router     {:datascript (ig/ref :zetawar.system/datascript)

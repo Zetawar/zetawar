@@ -1,6 +1,4 @@
 (ns zetawar.util
-  (:require
-   [taoensso.timbre :as log])
   #?(:cljs
      (:require-macros [zetawar.util :refer [inspect]])))
 
@@ -46,8 +44,7 @@
 ;;; Debugging
 
 (defn log-inspect [expr result]
-  #?(:clj (log/debug (str (pr-str expr) " => " (pr-str result)))
-     :cljs (js/console.debug expr result)))
+  #?(:cljs (js/console.debug expr result)))
 
 
 (defn- inspect-1 [expr]

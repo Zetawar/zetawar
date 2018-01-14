@@ -2,10 +2,10 @@
   (:require
    [cljsjs.clipboard]
    [datascript.core :as d]
-   [taoensso.timbre :as log]
    [zetawar.app :as app]
    [zetawar.db :refer [e qe qes qess]]
    [zetawar.game :as game]
+   [zetawar.logging :as log]
    [zetawar.players :as players]
    [zetawar.router :as router]
    [zetawar.serialization :as serialization]
