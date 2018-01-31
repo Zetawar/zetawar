@@ -44,13 +44,16 @@
 (defn ^:export -main [& args]
   (let [system (ig/init cli-game-config)
         ev-chan (-> system :zetawar.system/router :ev-chan)
+        conn (-> system :zetawar.system/datascript :conn)
         rl (.createInterface readline #js {"input" js/process.stdin
                                            "output" js/process.stdout
                                            "terminal" false})]
     (.on rl "line" (fn [line] (end-turn system)))
     (println "Hello from the Zetawar game runner!")
     (app/start-new-game! (:zetawar.system/game system) :sterlings-aruba-ai-vs-ai)
-    (router/dispatch ev-chan
-                     [:zetawar.events.player/send-game-state :faction.color/blue])))
+    (router/dispatch ev-chan [:zetawar.events.player/send-game-state
+                              (->> @conn
+                                   app/current-game
+                                   game/current-faction-color)])))
 
 (set! *main-cli-fn* -main)
