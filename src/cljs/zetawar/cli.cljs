@@ -49,7 +49,7 @@
                                            "terminal" false})]
     (.on rl "line" (fn [line] (end-turn system)))
     (println "Hello from the Zetawar game runner!")
-    (app/start-new-game! (:zetawar.system/game system) :sterlings-aruba-multiplayer)
+    (app/start-new-game! (:zetawar.system/game system) :sterlings-aruba-ai-vs-ai)
     (router/dispatch ev-chan
                      [:zetawar.events.player/send-game-state :faction.color/blue])))
 

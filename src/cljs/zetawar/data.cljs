@@ -1682,6 +1682,36 @@
       :units [{:q 7 :r 7 :unit-type :infantry}
               {:q 7 :r 8 :unit-type :infantry}]}]}
 
+   :sterlings-aruba-ai-vs-ai
+   {:id :sterlings-aruba-ai-vs-ai
+    :description "Sterling's Aruba AI vs AI"
+    :created-by "Weewar"
+    :ruleset-id :zetawar
+    :map-id :sterlings-aruba
+    :max-count-per-unit 10
+    :credits-per-base 100
+    :bases
+    [{:q 1 :r 2 :base-type :base}
+     {:q 1 :r 4 :base-type :seaport}
+     {:q 2 :r 1 :base-type :base}
+     {:q 2 :r 4 :base-type :airfield}
+     {:q 5 :r 7 :base-type :base}
+     {:q 5 :r 8 :base-type :seaport}
+     {:q 6 :r 5 :base-type :airfield}
+     {:q 7 :r 6 :base-type :base}]
+    :factions
+    [{:color :blue
+      :credits 300
+      :ai true
+      :bases [{:q 1 :r 2}]
+      :units [{:q 2 :r 2 :unit-type :infantry}]}
+     {:color :red
+      :credits 300
+      :ai true
+      :bases [{:q 7 :r 6}]
+      :units [{:q 7 :r 7 :unit-type :infantry}
+              {:q 7 :r 8 :unit-type :infantry}]}]}
+
    :city-sprawl-multiplayer
    {:id :city-sprawl-multiplayer
     :description "City Sprawl Multiplayer"
