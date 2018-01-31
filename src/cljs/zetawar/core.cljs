@@ -1,5 +1,6 @@
 (ns zetawar.core
   (:require
+   [cljsjs.raven]
    [integrant.core :as ig]
    [reagent.core :as r]
    [zetawar.app :as app]

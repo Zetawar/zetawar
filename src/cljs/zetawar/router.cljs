@@ -1,7 +1,6 @@
 (ns zetawar.router
   (:require
    [cljs.core.async :refer [<! >! chan offer!]]
-   [cljsjs.raven]
    [datascript.core :as d]
    [goog.object :as gobj]
    [zetawar.logging :as log]
