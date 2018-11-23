@@ -40,7 +40,11 @@
 ;; TODO: switch to cljs require
 (def readline (js/require "readline"))
 
+;; TODO: add dummy logger player
+;; TODO: add log level cli option
+;; TODO: add ability to disable turn stepping
 ;; TODO: add ability to pass in scenario
+
 (defn ^:export -main [& args]
   (let [system (ig/init cli-game-config)
         ev-chan (-> system :zetawar.system/router :ev-chan)

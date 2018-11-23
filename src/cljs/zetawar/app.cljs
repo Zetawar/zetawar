@@ -52,6 +52,7 @@
         (players/start player)
         (swap! players assoc color player)))))
 
+;; TODO: take option map instead of being multiarity
 (defn start-new-game!
   ([{:as app-ctx :keys [conn players]} scenario-id]
    (start-new-game! app-ctx data/rulesets data/maps data/scenarios scenario-id))
@@ -74,6 +75,7 @@
        (when players
          (create-players! app-ctx))))))
 
+;; TODO: take option map instead of being multiarity
 (defn load-game-state!
   ([{:as app-ctx :keys [conn players]} game-state]
    (load-game-state! app-ctx data/rulesets data/maps data/scenarios game-state))
