@@ -144,6 +144,10 @@
       ffirst
       (or 0)))
 
+(defn faction-won? [db faction]
+  (and (= 0 enemy-base-count db faction)
+       (= 0 enemy-unit-count db faction)))
+
 (defn income [db game faction]
   (let [base-count (faction-base-count db faction)
         captured-count (faction-base-being-captured-count db faction)
