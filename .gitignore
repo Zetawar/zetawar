@@ -5,6 +5,7 @@
 /.dir-locals.el
 /.nightlight.edn
 /.nrepl-*
+/.nyc_output
 /TAGS
 /node_modules
 /out
