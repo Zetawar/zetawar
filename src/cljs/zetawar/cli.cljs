@@ -35,7 +35,7 @@
                               {:action/type :action.type/end-turn
                                :action/faction-color cur-faction-color}])))
 
-(.install (js/require "source-map-support"))
+;; (.install (js/require "source-map-support"))
 
 ;; TODO: switch to cljs require
 (def readline (js/require "readline"))

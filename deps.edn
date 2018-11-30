@@ -1,0 +1,7 @@
+{:paths ["src/clj" "src/cljc" "src/cljs"]
+ :deps {com.cognitect/transit-cljs {:mvn/version "0.8.239"}
+        datascript {:mvn/version "0.15.5"}
+        integrant {:mvn/version "0.2.1"}
+        org.clojure/clojurescript {:mvn/version "1.10.439"}
+        org.clojure/core.async {:mvn/version "0.2.395"}
+        org.clojure/tools.cli {:mvn/version "0.4.1"}}}
