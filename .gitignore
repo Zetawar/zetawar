@@ -3,7 +3,6 @@
 .m2
 /.cljs_rhino_repl
 /.cpcache
-/.dir-locals.el
 /.nightlight.edn
 /.nrepl-*
 /.nyc_output
