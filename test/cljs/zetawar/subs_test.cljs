@@ -1,13 +1,14 @@
 (ns zetawar.subs-test
   (:require
-   [cljs.test :refer-macros [testing is async use-fixtures]]
+   [cljs.test :refer-macros [deftest testing is async use-fixtures]]
    [datascript.core :as d]
-   [devcards.core :as dc :refer-macros [deftest]]
    [zetawar.app :as app]
    [zetawar.db :refer [e qe]]
    [zetawar.game :as game]
    [zetawar.subs :as subs]
    [zetawar.test-helper :as helper]))
+
+;; TODO: use fixtures
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; App

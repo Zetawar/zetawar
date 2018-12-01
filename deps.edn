@@ -1,7 +1,18 @@
-{:paths ["src/clj" "src/cljc" "src/cljs"]
- :deps {com.cognitect/transit-cljs {:mvn/version "0.8.239"}
-        datascript {:mvn/version "0.15.5"}
-        integrant {:mvn/version "0.2.1"}
-        org.clojure/clojurescript {:mvn/version "1.10.439"}
-        org.clojure/core.async {:mvn/version "0.2.395"}
-        org.clojure/tools.cli {:mvn/version "0.4.1"}}}
+{:paths ["assets" "src/clj" "src/cljc" "src/cljs"]
+ :deps
+ {com.cognitect/transit-cljs {:mvn/version "0.8.239"}
+  datascript {:mvn/version "0.15.5"}
+  integrant {:mvn/version "0.2.1"}
+  org.clojure/clojurescript {:mvn/version "1.10.439"}
+  org.clojure/core.async {:mvn/version "0.2.395"}
+  org.clojure/tools.cli {:mvn/version "0.4.1"}
+  posh {:mvn/version "0.5.5"}
+  reagent {:mvn/version "0.6.1"}}
+
+ :aliases
+ {:build-dev {:extra-paths ["test/cljs"]
+              :extra-deps
+              {com.bhauman/figwheel-main {:mvn/version "0.1.9"}
+               com.bhauman/rebel-readline-cljs {:mvn/version "0.1.4"}
+               devcards {:mvn/version "0.2.2"}}
+              :main-opts ["-m" "figwheel.main" "-b" "dev" "-r"]}}}
