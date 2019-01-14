@@ -1,0 +1,11 @@
+;; shadow-cljs configuration
+{:dependencies [[nubank/workspaces "1.0.3"]]
+ :source-paths ["src/clj" "src/cljc" "src/cljs"]
+ :builds {:workspaces {:target     nubank.workspaces.shadow-cljs.target
+                       :ns-regexp  "-(test|cards)$"
+                       :output-dir "assets/js/workspaces"
+                       :asset-path "/js/workspaces"
+                       :devtools   {:http-root          "assets"
+                                    :http-port          8080
+                                    :http-resource-root "."
+                                    :preloads           []}}}}
